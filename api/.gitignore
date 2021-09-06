@@ -1,0 +1,13 @@
+# Rust
+debug/**
+target/
+Cargo.lock
+*.rs.bk
+
+# Other
+.idea/**
+
+# Config
+.env
+
+/data
