@@ -1,0 +1,18 @@
+$color-black: #111111;
+$color-white: #ffffff;
+
+$color-gray-dark: #686b6e;
+$color-gray: #a8b1bd;
+$color-gray-light: #c4c4c4;
+$color-gray-extra-light: #e9eaec;
+
+$color-blue: #0566eb;
+$color-red: #f43467;
+$color-yellow: #ffd740;
+
+$color-snapsoft: #29deb5;
+
+$color-primary: $color-snapsoft;
+$color-primary-medium: lighten($color-snapsoft, 10%);
+$color-primary-light: lighten($color-snapsoft, 20%);
+$color-primary-extra-light: lighten($color-snapsoft, 40%);

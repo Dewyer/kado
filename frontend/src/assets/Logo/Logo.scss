@@ -1,0 +1,26 @@
+@import "src/globals";
+
+.logo {
+	background-color: $color-snapsoft;
+	border-radius: 3px;
+	font-size: 1.2rem;
+	width: max-content;
+
+	.logo-primary {
+		display: inline-block;
+		color: $color-white;
+		font-weight: bold;
+		padding: 5px 3px 5px 5px;
+	}
+
+	.logo-secondary {
+		display: inline-block;
+		font-weight: bold;
+		color: $color-snapsoft;
+		margin: 2px;
+		padding: 5px 5px 5px 5px;
+		font-style: italic;
+		background-color: white;
+		border-radius: 2px;
+	}
+}
