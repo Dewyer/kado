@@ -8,6 +8,7 @@ import reportWebVitals from "./reportWebVitals";
 import { store } from "./store";
 import "./polyfills/array-polyfill";
 import { history } from "./helpers/history";
+import 'semantic-ui-less/semantic.less';
 
 ReactDOM.render(
 	<React.StrictMode>
@@ -24,3 +25,6 @@ ReactDOM.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+// https://github.com/Semantic-Org/example-github/blob/master/semantic/src/themes/github/globals/site.variables
+// https://semantic-ui.com/usage/theming.html
