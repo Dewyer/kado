@@ -1,13 +1,18 @@
 import React from "react";
 import styles from "./PageLayout.module.scss";
 import { MenuLayout } from "./MenuLayout";
-import {FooterLayout} from "./FooterLayout";
+import { FooterLayout } from "./FooterLayout";
+import classNames from "classnames";
 
-export const PageLayout: React.FC = (props) => {
+export interface PageLayoutProps {
+    contentClassName?: string;
+}
+
+export const PageLayout: React.FC<PageLayoutProps> = (props) => {
     const { children } = props;
     return <div className={styles.PageLayout}>
         <MenuLayout />
-        <div className={styles.ContentLayout}>
+        <div className={classNames(styles.ContentLayout, props.contentClassName)}>
             {children}
         </div>
         <FooterLayout />
