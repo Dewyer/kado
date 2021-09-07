@@ -1,0 +1,26 @@
+
+.PageLayout {
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+
+  grid-template-columns: 1fr;
+  grid-template-rows:4rem 1fr 4rem;
+  grid-template-areas: 'header'
+    'content'
+    'footer';
+}
+
+.MenuLayout {
+  grid-area: header;
+}
+
+.FooterLayout {
+  grid-area: footer;
+}
+
+
+.ContentLayout {
+  padding: 1rem;
+  grid-area: content;
+}

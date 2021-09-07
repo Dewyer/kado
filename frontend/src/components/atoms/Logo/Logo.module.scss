@@ -1,0 +1,11 @@
+@import "../../../styles/_colors";
+
+.Logo {
+  padding: 0;
+  font-size: 1.2rem;
+
+  & > span {
+    color: $color-snapsoft;
+    font-weight: bold;
+  }
+}

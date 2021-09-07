@@ -1,3 +1,12 @@
 /*******************************
      User Global Variables
 *******************************/
+
+@fontName : 'Roboto Mono';
+
+@medium: 1.1rem;
+@primaryColor   : #29deb5;
+@secondaryColor : #686b6e;
+
+@primaryTextColor: #111111;
+@secondaryTextColor: #111111;

@@ -1,6 +1,15 @@
 import React from "react";
 import styles from "./HomeScreen.module.scss";
+import {PageLayout} from "../../templates/PageLayout/PageLayout";
 
 export const HomeScreen: React.FC = () => {
-	return <div className={styles.homePage}>Home</div>;
+	return (
+		<PageLayout>
+			<div className={styles.homePage}>
+				<button className="ui primary button">
+					Save
+				</button>
+			</div>
+		</PageLayout>
+	);
 };
