@@ -16,6 +16,7 @@ const SECRET: &'static str = "KKEZxdXd";
 pub struct AppConfig {
     pub secret: Vec<u8>,
     pub admin_key: String,
+    pub google_client_id: String,
 }
 
 impl AppConfig {
@@ -31,6 +32,7 @@ impl AppConfig {
             });
 
             Ok(rocket.manage(AppConfig {
+                google_client_id: env::var("GOOGLE_CLIENT_ID").expect("No google client id defined!"),
                 secret: secret.into_bytes(),
                 admin_key: env::var("ADMIN_KEY").expect("No admin key defined!"),
             }))

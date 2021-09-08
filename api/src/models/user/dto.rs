@@ -1,4 +1,4 @@
-#[derive(serde::Serialize, rocket_okapi::JsonSchema)]
+#[derive(serde::Serialize, serde::Deserialize, rocket_okapi::JsonSchema)]
 pub struct UserDto {
     pub id: String,
     pub username: String,

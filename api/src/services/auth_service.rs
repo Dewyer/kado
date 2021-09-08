@@ -17,6 +17,8 @@ use crate::services::utils_service::UtilsService;
 use crate::models::http::responses::{AuthorizingResponse, CheckUserResponse};
 use crate::models::http::access_claim::AccessClaim;
 use crate::models::http::requests::CheckUserRequest;
+use crate::services::authenticators::ExternalAuthenticatorService;
+use crate::services::authenticators::models::{AuthenticationPayload, Authorizer};
 
 pub const REFRESH_TOKEN_EXPIRATION_SECONDS: u64 = 3 * 24 * 60 * 60;
 // 3 days
@@ -25,6 +27,7 @@ pub const ACCESS_TOKEN_EXPIRATION_SECONDS: u64 = 12 * 60 * 60; // 12 hours
 pub struct AuthService {
     config: AppConfig,
     user_repo: IUserRepo,
+    external_authenticator_service: ExternalAuthenticatorService,
     tm: TransactionManager,
 }
 
@@ -32,11 +35,13 @@ impl AuthService {
     pub fn new(
         config: AppConfig,
         user_repo: IUserRepo,
+        external_authenticator_service: ExternalAuthenticatorService,
         tm: TransactionManager,
     ) -> Self {
         Self {
             config,
             user_repo,
+            external_authenticator_service,
             tm,
         }
     }
@@ -119,6 +124,7 @@ impl AuthService {
         self.authorize_user(&refresh_guard.user)
     }
 
+    /*
     fn create_user(
         &self,
         payload: RegisterRequest,
@@ -178,11 +184,29 @@ impl AuthService {
 
             self.authorize_user(&existing_user)
         })
-    }
+    }*/
 
     pub fn check_user(&self, payload: CheckUserRequest) -> anyhow::Result<CheckUserResponse> {
         self.tm.transaction(|tr| {
+            let authorizer = Authorizer::from_string(payload.authorizer)?;
+            let external_auth_result = self.external_authenticator_service.authenticate(AuthenticationPayload {
+                authorizer,
+                token: payload.token,
+            })?;
 
+            let existing_user = self
+                .user_repo
+                .find_by_email_or_username(
+                    &external_auth_result.email,
+                    "",
+                    &tr,
+                )
+                .ok();
+
+            Ok(CheckUserResponse {
+                user_exists: existing_user.is_some(),
+                user_inactive: existing_user.map_or(false, |usr| usr.is_active),
+            })
         })
     }
 }
@@ -198,11 +222,13 @@ impl<'a, 'r> FromRequest<'a, 'r> for AuthService {
             )
         })?;
         let user_repo = req.guard::<DbUserRepo>()?;
+        let external_authenticator_service = req.guard::<ExternalAuthenticatorService>()?;
         let db_tm = req.guard::<TransactionManager>()?;
 
         request::Outcome::Success(AuthService::new(
             config.inner().clone(),
             Box::new(user_repo),
+            external_authenticator_service,
             db_tm,
         ))
     }

@@ -15,7 +15,7 @@ pub fn check_user(
     auth_service: AuthService,
 ) -> AnyApiResult<CheckUserResponse> {
     auth_service
-        .authenticate_user_by_refresh_token(refresh_token_guard)
+        .check_user(request.0)
         .into()
 }
 

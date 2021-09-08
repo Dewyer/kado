@@ -21,6 +21,7 @@ use rocket_okapi::swagger_ui::make_swagger_ui;
 
 use crate::config::get_swagger_config;
 
+mod guards;
 mod config;
 mod db;
 mod errors;

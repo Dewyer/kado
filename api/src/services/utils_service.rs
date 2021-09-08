@@ -1,4 +1,7 @@
 use uuid::Uuid;
+use rocket::Request;
+
+pub const AUTHORIZATION_HEADER: &'static str = "Authorization";
 
 pub struct UtilsService {}
 
@@ -15,5 +18,19 @@ impl UtilsService {
         } else {
             Ok(None).into()
         }
+    }
+
+    pub fn header_value_or_empty_from_request(req: &Request<'_>, hdr: &str) -> String {
+        req.headers().get(hdr).next().unwrap_or("").to_string()
+    }
+
+    pub fn get_bearer_token_from_header(req: &Request<'_>) -> String {
+        let raw_val = UtilsService::header_value_or_empty_from_request(req, AUTHORIZATION_HEADER);
+        raw_val
+            .split("Bearer ")
+            .skip(1)
+            .next()
+            .unwrap_or("")
+            .to_string()
     }
 }

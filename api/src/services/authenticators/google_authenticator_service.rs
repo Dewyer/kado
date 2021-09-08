@@ -3,6 +3,9 @@ use rocket::request::FromRequest;
 use crate::errors::ServiceError;
 use rocket::{Request, request, State};
 use rocket::http::Status;
+use crate::services::authenticators::models::{AuthenticationResult, AuthenticationPayload};
+use crate::services::authenticators::authenticator::Authenticator;
+use google_jwt_verify::Client;
 
 pub struct GoogleAuthenticatorService {
     config: AppConfig,
@@ -13,6 +16,22 @@ impl GoogleAuthenticatorService {
         Self {
             config,
         }
+    }
+}
+
+impl Authenticator for GoogleAuthenticatorService {
+    fn authenticate(&self, payload: AuthenticationPayload) -> anyhow::Result<AuthenticationResult> {
+        let client = Client::new(&self.config.google_client_id);
+        let id_token = client.verify_id_token(&payload.token)
+            .map_err(|_| anyhow::Error::msg("Invalid google token!"))?;
+
+        let email = id_token.get_payload().get_email();
+
+        Ok(
+            AuthenticationResult {
+                email,
+            }
+        )
     }
 }
 

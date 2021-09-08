@@ -7,6 +7,7 @@ use crate::errors::ServiceError;
 
 pub mod crud_repo;
 pub mod offset_limit;
+pub mod user_repo;
 pub mod transaction_manager;
 
 #[database("diesel_postgres_pool")]

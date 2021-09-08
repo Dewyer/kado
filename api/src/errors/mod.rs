@@ -12,4 +12,6 @@ pub enum AuthError {
     AdminAuthError,
     #[error("ApiAuthError")]
     ApiAuthError,
+    #[error("AuthTokenFailed")]
+    AuthTokenFailed,
 }

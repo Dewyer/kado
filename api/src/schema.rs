@@ -1,8 +1,10 @@
 table! {
-    sleep_records (id) {
+    users (id) {
         id -> Uuid,
         username -> Varchar,
-        created_at -> Timestamp,
-        status -> Varchar,
+        email -> Varchar,
+        authenticator -> Varchar,
+        is_active -> Bool,
+        is_admin -> Bool,
     }
 }

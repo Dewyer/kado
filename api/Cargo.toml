@@ -39,6 +39,10 @@ base64 = "0.13.0"
 jwt = "0.13.0"
 hmac = "0.10"
 
+# Google
+google-jwt-verify = { path="../google-jwt-verify" }
+
+lazy_static = "1.4.0"
 
 [dependencies.rocket_contrib]
 version = "*"

@@ -3,7 +3,9 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/api/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/google-jwt-verify/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/api/target" />
+      <excludeFolder url="file://$MODULE_DIR$/google-jwt-verify/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
