@@ -15,7 +15,6 @@ const SECRET: &'static str = "KKEZxdXd";
 #[derive(Clone)]
 pub struct AppConfig {
     pub secret: Vec<u8>,
-    pub admin_key: String,
     pub google_client_id: String,
 }
 
@@ -34,7 +33,6 @@ impl AppConfig {
             Ok(rocket.manage(AppConfig {
                 google_client_id: env::var("GOOGLE_CLIENT_ID").expect("No google client id defined!"),
                 secret: secret.into_bytes(),
-                admin_key: env::var("ADMIN_KEY").expect("No admin key defined!"),
             }))
         })
     }
@@ -58,7 +56,7 @@ pub fn from_env() -> Config {
 
     Config::build(environment)
         .environment(environment)
-        //.address("127.0.0.1")
+        .address("127.0.0.1")
         .port(port)
         .extra("databases", databases)
         .finalize()

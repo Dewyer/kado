@@ -44,7 +44,7 @@
 		"fmt": "prettier --write .",
 		"schema:fetch": "node ./tools/fetch-schema.js",
 		"schema:generate": "node ./tools/schema-codegen.js --srcPath ./src/typings/ --destPath ./src/typings/api --separatedFiles true",
-		"schema:codegen": "npm run schema:fetch && npm run schema:generate"
+		"schema:codegen": "yarn schema:fetch && yarn schema:generate"
 	},
 	"eslintConfig": {
 		"extends": [

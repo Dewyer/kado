@@ -56,6 +56,8 @@ pub fn rocket() -> rocket::Rocket {
             "/api",
             routes_with_openapi![
                 routes::healthcheck_routes::healthcheck_route,
+                routes::auth_routes::check_user,
+                routes::auth_routes::refresh_token,
             ],
         )
         .mount("/swagger", make_swagger_ui(&get_swagger_config()))

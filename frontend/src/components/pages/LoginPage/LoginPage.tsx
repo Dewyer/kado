@@ -22,11 +22,12 @@ export const LoginPage: React.FC = () => {
 
         setCheckLoading(true);
         const userCheckResponse = await ApiService.checkUser({
+            authorizer: 'google',
             token: response.tokenId,
         });
 
         // TODO if logged in do some stuff
-        if (userCheckResponse.exists) {
+        if (userCheckResponse.user_exists) {
             history.push(GLOBAL_ROUTES.HOME);
             return;
         }
