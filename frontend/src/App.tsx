@@ -1,8 +1,8 @@
+import React from "react";
 import Routes from "src/routing/Routes";
 import "src/App.scss";
 
-
-const App:React.FC = () => {
+const App: React.FC = () => {
 	return (
 		<Routes />
 	);

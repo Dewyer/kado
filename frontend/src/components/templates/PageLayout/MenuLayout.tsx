@@ -27,7 +27,7 @@ export const MenuLayout: React.FC = () => {
                     Messages
                 </Link>
                 <Link to={GLOBAL_ROUTES.HOME} className="item active">
-                Friends
+                    Friends
                 </Link>
             </>
         )}

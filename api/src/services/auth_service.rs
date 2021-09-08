@@ -7,17 +7,16 @@ use rocket::{request, Request, State};
 use sha2::Sha256;
 
 use crate::config::AppConfig;
-use crate::db::invite_code_repo::{DbInviteCodeRepo, IInviteCodeRepo};
 use crate::db::transaction_manager::{ITransaction, TransactionManager};
 use crate::db::user_repo::{DbUserRepo, IUserRepo};
 use crate::errors::ServiceError;
 use crate::guards::{AuthTokenGuard, RefreshToken};
-use crate::models::invite_code::InviteCode;
 use crate::models::user::{NewUser, User};
 use crate::services::crypto_service::CryptoService;
 use crate::services::utils_service::UtilsService;
-use crate::models::http::responses::AuthorizingResponse;
+use crate::models::http::responses::{AuthorizingResponse, CheckUserResponse};
 use crate::models::http::access_claim::AccessClaim;
+use crate::models::http::requests::CheckUserRequest;
 
 pub const REFRESH_TOKEN_EXPIRATION_SECONDS: u64 = 3 * 24 * 60 * 60;
 // 3 days
@@ -26,7 +25,6 @@ pub const ACCESS_TOKEN_EXPIRATION_SECONDS: u64 = 12 * 60 * 60; // 12 hours
 pub struct AuthService {
     config: AppConfig,
     user_repo: IUserRepo,
-    invite_code_repo: IInviteCodeRepo,
     tm: TransactionManager,
 }
 
@@ -34,13 +32,11 @@ impl AuthService {
     pub fn new(
         config: AppConfig,
         user_repo: IUserRepo,
-        invite_code_repo: IInviteCodeRepo,
         tm: TransactionManager,
     ) -> Self {
         Self {
             config,
             user_repo,
-            invite_code_repo,
             tm,
         }
     }
@@ -183,6 +179,12 @@ impl AuthService {
             self.authorize_user(&existing_user)
         })
     }
+
+    pub fn check_user(&self, payload: CheckUserRequest) -> anyhow::Result<CheckUserResponse> {
+        self.tm.transaction(|tr| {
+
+        })
+    }
 }
 
 impl<'a, 'r> FromRequest<'a, 'r> for AuthService {
@@ -196,13 +198,11 @@ impl<'a, 'r> FromRequest<'a, 'r> for AuthService {
             )
         })?;
         let user_repo = req.guard::<DbUserRepo>()?;
-        let inv_code_repo = req.guard::<DbInviteCodeRepo>()?;
         let db_tm = req.guard::<TransactionManager>()?;
 
         request::Outcome::Success(AuthService::new(
             config.inner().clone(),
             Box::new(user_repo),
-            Box::new(inv_code_repo),
             db_tm,
         ))
     }
