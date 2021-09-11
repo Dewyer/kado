@@ -10,7 +10,6 @@ import {useDispatch, useSelector} from "react-redux";
 import {makeSelectUser} from "../../../store/selectors/global.selectors";
 import {useCheckUserMutation, useLoginUserMutation} from "../../../api/hooks/authApiHooks";
 import {GoogleLoginResponse} from "react-google-login";
-import {AuthApiService} from "../../../api/apis/AuthApiService";
 import {authorizedAction} from "../../../store/actions/global";
 
 export const LoginPage: React.FC = () => {
@@ -22,7 +21,7 @@ export const LoginPage: React.FC = () => {
     const checkUserMutation = useCheckUserMutation();
     const loginUserMutation = useLoginUserMutation();
 
-    const handleExistingUser = async (response: GoogleLoginResponse) => {
+    const handleExistingUser = useCallback(async (response: GoogleLoginResponse) => {
         const authorizingResponse = await loginUserMutation.mutateAsync({
             authorizer: 'google',
             token: response.tokenId,
@@ -30,7 +29,7 @@ export const LoginPage: React.FC = () => {
 
         dispatch(authorizedAction(authorizingResponse));
         history.push(GLOBAL_ROUTES.HOME);
-    };
+    }, [history, dispatch, loginUserMutation]);
 
     const onGoogleLoginSuccessCallback = useCallback(async (response: GoogleLoginResponseFull) => {
         if ('code' in response) {
@@ -50,7 +49,7 @@ export const LoginPage: React.FC = () => {
         }
 
         setLastGoogleLoginResult(response);
-    }, [setLastGoogleLoginResult]);
+    }, [setLastGoogleLoginResult, checkUserMutation, history, handleExistingUser]);
     const googleLoginLoading = checkUserMutation.isLoading || loginUserMutation.isLoading;
 
     return (

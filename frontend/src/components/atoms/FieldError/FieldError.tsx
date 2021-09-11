@@ -1,6 +1,5 @@
 import React from "react";
-import classNames from "classnames";
-import {FieldInputProps, FieldMetaState} from "react-final-form";
+import {FieldMetaState} from "react-final-form";
 
 export type FieldErrorProps = {
     meta: FieldMetaState<unknown>;

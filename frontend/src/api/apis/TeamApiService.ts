@@ -1,5 +1,4 @@
 import {GetUsersTeamResponse} from "../../typings/api";
-import axiosInstance from "src/axios/axios-instance";
 import {Endpoints} from "src/api/endpoints";
 import {ApiService} from "../ApiService";
 

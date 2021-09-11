@@ -1,6 +1,5 @@
-import {useMutation, UseMutationResult, useQuery, UseQueryResult} from "react-query";
-import {AuthorizingResponse, GetUsersTeamResponse, RegisterRequest} from "../../typings/api";
-import {AuthApiService} from "../apis/AuthApiService";
+import {useQuery, UseQueryResult} from "react-query";
+import {GetUsersTeamResponse} from "../../typings/api";
 import {toastPopper} from "../../helpers/toastPopper";
 import {TeamApiService} from "../apis/TeamApiService";
 

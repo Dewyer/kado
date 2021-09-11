@@ -25,7 +25,7 @@ const validateJoinTeamForm = (values: JoinTeamFormData): ValidationErrors => {
 
 export const JoinTeam: React.FC = () => {
     const onSubmit = async (values: JoinTeamFormData) => {
-
+        //TODO join team api
     };
 
     return (
