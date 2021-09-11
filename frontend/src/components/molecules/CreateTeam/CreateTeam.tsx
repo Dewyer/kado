@@ -5,14 +5,21 @@ import classNames from "classnames";
 import {FieldTextInput} from "src/components/atoms/FieldTextInput/FieldTextInput";
 import {CreateTeamFormData} from "./CreateTeam.types";
 import {validateCreateTeamForm} from "./CreateTeam.validation";
+import {useCreateTeamMutation} from "../../../api/hooks/teamApiHooks";
+import {queryClient} from "../../../api/queryClient";
 
 export interface CreateTeamProps {
 }
 
 export const CreateTeam: React.FC<CreateTeamProps> = (props) => {
+    const createTeamMutation = useCreateTeamMutation();
 
     const onSubmit = async (values: CreateTeamFormData) => {
-        //TODO create team api
+        await createTeamMutation.mutateAsync({
+            name: values.name,
+        });
+
+        await queryClient.invalidateQueries("FetchUserTeam");
     };
 
     return <div className={styles.CreateTeam}>
@@ -36,9 +43,9 @@ export const CreateTeam: React.FC<CreateTeamProps> = (props) => {
                         />
                     </div>
                     <button
-                        className="ui button primary"
+                        className={classNames("ui button primary", { loading: createTeamMutation.isLoading })}
                         type="submit"
-                        disabled={submitting || !valid}
+                        disabled={submitting || !valid || createTeamMutation.isLoading}
                     >
                         Create
                     </button>
