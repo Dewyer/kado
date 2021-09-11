@@ -16,9 +16,7 @@ export const MenuLayout: React.FC = () => {
 
     const onLogout = () => {
         dispatch(logoutAction());
-    }
-
-    console.log(history.location);
+    };
 
     const isTabActive = (route: string) => {
         return history.location.pathname === route;

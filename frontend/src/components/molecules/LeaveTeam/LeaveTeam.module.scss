@@ -1,0 +1,11 @@
+
+.LeaveTeam {
+  max-width: 30rem;
+  display: flex;
+  flex-direction: column;
+
+  & > label {
+    margin-top: 2rem;
+    margin-bottom: 0.4rem;
+  }
+}
