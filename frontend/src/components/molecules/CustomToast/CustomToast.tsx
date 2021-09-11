@@ -1,4 +1,5 @@
 import React from "react";
+import styles from "./CustomToast.module.scss";
 
 export interface CustomToastProps {
     message: string,
@@ -7,6 +8,6 @@ export interface CustomToastProps {
 export const CustomToast: React.FC<CustomToastProps> = (props) => {
     const { message } = props;
     return <div>
-        <span>{message}</span>
+        <span className={styles.Message}>{message}</span>
     </div>;
 };

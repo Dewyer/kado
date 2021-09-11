@@ -1,0 +1,24 @@
+
+$bdr: 0.28571429rem;
+
+.ViewJoinCode {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0.5rem 0;
+
+  & > label {
+    font-weight: bold;
+    margin-right: 1rem;
+  }
+
+  & > div > input {
+    border-radius: $bdr 0 0 $bdr !important;
+
+  }
+
+  & > button {
+    border-radius: 0 $bdr $bdr 0 !important;
+    height: 40px;
+  }
+}

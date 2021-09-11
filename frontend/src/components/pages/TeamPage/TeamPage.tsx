@@ -25,7 +25,7 @@ export const TeamPage: React.FC = () => {
     return (
         <PageLayout contentClassName={styles.TeamPageContainer}>
             {fetchTeamResult.data?.team ?
-                <TeamDetailsView /> :
+                <TeamDetailsView team={fetchTeamResult.data.team} /> :
                 <JoinOrCreateTeamView />
             }
         </PageLayout>
