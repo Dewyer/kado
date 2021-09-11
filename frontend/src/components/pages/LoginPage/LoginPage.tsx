@@ -51,7 +51,7 @@ export const LoginPage: React.FC = () => {
 
         setLastGoogleLoginResult(response);
     }, [setLastGoogleLoginResult]);
-    const googleLoginLoading = checkUserMutation.isLoading || loginUserMutation.isLoading || !!lastGoogleLoginResult;
+    const googleLoginLoading = checkUserMutation.isLoading || loginUserMutation.isLoading;
 
     return (
         <PageLayout contentClassName={styles.LoginPage}>
@@ -60,7 +60,7 @@ export const LoginPage: React.FC = () => {
                 <span>To participate please log in with google:</span>
                 <GoogleLoginButton
                     onSuccess={onGoogleLoginSuccessCallback}
-                    disabled={googleLoginLoading}
+                    disabled={googleLoginLoading || !!lastGoogleLoginResult}
                     loading={googleLoginLoading}
                 />
 

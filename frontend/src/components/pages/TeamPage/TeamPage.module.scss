@@ -3,3 +3,8 @@
 .TeamPage {
 	max-width: 100vw;
 }
+
+.TeamPageContainer {
+	display: flex;
+	flex-direction: column;
+}
