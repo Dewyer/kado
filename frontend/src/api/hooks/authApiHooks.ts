@@ -1,7 +1,7 @@
 import {useMutation, UseMutationResult} from "react-query";
-import {AuthorizingResponse, CheckUserRequest, CheckUserResponse, LoginRequest, RegisterRequest} from "../typings/api";
-import {toastPopper} from "../helpers/toastPopper";
-import {AuthApiService} from "./apis/AuthApiService";
+import {AuthorizingResponse, CheckUserRequest, CheckUserResponse, LoginRequest, RegisterRequest} from "../../typings/api";
+import {toastPopper} from "../../helpers/toastPopper";
+import {AuthApiService} from "../apis/AuthApiService";
 
 export const useRegisterUserMutation = (): UseMutationResult<AuthorizingResponse, unknown, RegisterRequest> => {
     return useMutation(

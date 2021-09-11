@@ -8,7 +8,7 @@ import {GLOBAL_ROUTES} from "../../../routing/routingConstants";
 import {toastPopper} from "../../../helpers/toastPopper";
 import {useDispatch, useSelector} from "react-redux";
 import {makeSelectUser} from "../../../store/selectors/global.selectors";
-import {useCheckUserMutation, useLoginUserMutation} from "../../../api/authApiHooks";
+import {useCheckUserMutation, useLoginUserMutation} from "../../../api/hooks/authApiHooks";
 import {GoogleLoginResponse} from "react-google-login";
 import {AuthApiService} from "../../../api/apis/AuthApiService";
 import {authorizedAction} from "../../../store/actions/global";
