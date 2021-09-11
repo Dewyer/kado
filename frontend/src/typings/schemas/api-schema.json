@@ -157,6 +157,31 @@
           }
         }
       }
+    },
+    "/team": {
+      "get": {
+        "description": "Get the team of the logged in user",
+        "operationId": "team",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/GetUsersTeamResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -221,6 +246,19 @@
           }
         }
       },
+      "GetUsersTeamResponse": {
+        "type": "object",
+        "properties": {
+          "team": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TeamFullyPopulatedDto"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
       "LoginRequest": {
         "type": "object",
         "required": [
@@ -259,6 +297,40 @@
           }
         }
       },
+      "TeamFullyPopulatedDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "members",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "join_code": {
+            "type": "string",
+            "nullable": true
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserDto"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner_user": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserDto"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
       "UserDto": {
         "type": "object",
         "required": [
@@ -280,6 +352,10 @@
           },
           "participate_in_leaderboards": {
             "type": "boolean"
+          },
+          "team_id": {
+            "type": "string",
+            "nullable": true
           },
           "username": {
             "type": "string"

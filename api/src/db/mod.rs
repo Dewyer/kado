@@ -5,6 +5,7 @@ use rocket_contrib::databases::diesel;
 
 use crate::errors::ServiceError;
 
+pub mod team_repo;
 pub mod crud_repo;
 pub mod offset_limit;
 pub mod user_repo;

@@ -3,4 +3,5 @@ export const Endpoints = {
     REGISTER_USER: "/api/auth/register",
     LOGIN_USER: "/api/auth/login",
     REFRESH_TOKEN: "/api/auth/refresh",
+    GET_TEAM: "/api/team",
 }

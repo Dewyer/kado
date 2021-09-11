@@ -2,7 +2,7 @@ import React, {useCallback, useState} from "react";
 import styles from "./LoginPage.module.scss";
 import { PageLayout } from "src/components/templates/PageLayout/PageLayout";
 import {GoogleLoginButton, GoogleLoginResponseFull} from "../../molecules/GoogleLoginButton/GoogleLoginButton";
-import {CompleteProfileForm} from "./CompleteProfileForm/CompleteProfileForm";
+import {CompleteProfileForm} from "../../templates/CompleteProfileForm/CompleteProfileForm";
 import { useHistory } from "react-router-dom";
 import {GLOBAL_ROUTES} from "../../../routing/routingConstants";
 import {toastPopper} from "../../../helpers/toastPopper";
