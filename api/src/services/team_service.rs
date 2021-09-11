@@ -10,18 +10,22 @@ use crate::models::http::requests::CreateTeamRequest;
 use crate::models::user::User;
 use base64::CharacterSet::Crypt;
 use crate::services::crypto_service::CryptoService;
+use crate::db::user_repo::{IUserRepo, DbUserRepo};
 
 pub struct TeamService {
+    user_repo: IUserRepo,
     team_repo: ITeamRepo,
     tm: TransactionManager,
 }
 
 impl TeamService {
     pub fn new(
+        user_repo: IUserRepo,
         team_repo: ITeamRepo,
         tm: TransactionManager,
     ) -> Self {
         Self {
+            user_repo,
             team_repo,
             tm,
         }
@@ -79,7 +83,7 @@ impl TeamService {
 
     pub fn create_team(&self, user_guard: AuthTokenGuard<AccessToken>, payload: CreateTeamRequest) -> anyhow::Result<CreateTeamResponse> {
         self.tm.transaction(|td| {
-            let user = user_guard.user;
+            let mut user = user_guard.user;
             self.assert_user_can_create_team(&user, &payload, &td);
 
             let new_team = self.team_repo.crud().insert(&NewTeam {
@@ -88,6 +92,9 @@ impl TeamService {
                 owner_user: Some(user.id),
                 is_deleted: false,
             }, &td)?;
+
+            user.team_id = Some(new_team.id);
+            self.user_repo.save(&user, &td)?;
 
             Ok(CreateTeamResponse {
                 team: TeamFullyPopulatedDto::from_team_and_users(&new_team, &vec![user], true),
@@ -100,11 +107,14 @@ impl<'a, 'r> FromRequest<'a, 'r> for TeamService {
     type Error = ServiceError;
 
     fn from_request(req: &'a Request<'r>) -> request::Outcome<TeamService, Self::Error> {
-        let user_repo = req.guard::<DbTeamRepo>()?;
+        let user_repo = req.guard::<DbUserRepo>()?;
+        let team_repo = req.guard::<DbTeamRepo>()?;
+
         let db_tm = req.guard::<TransactionManager>()?;
 
         request::Outcome::Success(TeamService::new(
             Box::new(user_repo),
+            Box::new(team_repo),
             db_tm,
         ))
     }

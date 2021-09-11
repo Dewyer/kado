@@ -22,6 +22,8 @@ pub trait UserRepo {
         username: &str,
         tm: &ITransaction,
     ) -> anyhow::Result<User>;
+
+    fn save(&self, user: &User, td: &ITransaction) -> anyhow::Result<User>;
 }
 
 pub struct DbUserRepo {
@@ -60,6 +62,14 @@ impl UserRepo for DbUserRepo {
             .or_filter(users::username.eq(username))
             .first::<User>(tr.get_db_connection())
             .map_err(|er| anyhow::Error::from(er))
+    }
+
+    fn save(&self, user: &User, td: &ITransaction) -> anyhow::Result<User> {
+        diesel::update(users::table)
+            .filter(users::id.eq(user.id))
+            .set(user)
+            .get_result(td.get_db_connection())
+            .map_err(|_| anyhow::Error::msg("Can't save user!"))
     }
 }
 

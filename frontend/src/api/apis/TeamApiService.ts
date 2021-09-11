@@ -16,6 +16,7 @@ export abstract class TeamApiService {
         const resp = await ApiService.authenticatedRequest<CreateTeamResponse>({
             url: Endpoints.CREATE_TEAM,
             method: "POST",
+            data: payload,
         });
 
         return resp.data;
