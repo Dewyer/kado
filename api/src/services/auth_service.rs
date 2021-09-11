@@ -16,7 +16,7 @@ use crate::services::crypto_service::CryptoService;
 use crate::services::utils_service::UtilsService;
 use crate::models::http::responses::{AuthorizingResponse, CheckUserResponse};
 use crate::models::http::access_claim::AccessClaim;
-use crate::models::http::requests::{CheckUserRequest, RegisterRequest};
+use crate::models::http::requests::{CheckUserRequest, RegisterRequest, LoginRequest};
 use crate::services::authenticators::ExternalAuthenticatorService;
 use crate::services::authenticators::models::{AuthenticationPayload, Authorizer};
 
@@ -165,34 +165,30 @@ impl AuthService {
         })
     }
 
-    /*
     pub fn login_user(&self, payload: LoginRequest) -> anyhow::Result<AuthorizingResponse> {
         self.tm.transaction(|tr| {
+            let authorizer = Authorizer::from_string(payload.authorizer.clone())?;
+            let external_auth_result = self.external_authenticator_service.authenticate(AuthenticationPayload {
+                authorizer,
+                token: payload.token.clone(),
+            })?;
+
             let existing_user = self
                 .user_repo
                 .find_by_email_or_username(
-                    &payload.username_or_email,
-                    &payload.username_or_email,
+                    &external_auth_result.email,
+                    "",
                     &tr,
                 )
-                .map_err(|_| anyhow::Error::msg("Wrong username or email!"))?;
+                .map_err(|_| anyhow::Error::msg("Email address is not registered!"))?;
 
             if !existing_user.is_active {
                 bail!("User is inactive!");
             }
 
-            let user_hash = CryptoService::hash_string_with_salt(
-                &payload.password_hashed,
-                &existing_user.password_salt,
-            );
-
-            if user_hash != existing_user.password_hash {
-                bail!("Wrong password!");
-            }
-
             self.authorize_user(&existing_user)
         })
-    }*/
+    }
 
     pub fn check_user(&self, payload: CheckUserRequest) -> anyhow::Result<CheckUserResponse> {
         self.tm.transaction(|tr| {

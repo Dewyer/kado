@@ -11,9 +11,14 @@ export interface AuthorizedAction {
 	authorizingResponse: AuthorizingResponse,
 }
 
-export interface GlobalState {
+export interface UserInitiallyLoaded {
+	type: typeof actions.USER_INITIAL_LOADED;
 	user?: UserDto;
-	loading: boolean;
 }
 
-export type GlobalActionTypes = LogoutAction | AuthorizedAction;
+export interface GlobalState {
+	user?: UserDto;
+	loadedUserInitially: boolean;
+}
+
+export type GlobalActionTypes = LogoutAction | AuthorizedAction | UserInitiallyLoaded;

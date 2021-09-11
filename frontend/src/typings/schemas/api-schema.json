@@ -45,6 +45,41 @@
         }
       }
     },
+    "/auth/login": {
+      "post": {
+        "description": "Login an existing user",
+        "operationId": "authlogin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AuthorizingResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/refresh": {
       "post": {
         "description": "Refresh user session with refresh token",
@@ -182,6 +217,21 @@
         ],
         "properties": {
           "error": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "authorizer",
+          "token"
+        ],
+        "properties": {
+          "authorizer": {
+            "type": "string"
+          },
+          "token": {
             "type": "string"
           }
         }

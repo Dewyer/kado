@@ -1,5 +1,7 @@
 import { PropsWithChildren, ReactElement } from "react";
 import { Redirect, Route, RouteProps } from "react-router-dom";
+import {useSelector} from "react-redux";
+import {makeSelectUser} from "../../store/selectors/global.selectors";
 
 export interface ProtectedRouteProps extends RouteProps {
 	restrictedPath?: string;
@@ -8,9 +10,9 @@ export interface ProtectedRouteProps extends RouteProps {
 export const ProtectedRoute = (props: PropsWithChildren<ProtectedRouteProps>): ReactElement => {
 	const { restrictedPath, children, ...rest } = props;
 
-	const isLoggedIn = false;
+	const user = useSelector(makeSelectUser);
 
-	return isLoggedIn ? (
+	return !!user ? (
 		<Route {...rest}>{children}</Route>
 	) : (
 		<Route {...rest}>

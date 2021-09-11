@@ -5,12 +5,13 @@ import {Logo} from "src/components/atoms/Logo/Logo";
 import { Link } from "react-router-dom";
 import {GLOBAL_ROUTES} from "src/routing/routingConstants";
 import {useDispatch, useSelector} from "react-redux";
-import {makeSelectLoggedIn} from "src/store/selectors/global.selectors";
+import {makeSelectUser} from "src/store/selectors/global.selectors";
 import {logoutAction} from "src/store/actions/global";
 
 export const MenuLayout: React.FC = () => {
     const dispatch = useDispatch();
-    const loggedIn = useSelector(makeSelectLoggedIn());
+    const user = useSelector(makeSelectUser());
+    const loggedIn = !!user;
 
     const onLogout = () => {
         dispatch(logoutAction());
@@ -24,18 +25,21 @@ export const MenuLayout: React.FC = () => {
         {loggedIn && (
             <>
                 <Link to={GLOBAL_ROUTES.HOME} className="item">
-                    Messages
+                    Tasks
                 </Link>
                 <Link to={GLOBAL_ROUTES.HOME} className="item active">
-                    Friends
+                    Leaderboard
                 </Link>
             </>
         )}
         <div className="right menu">
             {loggedIn ?
-                <a onClick={onLogout} className="ui item">
-                    Logout
-                </a>
+                <>
+                    <span className="ui item">Logged in: {user?.username}</span>
+                    <a onClick={onLogout} className="ui item">
+                        Logout
+                    </a>
+                </>
                 :
                 <Link to={GLOBAL_ROUTES.LOGIN} className="ui item">
                     Login

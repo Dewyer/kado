@@ -10,10 +10,11 @@ export interface GoogleLoginButtonProps {
     onSuccess?: (response: GoogleLoginResponseFull) => void;
     onFailure?: (error: GoogleLoginError) => void;
     disabled?: boolean;
+    loading?: boolean;
 }
 
 export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = (props) => {
-    const { onSuccess, onFailure, disabled } = props;
+    const { onSuccess, onFailure, disabled, loading } = props;
 
     const onSuccessCallback = useCallback((response: GoogleLoginResponseFull) => {
         if (onSuccess) {
@@ -27,10 +28,14 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = (props) => {
         }
     }, [onFailure]);
 
+    const loginButtonClassNames = classNames("ui primary button", styles.GoogleLoginButton, {
+        "loading": !!loading,
+    });
+
     return <GoogleLogin
         clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || ''}
         render={renderProps => (
-            <button onClick={renderProps.onClick} disabled={renderProps.disabled || disabled} className={classNames("ui primary button", styles.GoogleLoginButton)}>
+            <button onClick={renderProps.onClick} disabled={renderProps.disabled || disabled} className={loginButtonClassNames}>
                 Login with google
             </button>
         )}

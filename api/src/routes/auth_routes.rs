@@ -4,7 +4,7 @@ use crate::guards::{AuthTokenGuard, RefreshToken};
 use crate::models::http::api_result::{AnyApiResult, ApiResult, ErrorResponse};
 use crate::services::auth_service::AuthService;
 use crate::models::http::responses::{AuthorizingResponse, CheckUserResponse};
-use crate::models::http::requests::{CheckUserRequest, RegisterRequest};
+use crate::models::http::requests::{CheckUserRequest, RegisterRequest, LoginRequest};
 
 
 #[openapi]
@@ -30,6 +30,19 @@ pub fn register_user(
         .register_user(request.0)
         .into()
 }
+
+#[openapi]
+#[post("/auth/login", format = "json", data = "<request>")]
+/// Login an existing user
+pub fn login_user(
+    request: Json<LoginRequest>,
+    auth_service: AuthService,
+) -> AnyApiResult<AuthorizingResponse> {
+    auth_service
+        .login_user(request.0)
+        .into()
+}
+
 
 #[openapi]
 #[post("/auth/refresh")]

@@ -7,9 +7,11 @@ import {completeProfileFormValidation} from "./CompleteProfileForm.validation";
 import {FieldTextInput} from "src/components/atoms/FieldTextInput/FieldTextInput";
 import {FieldCheckbox} from "src/components/atoms/FieldCheckbox/FieldCheckbox";
 import classNames from "classnames";
-import {useRegisterUserMutation} from "src/api/hooks";
+import {useRegisterUserMutation} from "src/api/authApiHooks";
 import {useDispatch} from "react-redux";
-import {authorizedAction} from "../../../../store/actions/global";
+import {authorizedAction} from "src/store/actions/global";
+import {history} from "src/helpers/history";
+import {GLOBAL_ROUTES} from "src/routing/routingConstants";
 
 export interface CompleteProfileFormProps {
     containerClassName?: string;
@@ -33,6 +35,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = (props) =
             participate_in_leaderboards: values.participateInLeaderBoard,
         });
 
+        history.push(GLOBAL_ROUTES.HOME);
         dispatch(authorizedAction(authorizingResponse));
     };
 
