@@ -21,6 +21,8 @@ pub trait TeamRepo {
     fn find_by_id_not_deleted(&self, id: Uuid, td: &ITransaction) -> anyhow::Result<Team>;
 
     fn find_by_id_with_users(&self, id: Uuid, td: &ITransaction) -> anyhow::Result<(Team, Vec<User>)>;
+
+    fn save(&self, team: &Team, td: &ITransaction) -> anyhow::Result<Team>;
 }
 
 pub struct DbTeamRepo {
@@ -65,6 +67,14 @@ impl TeamRepo for DbTeamRepo {
             .map_err(|_| anyhow::Error::msg("Users for team could not be found!"))?;
 
         Ok((team, users_on_team))
+    }
+
+    fn save(&self, team: &Team, td: &ITransaction) -> anyhow::Result<Team> {
+        diesel::update(teams::table)
+            .filter(teams::id.eq(team.id))
+            .set(team)
+            .get_result(td.get_db_connection())
+            .map_err(|_| anyhow::Error::msg("Can't save team!"))
     }
 }
 

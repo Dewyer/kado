@@ -217,6 +217,41 @@
           }
         }
       }
+    },
+    "/team/leave": {
+      "post": {
+        "description": "Leave team user is in",
+        "operationId": "teamleave",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaveTeamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -312,6 +347,15 @@
                 "$ref": "#/components/schemas/TeamFullyPopulatedDto"
               }
             ],
+            "nullable": true
+          }
+        }
+      },
+      "LeaveTeamRequest": {
+        "type": "object",
+        "properties": {
+          "inheritor": {
+            "type": "string",
             "nullable": true
           }
         }

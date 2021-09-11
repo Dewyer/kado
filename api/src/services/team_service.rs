@@ -6,11 +6,12 @@ use crate::models::team::{TeamFullyPopulatedDto, Team, NewTeam};
 use crate::guards::{AuthTokenGuard, AccessToken};
 use crate::models::http::responses::{GetUsersTeamResponse, CreateTeamResponse};
 use crate::db::team_repo::{ITeamRepo, DbTeamRepo};
-use crate::models::http::requests::CreateTeamRequest;
+use crate::models::http::requests::{CreateTeamRequest, LeaveTeamRequest};
 use crate::models::user::User;
 use base64::CharacterSet::Crypt;
 use crate::services::crypto_service::CryptoService;
 use crate::db::user_repo::{IUserRepo, DbUserRepo};
+use crate::services::utils_service::UtilsService;
 
 pub struct TeamService {
     user_repo: IUserRepo,
@@ -99,6 +100,64 @@ impl TeamService {
             Ok(CreateTeamResponse {
                 team: TeamFullyPopulatedDto::from_team_and_users(&new_team, &vec![user], true),
             })
+        })
+    }
+
+    fn assert_user_can_leave_team(&self, user: &User, payload: &LeaveTeamRequest, td: &ITransaction) -> anyhow::Result<()> {
+        if user.team_id.is_none() {
+            bail!("User is not a team!");
+        }
+
+        let existing_team = self.team_repo.find_by_id_not_deleted(user.team_id.unwrap(), &td)
+            .map_err(|_| anyhow::Error::msg("Team user is in is deleted!"))?;
+        if existing_team.owner_user.contains(&user.id) && payload.inheritor.is_none()  {
+            bail!("Inheritor not chosen for ownership!")
+        }
+
+        Ok(())
+    }
+
+    fn handle_ownership_transfer_on_team_leave(
+        &self,
+        team_and_users: &mut (Team, Vec<User>),
+        leave_payload: &LeaveTeamRequest,
+        td: &ITransaction,
+    ) -> anyhow::Result<()> {
+        let (team, team_users) = team_and_users;
+        if team_users.len() == 0 {
+            team.is_deleted = true;
+            team.owner_user = None;
+            return Ok(());
+        }
+
+        let inheritor_uuid = UtilsService::parse_optional_uuid(&leave_payload.inheritor)?
+            .ok_or(anyhow::Error::msg("Inheritor required!"))?;
+
+        if !team_users.iter().any(|el| el.id == inheritor_uuid) {
+            bail!("Inheritor is not in the team!");
+        }
+        self.user_repo.crud().find_by_id(inheritor_uuid, &td).map_err(|_| anyhow::Error::msg("Inheritor not found!"))?;
+
+        team.owner_user = Some(inheritor_uuid);
+        self.team_repo.save(&team, &td)?;
+
+        Ok(())
+    }
+
+    pub fn leave_team(&self, user_guard: AuthTokenGuard<AccessToken>, payload: LeaveTeamRequest) -> anyhow::Result<()> {
+        self.tm.transaction(|td| {
+            let mut user = user_guard.user;
+            self.assert_user_can_leave_team(&user, &payload, &td)?;
+            let mut team_and_users = self.team_repo.find_by_id_with_users(user.team_id.unwrap(), &td)?;
+
+            user.team_id = None;
+            self.user_repo.save(&user, &td)?;
+
+            if team_and_users.0.owner_user.contains(&user.id) {
+                self.handle_ownership_transfer_on_team_leave(&mut team_and_users, &payload, &td)?;
+            }
+
+            Ok(())
         })
     }
 }

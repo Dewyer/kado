@@ -2,7 +2,7 @@ use serde::Serialize;
 use uuid::Uuid;
 use crate::schema::teams;
 
-#[derive(Queryable, Serialize)]
+#[derive(Queryable, Serialize, AsChangeset)]
 pub struct Team {
     pub id: Uuid,
     pub name: String,

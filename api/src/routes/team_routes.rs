@@ -4,7 +4,7 @@ use crate::models::http::api_result::AnyApiResult;
 use crate::guards::{AccessToken, AuthTokenGuard};
 use crate::models::http::responses::{GetUsersTeamResponse, CreateTeamResponse};
 use crate::services::team_service::TeamService;
-use crate::models::http::requests::CreateTeamRequest;
+use crate::models::http::requests::{CreateTeamRequest, LeaveTeamRequest};
 
 #[openapi]
 #[get("/team")]
@@ -28,5 +28,18 @@ pub fn create_team(
 ) -> AnyApiResult<CreateTeamResponse> {
     team_service
         .create_team(user_guard, request.0)
+        .into()
+}
+
+#[openapi]
+#[post("/team/leave", format = "json", data = "<request>")]
+/// Leave team user is in
+pub fn leave_team(
+    user_guard: AuthTokenGuard<AccessToken>,
+    request: Json<LeaveTeamRequest>,
+    team_service: TeamService,
+) -> AnyApiResult<()> {
+    team_service
+        .leave_team(user_guard, request.0)
         .into()
 }
