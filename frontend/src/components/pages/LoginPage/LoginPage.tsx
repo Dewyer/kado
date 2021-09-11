@@ -6,17 +6,22 @@ import {CompleteProfileForm} from "./CompleteProfileForm/CompleteProfileForm";
 import {ApiService} from "src/api/ApiService";
 import { useHistory } from "react-router-dom";
 import {GLOBAL_ROUTES} from "../../../routing/routingConstants";
+import {toastPopper} from "../../../helpers/toastPopper";
 
 // 1. google login -> token
 // 2. kell egy api check hívás -> ha valid a google token akkor megmondja h van e fiokunk
 
+const mockGoogleResp = { tokenId: '' } as unknown as GoogleLoginResponseFull;
+
 export const LoginPage: React.FC = () => {
     const history = useHistory();
-    const [lastGoogleLoginResult, setLastGoogleLoginResult] = useState<GoogleLoginResponseFull>({ tokenId: '' } as unknown as GoogleLoginResponseFull);
+    const [lastGoogleLoginResult, setLastGoogleLoginResult] = useState<GoogleLoginResponseFull>();
     const [checkLoading, setCheckLoading] = useState(false);
 
     const onGoogleLoginSuccessCallback = useCallback(async (response: GoogleLoginResponseFull) => {
         if ('code' in response) {
+            toastPopper({ message:"You are offline and can't register!" });
+            history.push(GLOBAL_ROUTES.HOME);
             return;
         }
 

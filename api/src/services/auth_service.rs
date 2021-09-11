@@ -16,7 +16,7 @@ use crate::services::crypto_service::CryptoService;
 use crate::services::utils_service::UtilsService;
 use crate::models::http::responses::{AuthorizingResponse, CheckUserResponse};
 use crate::models::http::access_claim::AccessClaim;
-use crate::models::http::requests::CheckUserRequest;
+use crate::models::http::requests::{CheckUserRequest, RegisterRequest};
 use crate::services::authenticators::ExternalAuthenticatorService;
 use crate::services::authenticators::models::{AuthenticationPayload, Authorizer};
 
@@ -124,18 +124,19 @@ impl AuthService {
         self.authorize_user(&refresh_guard.user)
     }
 
-    /*
     fn create_user(
         &self,
         payload: RegisterRequest,
+        email: &str,
         tr: &ITransaction,
     ) -> anyhow::Result<AuthorizingResponse> {
 
         let created_user = self.user_repo.create(
             &NewUser {
                 username: &payload.username,
-                email: &payload.email,
-                authenticator: "google",
+                email,
+                authenticator: &payload.authorizer.to_lowercase(),
+                participate_in_leaderboards: payload.participate_in_leaderboards,
                 is_active: true,
                 is_admin: false,
             },
@@ -147,17 +148,24 @@ impl AuthService {
 
     pub fn register_user(&self, payload: RegisterRequest) -> anyhow::Result<AuthorizingResponse> {
         self.tm.transaction(|tr| {
+            let authorizer = Authorizer::from_string(payload.authorizer.clone())?;
+            let external_auth_result = self.external_authenticator_service.authenticate(AuthenticationPayload {
+                authorizer,
+                token: payload.token.clone(),
+            })?;
+
             let existing_user =
                 self.user_repo
-                    .find_by_email_or_username(&payload.email, &payload.username, &tr);
+                    .find_by_email_or_username(&external_auth_result.email, &payload.username, &tr);
             if existing_user.is_ok() {
-                return Err(anyhow::Error::msg("User already exists"));
+                bail!("User already exists");
             }
 
-            self.create_user(payload, &tr)
+            self.create_user(payload, &external_auth_result.email, &tr)
         })
     }
 
+    /*
     pub fn login_user(&self, payload: LoginRequest) -> anyhow::Result<AuthorizingResponse> {
         self.tm.transaction(|tr| {
             let existing_user = self

@@ -70,6 +70,41 @@
         }
       }
     },
+    "/auth/register": {
+      "post": {
+        "description": "Register a new user",
+        "operationId": "authregister",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AuthorizingResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "description": "Healthcheck",
@@ -151,12 +186,36 @@
           }
         }
       },
+      "RegisterRequest": {
+        "type": "object",
+        "required": [
+          "authorizer",
+          "participate_in_leaderboards",
+          "token",
+          "username"
+        ],
+        "properties": {
+          "authorizer": {
+            "type": "string"
+          },
+          "participate_in_leaderboards": {
+            "type": "boolean"
+          },
+          "token": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
       "UserDto": {
         "type": "object",
         "required": [
           "email",
           "id",
           "is_admin",
+          "participate_in_leaderboards",
           "username"
         ],
         "properties": {
@@ -167,6 +226,9 @@
             "type": "string"
           },
           "is_admin": {
+            "type": "boolean"
+          },
+          "participate_in_leaderboards": {
             "type": "boolean"
           },
           "username": {

@@ -6,6 +6,7 @@ CREATE TABLE users
     username      VARCHAR          NOT NULL UNIQUE,
     email         VARCHAR          NOT NULL UNIQUE,
     authenticator         VARCHAR          NOT NULL UNIQUE,
+    participate_in_leaderboards     BOOL             NOT NULL DEFAULT false,
     is_active     BOOL             NOT NULL DEFAULT TRUE,
     is_admin      BOOL             NOT NULL DEFAULT FALSE
 );

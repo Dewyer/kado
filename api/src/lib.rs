@@ -58,6 +58,7 @@ pub fn rocket() -> rocket::Rocket {
                 routes::healthcheck_routes::healthcheck_route,
                 routes::auth_routes::check_user,
                 routes::auth_routes::refresh_token,
+                routes::auth_routes::register_user,
             ],
         )
         .mount("/swagger", make_swagger_ui(&get_swagger_config()))

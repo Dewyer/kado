@@ -10,14 +10,21 @@ import reportWebVitals from "./reportWebVitals";
 import { store } from "./store";
 import "./polyfills/array-polyfill";
 import { history } from "./helpers/history";
+import { ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
+import {QueryClient, QueryClientProvider} from "react-query";
 
+const queryClient = new QueryClient()
 
 ReactDOM.render(
 	<React.StrictMode>
 		<Provider store={store}>
-			<Router history={history}>
-				<App />
-			</Router>
+			<QueryClientProvider client={queryClient}>
+				<ToastContainer />
+				<Router history={history}>
+					<App />
+				</Router>
+			</QueryClientProvider>
 		</Provider>
 	</React.StrictMode>,
 	document.getElementById("root")

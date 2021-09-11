@@ -1,8 +1,7 @@
 /* tslint:disable */
-export interface UserDto {
-  email: string;
-  id: string;
-  is_admin: boolean;
+export interface RegisterRequest {
+  authorizer: string;
   participate_in_leaderboards: boolean;
+  token: string;
   username: string;
 }

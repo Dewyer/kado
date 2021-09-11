@@ -5,9 +5,11 @@ import { Form, Field } from 'react-final-form'
 import {CompleteProfileFormData} from "./CompleteProfileForm.types";
 import {completeProfileFormValidation} from "./CompleteProfileForm.validation";
 import {FieldTextInput} from "src/components/atoms/FieldTextInput/FieldTextInput";
-import { Checkbox } from "semantic-ui-react";
-import {FieldCheckbox} from "../../../atoms/FieldCheckbox/FieldCheckbox";
+import {FieldCheckbox} from "src/components/atoms/FieldCheckbox/FieldCheckbox";
 import classNames from "classnames";
+import {useRegisterUserMutation} from "src/api/hooks";
+import {useDispatch} from "react-redux";
+import {authorizedAction} from "../../../../store/actions/global";
 
 export interface CompleteProfileFormProps {
     containerClassName?: string;
@@ -16,10 +18,27 @@ export interface CompleteProfileFormProps {
 
 export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = (props) => {
     const { loginResponse, containerClassName } = props;
+    const dispatch = useDispatch();
+    const registerUserMutation = useRegisterUserMutation();
 
-    const onSubmit = (values: CompleteProfileFormData) => {
-        console.log(values, loginResponse);
+    const onSubmit = async (values: CompleteProfileFormData) => {
+        if ('code' in loginResponse) {
+            return;
+        }
+
+        const authorizingResponse = await registerUserMutation.mutateAsync({
+            authorizer: "google",
+            token: loginResponse.tokenId,
+            username: values.username,
+            participate_in_leaderboards: values.participateInLeaderBoard,
+        });
+
+        dispatch(authorizedAction(authorizingResponse));
     };
+
+    const submitButtonClasses = classNames("ui primary button" , {
+        "loading": registerUserMutation.isLoading,
+    });
 
     return (
         <div className={classNames(styles.CompleteProfileForm, containerClassName)}>
@@ -48,7 +67,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = (props) =
                             type="checkbox"
                         />
 
-                        <button className="ui primary button" type="submit" disabled={submitting || !valid}>
+                        <button className={submitButtonClasses} type="submit" disabled={submitting || !valid || registerUserMutation.isLoading}>
                             Register
                         </button>
                     </form>

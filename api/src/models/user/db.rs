@@ -10,6 +10,7 @@ pub struct User {
     pub username: String,
     pub email: String,
     pub authenticator: String,
+    pub participate_in_leaderboards: bool,
     pub is_active: bool,
     pub is_admin: bool,
 }
@@ -20,6 +21,7 @@ pub struct NewUser<'a> {
     pub username: &'a str,
     pub email: &'a str,
     pub authenticator: &'a str,
+    pub participate_in_leaderboards: bool,
     pub is_active: bool,
     pub is_admin: bool,
 }
@@ -30,6 +32,7 @@ impl User {
             id: self.id.to_string(),
             username: self.username.clone(),
             email: self.email.clone(),
+            participate_in_leaderboards: self.participate_in_leaderboards.clone(),
             is_admin: self.is_admin.clone(),
         }
     }
