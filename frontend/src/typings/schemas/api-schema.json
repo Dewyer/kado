@@ -182,6 +182,41 @@
           }
         }
       }
+    },
+    "/team/create": {
+      "post": {
+        "description": "Create a new team",
+        "operationId": "teamcreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTeamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/CreateTeamResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -232,6 +267,28 @@
           },
           "user_inactive": {
             "type": "boolean"
+          }
+        }
+      },
+      "CreateTeamRequest": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateTeamResponse": {
+        "type": "object",
+        "required": [
+          "team"
+        ],
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/TeamFullyPopulatedDto"
           }
         }
       },

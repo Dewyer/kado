@@ -31,7 +31,7 @@ export const CreateTeam: React.FC<CreateTeamProps> = (props) => {
                         <Field<string>
                             name="name"
                             component={FieldTextInput}
-                            placeHolder="ex: Tank1234"
+                            placeHolder="ex: Labosch"
                             type="text"
                         />
                     </div>

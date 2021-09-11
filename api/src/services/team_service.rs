@@ -1,11 +1,15 @@
-use crate::db::transaction_manager::TransactionManager;
+use crate::db::transaction_manager::{TransactionManager, ITransaction};
 use rocket::request::FromRequest;
 use crate::errors::ServiceError;
 use rocket::{Request, request};
-use crate::models::team::{TeamFullyPopulatedDto, Team};
+use crate::models::team::{TeamFullyPopulatedDto, Team, NewTeam};
 use crate::guards::{AuthTokenGuard, AccessToken};
-use crate::models::http::responses::GetUsersTeamResponse;
+use crate::models::http::responses::{GetUsersTeamResponse, CreateTeamResponse};
 use crate::db::team_repo::{ITeamRepo, DbTeamRepo};
+use crate::models::http::requests::CreateTeamRequest;
+use crate::models::user::User;
+use base64::CharacterSet::Crypt;
+use crate::services::crypto_service::CryptoService;
 
 pub struct TeamService {
     team_repo: ITeamRepo,
@@ -49,6 +53,45 @@ impl TeamService {
                     team: None,
                 })
             }
+        })
+    }
+
+    fn get_new_join_code_for_team(&self) -> String {
+        CryptoService::get_random_string(8)
+    }
+
+    pub fn assert_user_can_create_team(&self, user: &User, payload: &CreateTeamRequest, td: &ITransaction) -> anyhow::Result<()> {
+        if let Some(user_team_id) = user.team_id.clone() {
+            let team_res = self.team_repo.find_by_id_not_deleted(user_team_id, &td);
+            if team_res.is_ok()
+            {
+                bail!("Can't create a new team while already in one!");
+            }
+        }
+
+        let existing_team = self.team_repo.find_by_name(&payload.name, &td);
+        if existing_team.is_ok() {
+            bail!("Team with the same name already exists!");
+        }
+
+        Ok(())
+    }
+
+    pub fn create_team(&self, user_guard: AuthTokenGuard<AccessToken>, payload: CreateTeamRequest) -> anyhow::Result<CreateTeamResponse> {
+        self.tm.transaction(|td| {
+            let user = user_guard.user;
+            self.assert_user_can_create_team(&user, &payload, &td);
+
+            let new_team = self.team_repo.crud().insert(&NewTeam {
+                name: &payload.name,
+                join_code: &self.get_new_join_code_for_team(),
+                owner_user: Some(user.id),
+                is_deleted: false,
+            }, &td)?;
+
+            Ok(CreateTeamResponse {
+                team: TeamFullyPopulatedDto::from_team_and_users(&new_team, &vec![user], true),
+            })
         })
     }
 }
