@@ -3,3 +3,12 @@
   display: flex;
   flex-direction: column;
 }
+
+.Markdown {
+  & code {
+    background-color: #111111;
+    color: white;
+    border-radius: 3px;
+    padding: 0.1rem;
+  }
+}

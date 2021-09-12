@@ -77,12 +77,14 @@ impl ProblemRepo for DbProblemRepo {
     }
 
     fn find_available_problem_by_code_name_populated(&self, code_name: &str, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<(Problem, ProblemStatement)> {
+        let full = problems::available_from.ge(now).or(problems::available_from.is_null()).and(problems::available_until.le(now).or(problems::available_until.is_null()));
+
         problems::table
             .inner_join(problem_statements::table)
             .filter(
                 problems::is_deleted.eq(false)
                     .and(problems::code_name.eq(code_name))
-                    .and(problems::available_from.is_not_null().and(problems::available_until.is_not_null().and(problems::available_until.le(now))))
+                    .and(full)
             ).first::<(Problem, ProblemStatement)>(td.get_db_connection())
             .map_err(|_| anyhow::Error::msg("Problem not found!"))
     }
