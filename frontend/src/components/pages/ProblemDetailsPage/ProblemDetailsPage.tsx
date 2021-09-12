@@ -1,6 +1,6 @@
 import React from "react";
 import {PageLayout} from "src/components/templates/PageLayout/PageLayout";
-import {Redirect, useParams} from "react-router-dom";
+import {Link, Redirect, useParams} from "react-router-dom";
 import styles from "./ProblemDetailsPage.module.scss"
 import {useFetchProblemDetails} from "../../../api/hooks/problemApiHooks";
 import {PageLoader} from "../../templates/PageLoader/PageLoader";
@@ -39,6 +39,9 @@ export const ProblemDetailsPage: React.FC = () => {
                     children={problem.problem_statement.problem_statement}
                 />
             </div>
+            <span className={styles.ToSolveDisclaimer}>
+                To solve this problem follow the instructions found in the <Link to={GLOBAL_ROUTES.API_GUIDE}>Api Guide</Link>.
+            </span>
         </PageLayout>
     );
 };

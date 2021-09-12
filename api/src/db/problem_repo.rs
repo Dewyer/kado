@@ -52,7 +52,7 @@ impl ProblemRepo for DbProblemRepo {
     }
 
     fn find_available_problems(&self, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<Vec<Problem>> {
-        let full = problems::available_from.ge(now).or(problems::available_from.is_null()).and(problems::available_until.le(now).or(problems::available_until.is_null()));
+        let full = problems::available_from.le(now).or(problems::available_from.is_null()).and(problems::available_until.ge(now).or(problems::available_until.is_null()));
 
         problems::table
             .select(problems::all_columns)
@@ -69,7 +69,7 @@ impl ProblemRepo for DbProblemRepo {
             .select(problems::all_columns)
             .filter(
                 problems::is_deleted.eq(false)
-                    .and(problems::available_from.is_not_null().and(problems::available_until.is_not_null().and(problems::available_until.le(now))))
+                    .and(problems::available_from.is_not_null().and(problems::available_until.is_not_null().and(problems::available_until.ge(now)).or(problems::available_until.is_null())))
             )
             .order(problems::available_from.desc())
             .first::<Problem>(td.get_db_connection())
@@ -77,7 +77,7 @@ impl ProblemRepo for DbProblemRepo {
     }
 
     fn find_available_problem_by_code_name_populated(&self, code_name: &str, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<(Problem, ProblemStatement)> {
-        let full = problems::available_from.ge(now).or(problems::available_from.is_null()).and(problems::available_until.le(now).or(problems::available_until.is_null()));
+        let full = problems::available_from.le(now).or(problems::available_from.is_null()).and(problems::available_until.ge(now).or(problems::available_until.is_null()));
 
         problems::table
             .inner_join(problem_statements::table)

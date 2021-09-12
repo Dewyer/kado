@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import {GetProblemsResponse, ProblemDto} from "src/typings/api";
 import {GLOBAL_ROUTES} from "src/routing/routingConstants";
 import styles from "./AvailableProblemsList.module.scss";
+import Timer from 'react-compound-timer';
+import {TimerToNextAvailableProblem} from "./TimerToNextAvailableProblem";
 
 export interface ProblemListItemProps {
     problem: ProblemDto;
@@ -31,12 +33,15 @@ export interface AvailableProblemsListProps {
 }
 
 export const AvailableProblemsList: React.FC<AvailableProblemsListProps> = (props) => {
+    const { problemsResponse } = props;
+
     return (
         <div className={styles.AvailableProblemsList}>
             <h3 className={"ui header"}>Problems: </h3>
             <div className="ui ordered list">
-                {props.problemsResponse.problems.map((pr) => <ProblemListItem problem={pr} />)}
+                {problemsResponse.problems.map((pr) => <ProblemListItem problem={pr} />)}
             </div>
+            {problemsResponse.next_problem_available_at && <TimerToNextAvailableProblem nextProblemAt={problemsResponse.next_problem_available_at} />}
         </div>
     );
 };
