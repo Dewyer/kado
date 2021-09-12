@@ -5,7 +5,7 @@ import styles from "./ProblemDetailsPage.module.scss"
 import {useFetchProblemDetails} from "../../../api/hooks/problemApiHooks";
 import {PageLoader} from "../../templates/PageLoader/PageLoader";
 import {GLOBAL_ROUTES} from "src/routing/routingConstants";
-import ReactMarkdown from 'react-markdown'
+import {Markdown} from "src/components/templates/Markdown/Markdown";
 
 export const ProblemDetailsPage: React.FC = () => {
     const { codeName } = useParams<{ codeName: string }>();
@@ -34,11 +34,9 @@ export const ProblemDetailsPage: React.FC = () => {
             </h2>
             <span>ID: {problem.code_name}</span>
             <h3 className={"ui header"}>Problem statement:</h3>
-            <div className={styles.Markdown}>
-                <ReactMarkdown
-                    children={problem.problem_statement.problem_statement}
-                />
-            </div>
+            <Markdown
+                textContents={problem.problem_statement.problem_statement}
+            />
             <span className={styles.ToSolveDisclaimer}>
                 To solve this problem follow the instructions found in the <Link to={GLOBAL_ROUTES.API_GUIDE}>Api Guide</Link>.
             </span>
