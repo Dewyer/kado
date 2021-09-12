@@ -1,4 +1,13 @@
 table! {
+    api_tokens (id) {
+        id -> Uuid,
+        token -> Varchar,
+        owner_id -> Uuid,
+        is_deleted -> Bool,
+    }
+}
+
+table! {
     problem_statements (id) {
         id -> Uuid,
         version -> Nullable<Varchar>,
@@ -43,10 +52,12 @@ table! {
     }
 }
 
+joinable!(api_tokens -> users (owner_id));
 joinable!(problems -> problem_statements (problem_statement_id));
 joinable!(teams -> users (owner_user));
 
 allow_tables_to_appear_in_same_query!(
+    api_tokens,
     problem_statements,
     problems,
     teams,
