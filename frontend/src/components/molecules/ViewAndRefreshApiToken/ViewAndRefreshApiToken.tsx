@@ -6,6 +6,7 @@ import {toastPopper} from "src/helpers/toastPopper";
 import {useFetchApiToken, useRefreshApiTokenMutation} from "src/api/hooks/apiTokenApiHooks";
 import {PageLoader} from "../../templates/PageLoader/PageLoader";
 import {queryClient} from "../../../api/queryClient";
+import classNames from "classnames";
 
 export const ViewAndRefreshApiToken: React.FC = () => {
     const apiTokenQuery = useFetchApiToken();
@@ -37,7 +38,7 @@ export const ViewAndRefreshApiToken: React.FC = () => {
                 />
 
                 <button
-                    className="ui button primary"
+                    className={classNames("ui button primary", {loading: refreshApiTokenMutation.isLoading})}
                     disabled={refreshApiTokenMutation.isLoading}
                     onClick={onRefreshApiToken}
                 >

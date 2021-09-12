@@ -19,7 +19,6 @@ export const ApiGuidePage: React.FC = () => {
                 className={styles.MarkdownContentWrapper}
                 textContents={pageContent}
             />
-
         </PageLayout>
     );
 };
