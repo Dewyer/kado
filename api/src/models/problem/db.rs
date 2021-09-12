@@ -2,6 +2,7 @@ use uuid::Uuid;
 use chrono::NaiveDateTime;
 use crate::schema::problems;
 use serde::Serialize;
+use crate::models::problem::ProblemDto;
 
 #[derive(Queryable, Serialize, AsChangeset)]
 #[table_name = "problems"]
@@ -29,4 +30,20 @@ pub struct NewProblem<'a> {
     pub available_from: Option<NaiveDateTime>,
     pub available_until: Option<NaiveDateTime>,
     pub is_deleted: bool,
+}
+
+impl Problem {
+    pub fn to_dto(&self) -> ProblemDto {
+        ProblemDto {
+            id: self.id.to_string(),
+            code_name: self.code_name.clone(),
+            name: self.name.clone(),
+            base_point_value: self.base_point_value,
+            difficulty: self.difficulty,
+            problem_statement_id: self.problem_statement_id.to_string(),
+            available_from: self.available_from.map(|dt| dt.to_string()).clone(),
+            available_until: self.available_until.map(|dt| dt.to_string()).clone(),
+            is_deleted: self.is_deleted,
+        }
+    }
 }
