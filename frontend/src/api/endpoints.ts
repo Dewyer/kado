@@ -9,4 +9,6 @@ export const Endpoints = {
     JOIN_TEAM: "/api/team/join",
     GET_PROBLEMS: "/api/problems",
     GET_PROBLEM_DETAILS: "/api/problems",
+    GET_API_TOKEN: "/api/api-token",
+    REFRESH_API_TOKEN: "/api/refresh-api-token",
 }

@@ -1,0 +1,17 @@
+.ViewAndRefreshApiToken {
+  display: flex;
+  flex-direction: column;
+  margin-top: 2rem;
+
+}
+
+.ControlRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  & > button {
+    margin-left: 0.4rem !important;
+    max-width: 10rem !important;
+  }
+}

@@ -10,6 +10,31 @@
     }
   ],
   "paths": {
+    "/api-token": {
+      "get": {
+        "description": "Get active token for logged in user",
+        "operationId": "api-token",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/GetApiTokenResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/check-user": {
       "post": {
         "description": "Check if a user is already registered by a token",
@@ -218,6 +243,31 @@
         }
       }
     },
+    "/refresh-api-token": {
+      "post": {
+        "description": "Refresh api token for logged in user",
+        "operationId": "refresh-api-token",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/GetApiTokenResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/team": {
       "get": {
         "description": "Get the team of the logged in user",
@@ -351,6 +401,29 @@
   },
   "components": {
     "schemas": {
+      "ApiTokenDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "is_deleted",
+          "owner_id",
+          "token"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_deleted": {
+            "type": "boolean"
+          },
+          "owner_id": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
       "AuthorizingResponse": {
         "type": "object",
         "required": [
@@ -430,6 +503,17 @@
         "properties": {
           "error": {
             "type": "string"
+          }
+        }
+      },
+      "GetApiTokenResponse": {
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "$ref": "#/components/schemas/ApiTokenDto"
           }
         }
       },
