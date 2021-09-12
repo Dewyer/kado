@@ -5,6 +5,8 @@ import {TeamFullyPopulatedDto, UserDto} from "src/typings/api";
 import {Dropdown, DropdownItemProps} from "semantic-ui-react";
 import {useSelector} from "react-redux";
 import {makeSelectUser} from "../../../store/selectors/global.selectors";
+import {useLeaveTeamMutation} from "../../../api/hooks/teamApiHooks";
+import {queryClient} from "../../../api/queryClient";
 
 export interface LeaveTeamProps {
     className?: string;
@@ -22,8 +24,8 @@ const getDropdownOptionForUser = (user: UserDto):  DropdownItemProps => {
 export const LeaveTeam: React.FC<LeaveTeamProps> = (props) => {
     const { team } = props;
     const user = useSelector(makeSelectUser());
+    const leaveTeamMutation = useLeaveTeamMutation();
     const userIsOwner = team.owner_user?.id === user?.id;
-
     const [inheritor, setInheritor] = useState<string>();
 
     const inheritorOptions = useMemo(() => {
@@ -32,12 +34,28 @@ export const LeaveTeam: React.FC<LeaveTeamProps> = (props) => {
             .map((user) => getDropdownOptionForUser(user));
     },[team.members]);
     const inheritorSelectionVisible = userIsOwner && !!inheritorOptions.length;
-    const leaveTeamDisabled = inheritorSelectionVisible && !inheritor;
+    const leaveTeamDisabled = inheritorSelectionVisible && !inheritor || leaveTeamMutation.isLoading;
 
     const leaveTeamButtonTitle = inheritorOptions.length === 0 ? "Disband team" : "Leave team";
 
+    const onSubmit = async () => {
+        await leaveTeamMutation.mutateAsync({
+            inheritor,
+        });
+
+        await queryClient.invalidateQueries("FetchUserTeam");
+    };
+    const leaveTeamButtonClasses = classNames("ui red button", { loading: leaveTeamMutation.isLoading });
+
     return <div className={classNames(styles.LeaveTeam, props.className)}>
-        <div><button disabled={leaveTeamDisabled} className="ui red button">{leaveTeamButtonTitle}</button></div>
+        <div>
+            <button
+                onClick={onSubmit}
+                disabled={leaveTeamDisabled}
+                className={leaveTeamButtonClasses}>
+                {leaveTeamButtonTitle}
+            </button>
+        </div>
 
         {inheritorSelectionVisible && <>
             <label>Select the user to inherit the team:</label>

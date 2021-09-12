@@ -19,6 +19,7 @@ export const ViewJoinCode: React.FC<FieldErrorProps> = (props) => {
         <div className={styles.ViewJoinCode}>
             <label>Join code: </label>
             <CustomTextInput
+                readOnly
                 value={code}
             />
             <CopyToClipboard

@@ -6,8 +6,9 @@ import {TeamDetailsView} from "../../templates/TeamDetailsView/TeamDetailsView";
 import {JoinOrCreateTeamView} from "../../templates/JoinOrCreateTeam/JoinOrCreateTeamView";
 
 const PageLoader = () => (
-    <div className="ui active dimmer">
-        <div className="ui text loader">Loading user's team ...</div>
+    <div className={styles.Loader}>
+        <div className="ui active inline loader"></div>
+        <div className="ui text">Loading user's team ...</div>
     </div>
 );
 

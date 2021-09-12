@@ -2,7 +2,7 @@ import {useMutation, UseMutationResult, useQuery, UseQueryResult} from "react-qu
 import {
     CreateTeamRequest,
     CreateTeamResponse,
-    GetUsersTeamResponse,
+    GetUsersTeamResponse, LeaveTeamRequest,
 } from "src/typings/api";
 import {toastPopper} from "../../helpers/toastPopper";
 import {TeamApiService} from "../apis/TeamApiService";
@@ -23,6 +23,16 @@ export const useCreateTeamMutation = (): UseMutationResult<CreateTeamResponse, u
         async (request: CreateTeamRequest) => TeamApiService.createTeam(request),
         {
             onError: () => { toastPopper({ message: "Creating team failed!" }) },
+        }
+    );
+};
+
+export const useLeaveTeamMutation = (): UseMutationResult<void, unknown, LeaveTeamRequest> => {
+    return useMutation(
+        ["LeaveTeamMutation"],
+        async (request: LeaveTeamRequest) => TeamApiService.leaveTeam(request),
+        {
+            onError: () => { toastPopper({ message: "Leaving team failed!" }) },
         }
     );
 };

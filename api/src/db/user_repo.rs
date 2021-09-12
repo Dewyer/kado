@@ -64,6 +64,18 @@ impl UserRepo for DbUserRepo {
             .map_err(|er| anyhow::Error::from(er))
     }
 
+    /*
+    (
+                users::username.eq(&user.username),
+                users::email.eq(&user.email),
+                users::authenticator.eq(&user.authenticator),
+                users::participate_in_leaderboards.eq(&user.participate_in_leaderboards),
+                users::is_active.eq(&user.is_active),
+                users::is_admin.eq(&user.is_admin),
+                users::team_id.eq(&user.team_id),
+            )
+    */
+
     fn save(&self, user: &User, td: &ITransaction) -> anyhow::Result<User> {
         diesel::update(users::table)
             .filter(users::id.eq(user.id))

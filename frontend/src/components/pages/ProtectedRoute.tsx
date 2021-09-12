@@ -10,7 +10,7 @@ export interface ProtectedRouteProps extends RouteProps {
 export const ProtectedRoute = (props: PropsWithChildren<ProtectedRouteProps>): ReactElement => {
 	const { restrictedPath, children, ...rest } = props;
 
-	const user = useSelector(makeSelectUser);
+	const user = useSelector(makeSelectUser());
 
 	return !!user ? (
 		<Route {...rest}>{children}</Route>

@@ -3,6 +3,8 @@ use uuid::Uuid;
 use crate::schema::teams;
 
 #[derive(Queryable, Serialize, AsChangeset)]
+#[table_name = "teams"]
+#[changeset_options(treat_none_as_null = "true")]
 pub struct Team {
     pub id: Uuid,
     pub name: String,

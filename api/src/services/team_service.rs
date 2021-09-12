@@ -103,15 +103,9 @@ impl TeamService {
         })
     }
 
-    fn assert_user_can_leave_team(&self, user: &User, payload: &LeaveTeamRequest, td: &ITransaction) -> anyhow::Result<()> {
+    fn assert_user_can_leave_team(&self, user: &User) -> anyhow::Result<()> {
         if user.team_id.is_none() {
             bail!("User is not a team!");
-        }
-
-        let existing_team = self.team_repo.find_by_id_not_deleted(user.team_id.unwrap(), &td)
-            .map_err(|_| anyhow::Error::msg("Team user is in is deleted!"))?;
-        if existing_team.owner_user.contains(&user.id) && payload.inheritor.is_none()  {
-            bail!("Inheritor not chosen for ownership!")
         }
 
         Ok(())
@@ -124,9 +118,11 @@ impl TeamService {
         td: &ITransaction,
     ) -> anyhow::Result<()> {
         let (team, team_users) = team_and_users;
-        if team_users.len() == 0 {
+        if team_users.len() == 1 {
             team.is_deleted = true;
             team.owner_user = None;
+
+            self.team_repo.save(&team, &td)?;
             return Ok(());
         }
 
@@ -147,7 +143,7 @@ impl TeamService {
     pub fn leave_team(&self, user_guard: AuthTokenGuard<AccessToken>, payload: LeaveTeamRequest) -> anyhow::Result<()> {
         self.tm.transaction(|td| {
             let mut user = user_guard.user;
-            self.assert_user_can_leave_team(&user, &payload, &td)?;
+            self.assert_user_can_leave_team(&user)?;
             let mut team_and_users = self.team_repo.find_by_id_with_users(user.team_id.unwrap(), &td)?;
 
             user.team_id = None;

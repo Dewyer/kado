@@ -8,7 +8,7 @@ export const validateCreateTeamForm = (values: CreateTeamFormData): ValidationEr
         errors.name = "Required!";
     }
 
-    if (!!values.name && values.name.length <= 3) {
+    if (!!values.name && values.name.length < 3) {
         errors.name = "Must be at least 3 characters!";
     }
 

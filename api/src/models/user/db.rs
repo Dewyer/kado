@@ -5,6 +5,8 @@ use crate::schema::users;
 use crate::models::user::UserDto;
 
 #[derive(Queryable, Serialize, AsChangeset)]
+#[table_name = "users"]
+#[changeset_options(treat_none_as_null = "true")]
 pub struct User {
     pub id: Uuid,
     pub username: String,

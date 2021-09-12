@@ -1,4 +1,4 @@
-import {CreateTeamRequest, CreateTeamResponse, GetUsersTeamResponse} from "src/typings/api";
+import {CreateTeamRequest, CreateTeamResponse, GetUsersTeamResponse, LeaveTeamRequest} from "src/typings/api";
 import {Endpoints} from "src/api/endpoints";
 import {ApiService} from "../ApiService";
 
@@ -20,5 +20,13 @@ export abstract class TeamApiService {
         });
 
         return resp.data;
+    }
+
+    public static async leaveTeam(payload: LeaveTeamRequest): Promise<void> {
+        await ApiService.authenticatedRequest<CreateTeamResponse>({
+            url: Endpoints.LEAVE_TEAM,
+            method: "POST",
+            data: payload,
+        });
     }
 }
