@@ -8,4 +8,5 @@ export const Endpoints = {
     LEAVE_TEAM: "/api/team/leave",
     JOIN_TEAM: "/api/team/join",
     GET_PROBLEMS: "/api/problems",
+    GET_PROBLEM_DETAILS: "/api/problems",
 }

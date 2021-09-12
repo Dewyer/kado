@@ -183,6 +183,41 @@
         }
       }
     },
+    "/problems/{code_name}": {
+      "get": {
+        "description": "Get full problem details",
+        "operationId": "problems{code_name}",
+        "parameters": [
+          {
+            "name": "code_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/GetProblemDetailsResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/team": {
       "get": {
         "description": "Get the team of the logged in user",
@@ -398,6 +433,17 @@
           }
         }
       },
+      "GetProblemDetailsResponse": {
+        "type": "object",
+        "required": [
+          "problem"
+        ],
+        "properties": {
+          "problem": {
+            "$ref": "#/components/schemas/ProblemFullyPopulatedDto"
+          }
+        }
+      },
       "GetProblemsResponse": {
         "type": "object",
         "required": [
@@ -506,6 +552,70 @@
           },
           "problem_statement_id": {
             "type": "string"
+          }
+        }
+      },
+      "ProblemFullyPopulatedDto": {
+        "type": "object",
+        "required": [
+          "base_point_value",
+          "code_name",
+          "difficulty",
+          "id",
+          "is_deleted",
+          "name",
+          "problem_statement"
+        ],
+        "properties": {
+          "available_from": {
+            "type": "string",
+            "nullable": true
+          },
+          "available_until": {
+            "type": "string",
+            "nullable": true
+          },
+          "base_point_value": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "code_name": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "string"
+          },
+          "is_deleted": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "problem_statement": {
+            "$ref": "#/components/schemas/ProblemStatementDto"
+          }
+        }
+      },
+      "ProblemStatementDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "problem_statement"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "problem_statement": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string",
+            "nullable": true
           }
         }
       },

@@ -8,6 +8,8 @@ use crate::errors::ServiceError;
 use crate::models::problem::{NewProblem, Problem};
 use crate::schema::problems;
 use chrono::NaiveDateTime;
+use crate::schema::problem_statements;
+use crate::models::problem::problem_statement::ProblemStatement;
 
 crud_repo!(ProblemCrudRepo, DbProblemCrudRepo, problems, Problem, NewProblem, "Problems");
 pub type IProblemCrudRepo = Box<dyn ProblemCrudRepo>;
@@ -20,6 +22,8 @@ pub trait ProblemRepo {
     fn find_available_problems(&self, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<Vec<Problem>>;
 
     fn find_next_available_problem(&self, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<Problem>;
+
+    fn find_available_problem_by_code_name_populated(&self, code_name: &str, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<(Problem, ProblemStatement)>;
 }
 
 pub struct DbProblemRepo {
@@ -70,6 +74,17 @@ impl ProblemRepo for DbProblemRepo {
             .order(problems::available_from.desc())
             .first::<Problem>(td.get_db_connection())
             .map_err(|_| anyhow::Error::msg("Next available problem not found!"))
+    }
+
+    fn find_available_problem_by_code_name_populated(&self, code_name: &str, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<(Problem, ProblemStatement)> {
+        problems::table
+            .inner_join(problem_statements::table)
+            .filter(
+                problems::is_deleted.eq(false)
+                    .and(problems::code_name.eq(code_name))
+                    .and(problems::available_from.is_not_null().and(problems::available_until.is_not_null().and(problems::available_until.le(now))))
+            ).first::<(Problem, ProblemStatement)>(td.get_db_connection())
+            .map_err(|_| anyhow::Error::msg("Problem not found!"))
     }
 }
 

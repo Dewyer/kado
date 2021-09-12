@@ -1,11 +1,17 @@
 use uuid::Uuid;
 use rocket::Request;
+use chrono::{Utc, NaiveDateTime};
 
 pub const AUTHORIZATION_HEADER: &'static str = "Authorization";
 
 pub struct UtilsService {}
 
 impl UtilsService {
+    pub fn naive_now() -> chrono::NaiveDateTime {
+        let now = Utc::now();
+        NaiveDateTime::from_timestamp(now.timestamp(),0)
+    }
+
     pub fn parse_uuid(id_str: &str) -> anyhow::Result<Uuid> {
         Uuid::parse_str(id_str)
             .map(|v| v)
