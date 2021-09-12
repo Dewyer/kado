@@ -4,6 +4,7 @@ import classNames from "classnames";
 import {Field, Form} from "react-final-form";
 import {FieldTextInput} from "../../atoms/FieldTextInput/FieldTextInput";
 import {ValidationErrors} from "final-form";
+import {useJoinTeamMutation} from "../../../api/hooks/teamApiHooks";
 
 export interface JoinTeamFormData {
     joinCode: string;
@@ -24,8 +25,16 @@ const validateJoinTeamForm = (values: JoinTeamFormData): ValidationErrors => {
 }
 
 export const JoinTeam: React.FC = () => {
+    const joinTeamMutation = useJoinTeamMutation();
+
     const onSubmit = async (values: JoinTeamFormData) => {
-        //TODO join team api
+        if (joinTeamMutation.isLoading) {
+            return;
+        }
+
+        await joinTeamMutation.mutateAsync({
+            join_code: values.joinCode,
+        })
     };
 
     return (
@@ -50,9 +59,9 @@ export const JoinTeam: React.FC = () => {
                             />
                         </div>
                         <button
-                            className="ui button primary"
+                            className={classNames("ui button primary", {loading: joinTeamMutation.isLoading})}
                             type="submit"
-                            disabled={submitting || !valid}
+                            disabled={submitting || !valid || joinTeamMutation.isLoading}
                         >
                             Join
                         </button>

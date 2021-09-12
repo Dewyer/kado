@@ -6,7 +6,7 @@ use crate::models::team::{TeamFullyPopulatedDto, Team, NewTeam};
 use crate::guards::{AuthTokenGuard, AccessToken};
 use crate::models::http::responses::{GetUsersTeamResponse, CreateTeamResponse};
 use crate::db::team_repo::{ITeamRepo, DbTeamRepo};
-use crate::models::http::requests::{CreateTeamRequest, LeaveTeamRequest};
+use crate::models::http::requests::{CreateTeamRequest, LeaveTeamRequest, JoinTeamRequest};
 use crate::models::user::User;
 use base64::CharacterSet::Crypt;
 use crate::services::crypto_service::CryptoService;
@@ -153,6 +153,31 @@ impl TeamService {
                 self.handle_ownership_transfer_on_team_leave(&mut team_and_users, &payload, &td)?;
             }
 
+            Ok(())
+        })
+    }
+
+    fn assert_user_can_join_team(&self, user: &User) -> anyhow::Result<()> {
+        if user.team_id.is_some() {
+            bail!("User is already in a team!");
+        }
+
+        Ok(())
+    }
+
+    pub fn join_team(&self, user_guard: AuthTokenGuard<AccessToken>, payload: JoinTeamRequest) -> anyhow::Result<()> {
+        self.tm.transaction(|td| {
+            let mut user = user_guard.user;
+            self.assert_user_can_join_team(&user)?;
+
+            let mut team_to_join = self.team_repo.find_by_join_code(&payload.join_code, &td)?;
+            user.team_id = Some(team_to_join.id);
+            if team_to_join.owner_user.is_none() {
+                team_to_join.owner_user = Some(user.id);
+                self.team_repo.save(&team_to_join, &td)?;
+            }
+
+            self.user_repo.save(&user, &td)?;
             Ok(())
         })
     }

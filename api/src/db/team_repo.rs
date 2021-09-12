@@ -16,6 +16,8 @@ pub type ITeamCrudRepo = Box<dyn TeamCrudRepo>;
 pub trait TeamRepo {
     fn crud(&self) -> &ITeamCrudRepo;
 
+    fn find_by_join_code(&self, join_code: &str, td: &ITransaction) -> anyhow::Result<Team>;
+
     fn find_by_name(&self, name: &str, td: &ITransaction) -> anyhow::Result<Team>;
 
     fn find_by_id_not_deleted(&self, id: Uuid, td: &ITransaction) -> anyhow::Result<Team>;
@@ -40,6 +42,14 @@ impl DbTeamRepo {
 impl TeamRepo for DbTeamRepo {
     fn crud(&self) -> &ITeamCrudRepo {
         &self.crud
+    }
+
+    fn find_by_join_code(&self, join_code: &str, td: &ITransaction) -> anyhow::Result<Team> {
+        teams::table
+            .select(teams::all_columns)
+            .filter(teams::join_code.eq(join_code).and(teams::is_deleted.eq(false)))
+            .first::<Team>(td.get_db_connection())
+            .map_err(|_| anyhow::Error::msg("Team not found!"))
     }
 
     fn find_by_name(&self, name: &str, td: &ITransaction) -> anyhow::Result<Team> {

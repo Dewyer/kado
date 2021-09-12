@@ -218,6 +218,41 @@
         }
       }
     },
+    "/team/join": {
+      "post": {
+        "description": "Join a team",
+        "operationId": "teamjoin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinTeamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/team/leave": {
       "post": {
         "description": "Leave team user is in",
@@ -348,6 +383,17 @@
               }
             ],
             "nullable": true
+          }
+        }
+      },
+      "JoinTeamRequest": {
+        "type": "object",
+        "required": [
+          "join_code"
+        ],
+        "properties": {
+          "join_code": {
+            "type": "string"
           }
         }
       },

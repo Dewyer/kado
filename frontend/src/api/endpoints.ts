@@ -6,4 +6,5 @@ export const Endpoints = {
     GET_TEAM: "/api/team",
     CREATE_TEAM: "/api/team/create",
     LEAVE_TEAM: "/api/team/leave",
+    JOIN_TEAM: "/api/team/join",
 }
