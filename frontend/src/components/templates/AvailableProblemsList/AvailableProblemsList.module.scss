@@ -1,0 +1,14 @@
+
+.AvailableProblemsList {
+  display: flex;
+  flex-direction: column;
+
+  & > div {
+    margin-left: 3rem !important;
+  }
+}
+
+.LinkListItemText {
+  margin-left: 0.6rem;
+  color: #111111;;
+}

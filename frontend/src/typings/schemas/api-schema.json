@@ -158,6 +158,31 @@
         }
       }
     },
+    "/problems": {
+      "get": {
+        "description": "Get all available problems",
+        "operationId": "problems",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/GetProblemsResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/team": {
       "get": {
         "description": "Get the team of the logged in user",
@@ -373,6 +398,24 @@
           }
         }
       },
+      "GetProblemsResponse": {
+        "type": "object",
+        "required": [
+          "problems"
+        ],
+        "properties": {
+          "next_problem_available_at": {
+            "type": "string",
+            "nullable": true
+          },
+          "problems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemDto"
+            }
+          }
+        }
+      },
       "GetUsersTeamResponse": {
         "type": "object",
         "properties": {
@@ -417,6 +460,51 @@
             "type": "string"
           },
           "token": {
+            "type": "string"
+          }
+        }
+      },
+      "ProblemDto": {
+        "type": "object",
+        "required": [
+          "base_point_value",
+          "code_name",
+          "difficulty",
+          "id",
+          "is_deleted",
+          "name",
+          "problem_statement_id"
+        ],
+        "properties": {
+          "available_from": {
+            "type": "string",
+            "nullable": true
+          },
+          "available_until": {
+            "type": "string",
+            "nullable": true
+          },
+          "base_point_value": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "code_name": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "string"
+          },
+          "is_deleted": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "problem_statement_id": {
             "type": "string"
           }
         }

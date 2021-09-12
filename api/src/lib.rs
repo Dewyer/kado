@@ -64,6 +64,7 @@ pub fn rocket() -> rocket::Rocket {
                 routes::team_routes::create_team,
                 routes::team_routes::leave_team,
                 routes::team_routes::join_team,
+                routes::problem_routes::get_problems,
             ],
         )
         .mount("/swagger", make_swagger_ui(&get_swagger_config()))

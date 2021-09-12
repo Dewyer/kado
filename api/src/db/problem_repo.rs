@@ -65,7 +65,7 @@ impl ProblemRepo for DbProblemRepo {
             .select(problems::all_columns)
             .filter(
                 problems::is_deleted.eq(false)
-                    .and(problems::available_from.n.is_not_null().and(problems::available_until.is_not_null().and(problems::available_until.le(now))))
+                    .and(problems::available_from.is_not_null().and(problems::available_until.is_not_null().and(problems::available_until.le(now))))
             )
             .order(problems::available_from.desc())
             .first::<Problem>(td.get_db_connection())

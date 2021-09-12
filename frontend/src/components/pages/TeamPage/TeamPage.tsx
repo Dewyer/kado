@@ -4,13 +4,7 @@ import {PageLayout} from "src/components/templates/PageLayout/PageLayout";
 import {useFetchUserTeam} from "../../../api/hooks/teamApiHooks";
 import {TeamDetailsView} from "../../templates/TeamDetailsView/TeamDetailsView";
 import {JoinOrCreateTeamView} from "../../templates/JoinOrCreateTeam/JoinOrCreateTeamView";
-
-const PageLoader = () => (
-    <div className={styles.Loader}>
-        <div className="ui active inline loader"></div>
-        <div className="ui text">Loading user's team ...</div>
-    </div>
-);
+import {PageLoader} from "../../templates/PageLoader/PageLoader";
 
 export const TeamPage: React.FC = () => {
     const fetchTeamResult = useFetchUserTeam();
@@ -18,7 +12,7 @@ export const TeamPage: React.FC = () => {
     if (fetchTeamResult.isLoading) {
         return (
             <PageLayout>
-                <PageLoader />
+                <PageLoader message="Loading user's team ..." />
             </PageLayout>
         );
     }

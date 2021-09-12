@@ -27,12 +27,12 @@ impl ProblemService {
         self.tm.transaction(|td| {
             let now = Utc::now();
             let now_naive = NaiveDateTime::from_timestamp(now.timestamp(),0);
-            let available_problems = self.problem_repo.find_available_problems(now_naive)?;
-            let next_problem = self.problem_repo.find_next_available_problem(now_naive).ok();
+            let available_problems = self.problem_repo.find_available_problems(now_naive, &td)?;
+            let next_problem = self.problem_repo.find_next_available_problem(now_naive, &td).ok();
 
             Ok(GetProblemsResponse {
-                next_problem_available_at: None,
-                problems: vec![],
+                next_problem_available_at: next_problem.map(|pr| pr.available_from.map_or("".to_string(),|el| el.to_string())),
+                problems: available_problems.into_iter().map(|pr| pr.to_dto()).collect(),
             })
         })
     }

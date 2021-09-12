@@ -3,6 +3,7 @@ export const GLOBAL_ROUTES = {
 	LOGIN: "/login",
 	TEAM: "/team",
 	PROBLEMS: "/problems",
+	PROBLEM_DETAILS: "/problems/",
 	API_GUIDE: "/api-guide",
 	INDIVIDUAL_LEADERBOARD: "/individual-leaderboard",
 	TEAM_LEADERBOARD: "/team-leaderboard",
