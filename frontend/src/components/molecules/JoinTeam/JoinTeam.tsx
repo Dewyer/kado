@@ -2,9 +2,10 @@ import React from "react";
 import styles from "./JoinTeam.module.scss";
 import classNames from "classnames";
 import {Field, Form} from "react-final-form";
-import {FieldTextInput} from "../../atoms/FieldTextInput/FieldTextInput";
+import {FieldTextInput} from "src/components/atoms/FieldTextInput/FieldTextInput";
 import {ValidationErrors} from "final-form";
-import {useJoinTeamMutation} from "../../../api/hooks/teamApiHooks";
+import {useJoinTeamMutation} from "src/api/hooks/teamApiHooks";
+import {queryClient} from "src/api/queryClient";
 
 export interface JoinTeamFormData {
     joinCode: string;
@@ -17,7 +18,7 @@ const validateJoinTeamForm = (values: JoinTeamFormData): ValidationErrors => {
         errors.joinCode = "Required!";
     }
 
-    if (!!values.joinCode && values.joinCode.length <= 8) {
+    if (!!values.joinCode && values.joinCode.length < 8) {
         errors.joinCode = "Must be at least 8 characters!";
     }
 
@@ -34,7 +35,9 @@ export const JoinTeam: React.FC = () => {
 
         await joinTeamMutation.mutateAsync({
             join_code: values.joinCode,
-        })
+        });
+
+        await queryClient.invalidateQueries("FetchUserTeam");
     };
 
     return (
