@@ -33,11 +33,17 @@ export const MenuLayout: React.FC = () => {
         </Link>
         {loggedIn && (
             <>
+                <Link to={GLOBAL_ROUTES.PROBLEMS} className={getTabClasses(GLOBAL_ROUTES.PROBLEMS)}>
+                    Problems
+                </Link>
                 <Link to={GLOBAL_ROUTES.TEAM} className={getTabClasses(GLOBAL_ROUTES.TEAM)}>
                     Team
                 </Link>
-                <Link to={GLOBAL_ROUTES.HOME} className={getTabClasses(GLOBAL_ROUTES.HOME)}>
+                <Link to={GLOBAL_ROUTES.INDIVIDUAL_LEADERBOARD} className={getTabClasses(GLOBAL_ROUTES.INDIVIDUAL_LEADERBOARD)}>
                     Leaderboard
+                </Link>
+                <Link to={GLOBAL_ROUTES.API_GUIDE} className={getTabClasses(GLOBAL_ROUTES.API_GUIDE)}>
+                    Api Guide
                 </Link>
             </>
         )}

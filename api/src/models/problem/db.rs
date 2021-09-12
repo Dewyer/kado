@@ -1,6 +1,7 @@
 use uuid::Uuid;
 use chrono::NaiveDateTime;
 use crate::schema::problems;
+use serde::Serialize;
 
 #[derive(Queryable, Serialize, AsChangeset)]
 #[table_name = "problems"]
@@ -11,9 +12,9 @@ pub struct Problem {
     pub name: String,
     pub base_point_value: i64,
     pub difficulty: i32,
-    pub problem_statement_id: Option<Uuid>,
-    pub available_from: NaiveDateTime,
-    pub available_until: NaiveDateTime,
+    pub problem_statement_id: Uuid,
+    pub available_from: Option<NaiveDateTime>,
+    pub available_until: Option<NaiveDateTime>,
     pub is_deleted: bool,
 }
 
@@ -24,8 +25,8 @@ pub struct NewProblem<'a> {
     pub name: &'a str,
     pub base_point_value: i64,
     pub difficulty: i32,
-    pub problem_statement_id: Option<Uuid>,
-    pub available_from: NaiveDateTime,
-    pub available_until: NaiveDateTime,
+    pub problem_statement_id: Uuid,
+    pub available_from: Option<NaiveDateTime>,
+    pub available_until: Option<NaiveDateTime>,
     pub is_deleted: bool,
 }
