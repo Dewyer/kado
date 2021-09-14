@@ -22,10 +22,37 @@ table! {
         name -> Varchar,
         base_point_value -> Int8,
         difficulty -> Int4,
+        max_submissions -> Int4,
+        sample_count -> Int4,
         problem_statement_id -> Uuid,
         available_from -> Nullable<Timestamp>,
         available_until -> Nullable<Timestamp>,
         is_deleted -> Bool,
+    }
+}
+
+table! {
+    submission_tests (id) {
+        id -> Uuid,
+        submission_id -> Uuid,
+        class -> Varchar,
+        input -> Text,
+        output -> Nullable<Text>,
+        correct -> Nullable<Bool>,
+        submitted_at -> Nullable<Timestamp>,
+    }
+}
+
+table! {
+    submissions (id) {
+        id -> Uuid,
+        owner_id -> Uuid,
+        problem_id -> Uuid,
+        seed -> Int4,
+        test_count -> Int4,
+        sample_index -> Nullable<Int4>,
+        started_at -> Timestamp,
+        finished_at -> Nullable<Timestamp>,
     }
 }
 
@@ -54,12 +81,17 @@ table! {
 
 joinable!(api_tokens -> users (owner_id));
 joinable!(problems -> problem_statements (problem_statement_id));
+joinable!(submission_tests -> submissions (submission_id));
+joinable!(submissions -> problems (problem_id));
+joinable!(submissions -> users (owner_id));
 joinable!(teams -> users (owner_user));
 
 allow_tables_to_appear_in_same_query!(
     api_tokens,
     problem_statements,
     problems,
+    submission_tests,
+    submissions,
     teams,
     users,
 );

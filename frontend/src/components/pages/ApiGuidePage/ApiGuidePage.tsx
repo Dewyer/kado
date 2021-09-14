@@ -8,6 +8,8 @@ const pageContent = `
 ### Api docs
 
 This will explain the usage of the api, using md!
+
+Just create a submission session, and do that!
 `;
 
 export const ApiGuidePage: React.FC = () => {

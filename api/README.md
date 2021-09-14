@@ -8,3 +8,9 @@
     - can be with sample data
     - Solution session ends with a submission
     - Results are returned to the client, also shown in the problems detail's page
+    - submissions are limited
+    - submissions are handled by a submission handler
+    - Undefined handlers just cause errors
+
+- Test problem:
+  - https://www.hackerrank.com/challenges/camelcase/problem dadaaa

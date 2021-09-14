@@ -12,6 +12,8 @@ CREATE TABLE problems
     name VARCHAR NOT NULL UNIQUE,
     base_point_value BIGINT NOT NULL,
     difficulty INT NOT NULL,
+    max_submissions INT NOT NULL,
+    sample_count INT NOT NULL,
     problem_statement_id UUID NOT NULL,
     available_from timestamp NULL,
     available_until timestamp NULL,
