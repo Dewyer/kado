@@ -3,7 +3,7 @@ use rocket::request::FromRequest;
 use crate::errors::ServiceError;
 use rocket::{Request, request};
 use crate::guards::{AuthTokenGuard, ApiToken};
-use crate::models::http::requests::StartSubmissionRequest;
+use crate::models::http::requests::{StartSubmissionRequest, SendTestOutputRequest, GetTestInputRequest};
 use crate::db::problem_repo::{IProblemRepo, DbProblemRepo};
 use crate::services::utils_service::UtilsService;
 use crate::models::problem::code_name::CodeName;
@@ -13,7 +13,7 @@ use crate::models::submission::{Submission, NewSubmission};
 use crate::db::submission_repo::{ISubmissionRepo, DbSubmissionRepo};
 use crate::services::submission::support::{IProblemSupport, CamelCaseProblemSupport, SubmissionGenerationPayload, SubmissionTestGenerationPayload, SubmissionTestGenerationResult};
 use rand::Rng;
-use crate::models::http::responses::{StartSubmissionResponse, GetTestInputResponse};
+use crate::models::http::responses::{StartSubmissionResponse, GetTestInputResponse, SendTestOutputResponse};
 use crate::models::submission::submission_test::{SubmissionTest, NewSubmissionTest};
 
 pub struct SubmissionService {
@@ -130,8 +130,9 @@ impl SubmissionService {
         ))
     }
 
-    pub fn get_test_input(&self, user_guard: AuthTokenGuard<ApiToken>, code_name: String) -> anyhow::Result<GetTestInputResponse> {
+    pub fn get_test_input(&self, user_guard: AuthTokenGuard<ApiToken>, request: GetTestInputRequest) -> anyhow::Result<GetTestInputResponse> {
         self.tm.transaction(|td| {
+            let code_name = request.code_name;
             let user = user_guard.user;
             let now_naive = UtilsService::naive_now();
             CodeName::from_string(&code_name)?;
@@ -144,6 +145,19 @@ impl SubmissionService {
 
             Ok(GetTestInputResponse {
                 input: generated_test.input,
+            })
+        })
+    }
+
+    fn assert_can_send_test_output(&self, )
+
+    pub fn send_test_output(&self, _user_guard: AuthTokenGuard<ApiToken>, test_id: String, request: SendTestOutputRequest) -> anyhow::Result<SendTestOutputResponse> {
+        self.tm.transaction(|td| {
+            let test_uuid = UtilsService::parse_uuid(&test_id)?;
+            let test = self.submission_repo.crud_tests().find_by_id(test_uuid, &td)?;
+
+            Ok(SendTestOutputResponse {
+                correct: false,
             })
         })
     }

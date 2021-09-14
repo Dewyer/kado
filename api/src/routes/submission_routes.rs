@@ -3,8 +3,8 @@ use crate::models::http::api_result::AnyApiResult;
 use crate::guards::{ApiToken, AuthTokenGuard};
 use crate::services::submission::submission_service::SubmissionService;
 use rocket_contrib::json::Json;
-use crate::models::http::requests::StartSubmissionRequest;
-use crate::models::http::responses::{StartSubmissionResponse, GetTestInputResponse};
+use crate::models::http::requests::{StartSubmissionRequest, SendTestOutputRequest, GetTestInputRequest};
+use crate::models::http::responses::{StartSubmissionResponse, GetTestInputResponse, SendTestOutputResponse};
 
 #[openapi]
 #[post("/start-submission", format = "json", data = "<request>")]
@@ -20,14 +20,28 @@ pub fn start_submission(
 }
 
 #[openapi]
-#[post("/get-test-input/<code_name>")]
-/// Start a new submission
+#[put("/test-input", format = "json", data = "<request>")]
+/// Get input for a new test
 pub fn get_test_input(
     user_guard: AuthTokenGuard<ApiToken>,
-    code_name: String,
+    request: Json<GetTestInputRequest>,
     submission_service: SubmissionService,
 ) -> AnyApiResult<GetTestInputResponse> {
     submission_service
-        .get_test_input(user_guard, code_name)
+        .get_test_input(user_guard, request.0)
+        .into()
+}
+
+#[openapi]
+#[post("/test-input/<test_id>", format = "json", data = "<request>")]
+/// Send output for an existing test
+pub fn send_test_output(
+    user_guard: AuthTokenGuard<ApiToken>,
+    test_id: String,
+    request: Json<SendTestOutputRequest>,
+    submission_service: SubmissionService,
+) -> AnyApiResult<SendTestOutputResponse> {
+    submission_service
+        .send_test_output(user_guard, test_id, request.0)
         .into()
 }
