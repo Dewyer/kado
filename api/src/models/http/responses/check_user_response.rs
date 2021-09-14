@@ -1,5 +1,3 @@
-use crate::models::user::UserDto;
-
 #[derive(serde::Serialize, serde::Deserialize, rocket_okapi::JsonSchema)]
 pub struct CheckUserResponse {
     pub user_inactive: bool,

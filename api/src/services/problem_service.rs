@@ -4,8 +4,7 @@ use crate::errors::ServiceError;
 use rocket::{Request, request};
 use crate::models::http::responses::{GetProblemsResponse, GetProblemDetailsResponse};
 use crate::db::problem_repo::{IProblemRepo, DbProblemRepo};
-use chrono::{NaiveDateTime, DateTime, Utc};
-use crate::models::problem::{Problem, ProblemFullyPopulatedDto};
+use crate::models::problem::{ProblemFullyPopulatedDto};
 use crate::services::utils_service::UtilsService;
 
 pub struct ProblemService {

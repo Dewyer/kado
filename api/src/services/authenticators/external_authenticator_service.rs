@@ -1,13 +1,10 @@
-use crate::config::AppConfig;
 use rocket::request::FromRequest;
 use crate::errors::ServiceError;
-use rocket::{Request, request, State};
-use rocket::http::Status;
+use rocket::{Request, request};
 use crate::services::authenticators::google_authenticator_service::GoogleAuthenticatorService;
 use crate::services::authenticators::models::{AuthenticationPayload, AuthenticationResult};
 use crate::services::authenticators::models::Authorizer;
-use crate::services::authenticators::authenticator::{Authenticator, IAuthenticator};
-use google_jwt_verify::Client;
+use crate::services::authenticators::authenticator::{IAuthenticator};
 
 pub struct ExternalAuthenticatorService {
     google_authenticator_service: IAuthenticator,

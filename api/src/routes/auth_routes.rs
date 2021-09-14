@@ -1,7 +1,7 @@
 use rocket_contrib::json::Json;
 use rocket_okapi::openapi;
 use crate::guards::{AuthTokenGuard, RefreshToken};
-use crate::models::http::api_result::{AnyApiResult, ApiResult, ErrorResponse};
+use crate::models::http::api_result::{AnyApiResult};
 use crate::services::auth_service::AuthService;
 use crate::models::http::responses::{AuthorizingResponse, CheckUserResponse};
 use crate::models::http::requests::{CheckUserRequest, RegisterRequest, LoginRequest};

@@ -1,4 +1,3 @@
-use chrono::NaiveDateTime;
 use rocket_contrib::json::Json;
 use rocket_okapi::openapi;
 

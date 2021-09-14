@@ -12,7 +12,6 @@ use crate::db::user_repo::{DbUserRepo, IUserRepo};
 use crate::errors::ServiceError;
 use crate::guards::{AuthTokenGuard, RefreshToken};
 use crate::models::user::{NewUser, User};
-use crate::services::crypto_service::CryptoService;
 use crate::services::utils_service::UtilsService;
 use crate::models::http::responses::{AuthorizingResponse, CheckUserResponse};
 use crate::models::http::access_claim::AccessClaim;

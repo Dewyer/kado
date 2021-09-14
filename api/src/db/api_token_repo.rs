@@ -17,7 +17,7 @@ pub type IApiTokenCrudRepo = Box<dyn ApiTokenCrudRepo>;
 pub trait ApiTokenRepo {
     fn crud(&self) -> &IApiTokenCrudRepo;
 
-    fn save(&self, apiToken: &ApiToken, td: &ITransaction) -> anyhow::Result<ApiToken>;
+    fn save(&self, api_token: &ApiToken, td: &ITransaction) -> anyhow::Result<ApiToken>;
 
     fn find_api_token_by_user(&self, user_id: Uuid, td: &ITransaction) -> anyhow::Result<ApiToken>;
 
@@ -43,10 +43,10 @@ impl ApiTokenRepo for DbApiTokenRepo {
         &self.crud
     }
 
-    fn save(&self, apiToken: &ApiToken, td: &ITransaction) -> anyhow::Result<ApiToken> {
+    fn save(&self, api_token: &ApiToken, td: &ITransaction) -> anyhow::Result<ApiToken> {
         diesel::update(api_tokens::table)
-            .filter(api_tokens::id.eq(apiToken.id))
-            .set(apiToken)
+            .filter(api_tokens::id.eq(api_token.id))
+            .set(api_token)
             .get_result(td.get_db_connection())
             .map_err(|_| anyhow::Error::msg("Can't save ApiToken!"))
     }
@@ -62,7 +62,7 @@ impl ApiTokenRepo for DbApiTokenRepo {
     fn soft_delete_all_tokens_for_user(&self, user_id: Uuid, td: &ITransaction) -> anyhow::Result<()> {
         diesel::update(api_tokens::table)
             .filter(api_tokens::owner_id.eq(user_id))
-            .set((api_tokens::is_deleted.eq(true)))
+            .set(api_tokens::is_deleted.eq(true))
             .execute(td.get_db_connection())
             .map_err(|_| anyhow::Error::msg("Can't save ApiTokens!"))?;
 

@@ -8,7 +8,6 @@ use crate::models::http::responses::{GetUsersTeamResponse, CreateTeamResponse};
 use crate::db::team_repo::{ITeamRepo, DbTeamRepo};
 use crate::models::http::requests::{CreateTeamRequest, LeaveTeamRequest, JoinTeamRequest};
 use crate::models::user::User;
-use base64::CharacterSet::Crypt;
 use crate::services::crypto_service::CryptoService;
 use crate::db::user_repo::{IUserRepo, DbUserRepo};
 use crate::services::utils_service::UtilsService;
@@ -85,7 +84,7 @@ impl TeamService {
     pub fn create_team(&self, user_guard: AuthTokenGuard<AccessToken>, payload: CreateTeamRequest) -> anyhow::Result<CreateTeamResponse> {
         self.tm.transaction(|td| {
             let mut user = user_guard.user;
-            self.assert_user_can_create_team(&user, &payload, &td);
+            self.assert_user_can_create_team(&user, &payload, &td)?;
 
             let new_team = self.team_repo.crud().insert(&NewTeam {
                 name: &payload.name,

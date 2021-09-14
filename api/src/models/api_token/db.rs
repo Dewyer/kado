@@ -1,5 +1,4 @@
 use uuid::Uuid;
-use chrono::NaiveDateTime;
 use crate::schema::api_tokens;
 use serde::Serialize;
 use crate::models::api_token::ApiTokenDto;
