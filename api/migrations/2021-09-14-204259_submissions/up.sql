@@ -20,6 +20,7 @@ CREATE TABLE submission_tests
     input TEXT NOT NULL,
     output TEXT NULL,
     correct BOOL NULL,
-    submitted_at TIMESTAMP NULL,
+    started_at TIMESTAMP NOT NULL,
+    finished_at TIMESTAMP NULL,
     FOREIGN KEY (submission_id) REFERENCES submissions (id) ON DELETE CASCADE
 );

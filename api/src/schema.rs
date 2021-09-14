@@ -39,7 +39,8 @@ table! {
         input -> Text,
         output -> Nullable<Text>,
         correct -> Nullable<Bool>,
-        submitted_at -> Nullable<Timestamp>,
+        started_at -> Timestamp,
+        finished_at -> Nullable<Timestamp>,
     }
 }
 

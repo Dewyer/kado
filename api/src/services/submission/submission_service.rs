@@ -11,9 +11,10 @@ use crate::models::problem::Problem;
 use crate::models::user::User;
 use crate::models::submission::{Submission, NewSubmission};
 use crate::db::submission_repo::{ISubmissionRepo, DbSubmissionRepo};
-use crate::services::submission::support::{IProblemSupport, CamelCaseProblemSupport, SubmissionGenerationPayload};
+use crate::services::submission::support::{IProblemSupport, CamelCaseProblemSupport, SubmissionGenerationPayload, SubmissionTestGenerationPayload, SubmissionTestGenerationResult};
 use rand::Rng;
-use crate::models::http::responses::StartSubmissionResponse;
+use crate::models::http::responses::{StartSubmissionResponse, GetTestInputResponse};
+use crate::models::submission::submission_test::{SubmissionTest, NewSubmissionTest};
 
 pub struct SubmissionService {
     submission_repo: ISubmissionRepo,
@@ -40,11 +41,11 @@ impl SubmissionService {
         }
     }
 
-    fn create_new_submission(&self, user: &User, problem: &Problem, request: &StartSubmissionRequest, td: &ITransaction) -> anyhow::Result<Submission> {
+    fn create_submission(&self, user: &User, problem: &Problem, request: &StartSubmissionRequest, td: &ITransaction) -> anyhow::Result<Submission> {
         let now_naive = UtilsService::naive_now();
         let code_name = CodeName::from_string(&request.problem_id)?;
         let support = self.get_problem_support(code_name.clone());
-        let seed = rand::thread_rng().gen_range(0, 10e5);
+        let seed = rand::thread_rng().gen_range(0, 1000000);
         let gen_payload = SubmissionGenerationPayload {
             seed,
         };
@@ -85,10 +86,64 @@ impl SubmissionService {
             let problem = self.problem_repo.find_available_problem_by_code(&request.problem_id, now_naive, &td)?;
             self.assert_can_start_submission(&user_guard.user, &problem, &request, &td)?;
 
-            let new_submission = self.create_new_submission(&user_guard.user, &problem, &request, &td)?;
+            let new_submission = self.create_submission(&user_guard.user, &problem, &request, &td)?;
 
             Ok(StartSubmissionResponse {
                 submission: new_submission.to_dto(),
+            })
+        })
+    }
+
+    fn assert_can_start_new_test(&self, submission: &Submission, existing_tests: &Vec<SubmissionTest>) -> anyhow::Result<()> {
+        let open_test = existing_tests.iter().find(|test| test.finished_at.is_none());
+        if open_test.is_some() {
+            bail!("You already have an open test running, submit it before getting new inputs!");
+        }
+
+        if existing_tests.len() >= submission.test_count as usize {
+            bail!("You already submitted all the required tests!");
+        }
+
+        Ok(())
+    }
+
+    fn create_submission_test(&self, problem: &Problem, submission: &Submission, existing_tests: &Vec<SubmissionTest>, td: &ITransaction) -> anyhow::Result<(SubmissionTest, SubmissionTestGenerationResult)> {
+        let now_naive = UtilsService::naive_now();
+        let code_name = CodeName::from_string(&problem.code_name)?;
+        let support = self.get_problem_support(code_name.clone());
+        let input_res = support.generate_submission_test_input(SubmissionTestGenerationPayload {
+            test_index: existing_tests.len(),
+            seed: submission.seed,
+        })?;
+
+        Ok((
+            self.submission_repo.crud_tests().insert(&NewSubmissionTest {
+                submission_id: submission.id,
+                class: &input_res.test_class,
+                input: &input_res.input.to_string(),
+                output: None,
+                correct: None,
+                started_at: now_naive,
+                finished_at: None,
+            }, td)?,
+            input_res
+        ))
+    }
+
+    pub fn get_test_input(&self, user_guard: AuthTokenGuard<ApiToken>, code_name: String) -> anyhow::Result<GetTestInputResponse> {
+        self.tm.transaction(|td| {
+            let user = user_guard.user;
+            let now_naive = UtilsService::naive_now();
+            CodeName::from_string(&code_name)?;
+
+            let problem = self.problem_repo.find_available_problem_by_code(&code_name, now_naive, &td)?;
+            let (submission, submission_tests) = self.submission_repo.find_latest_submission_by_user_and_problem_with_tests(user.id, problem.id, &td)?;
+            self.assert_can_start_new_test(&submission, &submission_tests)?;
+
+            let (_, generated_test) = self.create_submission_test(&problem, &submission, &submission_tests, &td)?;
+
+            Ok(GetTestInputResponse {
+                input: generated_test.input,
             })
         })
     }

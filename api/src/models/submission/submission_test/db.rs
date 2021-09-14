@@ -12,8 +12,9 @@ pub struct SubmissionTest {
     pub class: String,
     pub input: String,
     pub output: Option<String>,
-    pub correct: bool,
-    pub submitted_at: Option<NaiveDateTime>,
+    pub correct: Option<bool>,
+    pub started_at: NaiveDateTime,
+    pub finished_at: Option<NaiveDateTime>,
 }
 
 #[derive(Insertable)]
@@ -23,6 +24,7 @@ pub struct NewSubmissionTest<'a> {
     pub class: &'a str,
     pub input: &'a str,
     pub output: Option<&'a str>,
-    pub correct: bool,
-    pub submitted_at: Option<NaiveDateTime>,
+    pub correct: Option<bool>,
+    pub started_at: NaiveDateTime,
+    pub finished_at: Option<NaiveDateTime>,
 }

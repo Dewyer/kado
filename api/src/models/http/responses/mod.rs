@@ -6,7 +6,9 @@ mod get_problems_response;
 mod get_problem_details_response;
 mod get_api_token_request;
 mod start_submission_response;
+mod get_test_input_response;
 
+pub use get_test_input_response::*;
 pub use start_submission_response::*;
 pub use get_api_token_request::*;
 pub use get_problem_details_response::*;

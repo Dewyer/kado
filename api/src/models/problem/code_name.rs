@@ -9,7 +9,7 @@ impl CodeName {
     pub fn from_string(code_name: &str) -> anyhow::Result<CodeName> {
         match &code_name.to_lowercase()[..] {
             CAMEL_CASE_NAME => Ok(CodeName::CamelCase),
-            _ => { anyhow::Error::msg("Problem id invalid!") }
+            _ => { Err(anyhow::Error::msg("Problem id invalid!")) }
         }
     }
 
