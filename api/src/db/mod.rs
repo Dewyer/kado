@@ -12,6 +12,7 @@ pub mod user_repo;
 pub mod api_token_repo;
 pub mod problem_repo;
 pub mod transaction_manager;
+pub mod submission_repo;
 
 #[database("diesel_postgres_pool")]
 pub struct ConnPool(diesel::PgConnection);

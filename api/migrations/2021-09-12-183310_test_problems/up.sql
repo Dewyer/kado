@@ -3,14 +3,14 @@ INSERT INTO problem_statements(
 VALUES (
     '4befd72e-13f9-11ec-ba5c-c30a7c25a635',
     'v1',
-    E'#### Test Problem\nDescription goes here'
+    E'#### Camel Case\nMake camel case!'
 );
 
 INSERT INTO problems(
     code_name, name, base_point_value, difficulty, max_submissions, sample_count ,problem_statement_id, available_from, available_until, is_deleted)
 VALUES (
-    'test-pr-1',
-    'Test Problem',
+    'camel-case',
+    'Camel Case',
     100,
     3,
     20,

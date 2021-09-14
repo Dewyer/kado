@@ -14,6 +14,13 @@ use crate::models::problem::problem_statement::ProblemStatement;
 crud_repo!(ProblemCrudRepo, DbProblemCrudRepo, problems, Problem, NewProblem, "Problems");
 pub type IProblemCrudRepo = Box<dyn ProblemCrudRepo>;
 
+#[macro_export]
+macro_rules! full_availability {
+    ($now: ident) => {
+        problems::available_from.le($now).or(problems::available_from.is_null()).and(problems::available_until.ge($now).or(problems::available_until.is_null()))
+    }
+}
+
 pub trait ProblemRepo {
     fn crud(&self) -> &IProblemCrudRepo;
 
@@ -22,6 +29,8 @@ pub trait ProblemRepo {
     fn find_available_problems(&self, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<Vec<Problem>>;
 
     fn find_next_available_problem(&self, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<Problem>;
+
+    fn find_available_problem_by_code(&self, code_name: &str, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<Problem>;
 
     fn find_available_problem_by_code_name_populated(&self, code_name: &str, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<(Problem, ProblemStatement)>;
 }
@@ -52,7 +61,7 @@ impl ProblemRepo for DbProblemRepo {
     }
 
     fn find_available_problems(&self, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<Vec<Problem>> {
-        let full = problems::available_from.le(now).or(problems::available_from.is_null()).and(problems::available_until.ge(now).or(problems::available_until.is_null()));
+        let full = full_availability!(now);
 
         problems::table
             .select(problems::all_columns)
@@ -76,8 +85,19 @@ impl ProblemRepo for DbProblemRepo {
             .map_err(|_| anyhow::Error::msg("Next available problem not found!"))
     }
 
+    fn find_available_problem_by_code(&self, code_name: &str, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<Problem> {
+        let full = full_availability!(now);
+        problems::table
+            .filter(
+                problems::is_deleted.eq(false)
+                    .and(problems::code_name.eq(code_name))
+                    .and(full)
+            ).first::<Problem>(td.get_db_connection())
+            .map_err(|_| anyhow::Error::msg("Problem not found!"))
+    }
+
     fn find_available_problem_by_code_name_populated(&self, code_name: &str, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<(Problem, ProblemStatement)> {
-        let full = problems::available_from.le(now).or(problems::available_from.is_null()).and(problems::available_until.ge(now).or(problems::available_until.is_null()));
+        let full = full_availability!(now);
 
         problems::table
             .inner_join(problem_statements::table)
