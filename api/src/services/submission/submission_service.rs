@@ -177,7 +177,7 @@ impl SubmissionService {
 
     fn get_diminishing_returns_on_points(&self, max_p: i64, sub_count: usize) -> i64 {
         const R: f64 = 0.2;
-        (max_p * std::f64::consts::E.powf(-R * (sub_count as f64))).floor() as i64
+        (max_p as f64 * std::f64::consts::E.powf(-R * (sub_count as f64))).floor() as i64
     }
 
     fn handle_team_member_submission_completion(&self, user: &User, team_id: Uuid, problem: &Problem, td: &ITransaction) -> anyhow::Result<()> {

@@ -7,6 +7,8 @@ export interface ProblemDto {
   difficulty: number;
   id: string;
   is_deleted: boolean;
+  max_submissions: number;
   name: string;
   problem_statement_id: string;
+  sample_count: number;
 }

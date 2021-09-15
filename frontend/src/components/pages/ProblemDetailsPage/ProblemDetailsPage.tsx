@@ -6,6 +6,7 @@ import {useFetchProblemDetails} from "../../../api/hooks/problemApiHooks";
 import {PageLoader} from "../../templates/PageLoader/PageLoader";
 import {GLOBAL_ROUTES} from "src/routing/routingConstants";
 import {Markdown} from "src/components/templates/Markdown/Markdown";
+import {SubmissionsList} from "../../templates/SubmissionsList/SubmissionsList";
 
 export const ProblemDetailsPage: React.FC = () => {
     const { codeName } = useParams<{ codeName: string }>();
@@ -23,6 +24,7 @@ export const ProblemDetailsPage: React.FC = () => {
         );
     }
     const problem = problemQuery.data.problem;
+    const submissions = problemQuery.data.submissions;
 
     return (
         <PageLayout contentClassName={styles.ProblemDetailsPage}>
@@ -40,6 +42,9 @@ export const ProblemDetailsPage: React.FC = () => {
             <span className={styles.ToSolveDisclaimer}>
                 To solve this problem follow the instructions found in the <Link to={GLOBAL_ROUTES.API_GUIDE}>Api Guide</Link>.
             </span>
+            <SubmissionsList
+                submissions={submissions}
+            />
         </PageLayout>
     );
 };

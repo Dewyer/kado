@@ -7,4 +7,5 @@ export interface TeamFullyPopulatedDto {
   members: Array<UserDto>;
   name: string;
   owner_user?: UserDto;
+  points: number;
 }

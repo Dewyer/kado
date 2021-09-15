@@ -9,6 +9,8 @@ export interface ProblemFullyPopulatedDto {
   difficulty: number;
   id: string;
   is_deleted: boolean;
+  max_submissions: number;
   name: string;
   problem_statement: ProblemStatementDto;
+  sample_count: number;
 }

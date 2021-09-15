@@ -6,9 +6,12 @@ use crate::models::http::responses::{GetProblemsResponse, GetProblemDetailsRespo
 use crate::db::problem_repo::{IProblemRepo, DbProblemRepo};
 use crate::models::problem::{ProblemFullyPopulatedDto};
 use crate::services::utils_service::UtilsService;
+use crate::db::submission_repo::{ISubmissionRepo, DbSubmissionRepo};
+use crate::guards::{AccessToken, AuthTokenGuard};
 
 pub struct ProblemService {
     problem_repo: IProblemRepo,
+    submission_repo: ISubmissionRepo,
     tm: TransactionManager,
 }
 
@@ -16,10 +19,12 @@ pub struct ProblemService {
 impl ProblemService {
     pub fn new(
         problem_repo: IProblemRepo,
+        submission_repo: ISubmissionRepo,
         tm: TransactionManager,
     ) -> Self {
         Self {
             problem_repo,
+            submission_repo,
             tm,
         }
     }
@@ -37,13 +42,15 @@ impl ProblemService {
         })
     }
 
-    pub fn get_problem_details(&self, code_name: String) -> anyhow::Result<GetProblemDetailsResponse> {
+    pub fn get_problem_details(&self, user_guard: AuthTokenGuard<AccessToken>, code_name: String) -> anyhow::Result<GetProblemDetailsResponse> {
         self.tm.transaction(|td| {
             let now_naive = UtilsService::naive_now();
             let problem_and_statement = self.problem_repo.find_available_problem_by_code_name_populated(&code_name, now_naive, &td)?;
+            let submissions = self.submission_repo.find_submissions_by_user_and_problem(user_guard.user.id, problem_and_statement.0.id, &td)?;
 
             Ok(GetProblemDetailsResponse {
                 problem: ProblemFullyPopulatedDto::from_problem_and_statement(&problem_and_statement.0, &problem_and_statement.1),
+                submissions: submissions.into_iter().map(|sub| sub.to_dto()).collect(),
             })
         })
     }
@@ -54,10 +61,12 @@ impl<'a, 'r> FromRequest<'a, 'r> for ProblemService {
 
     fn from_request(req: &'a Request<'r>) -> request::Outcome<ProblemService, Self::Error> {
         let problem_repo = req.guard::<DbProblemRepo>()?;
+        let submission_repo = req.guard::<DbSubmissionRepo>()?;
         let db_tm = req.guard::<TransactionManager>()?;
 
         request::Outcome::Success(ProblemService::new(
             Box::new(problem_repo),
+            Box::new(submission_repo),
             db_tm,
         ))
     }

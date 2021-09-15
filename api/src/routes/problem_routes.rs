@@ -20,11 +20,11 @@ pub fn get_problems(
 #[get("/problems/<code_name>")]
 /// Get full problem details
 pub fn get_problem_details(
-    _user_guard: AuthTokenGuard<AccessToken>,
+    user_guard: AuthTokenGuard<AccessToken>,
     code_name: String,
     problem_service: ProblemService,
 ) -> AnyApiResult<GetProblemDetailsResponse> {
     problem_service
-        .get_problem_details(code_name)
+        .get_problem_details(user_guard, code_name)
         .into()
 }
