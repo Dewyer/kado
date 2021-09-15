@@ -51,6 +51,7 @@ table! {
         problem_id -> Uuid,
         seed -> Int4,
         test_count -> Int4,
+        correct -> Nullable<Bool>,
         sample_index -> Nullable<Int4>,
         started_at -> Timestamp,
         finished_at -> Nullable<Timestamp>,
@@ -62,6 +63,7 @@ table! {
         id -> Uuid,
         name -> Varchar,
         join_code -> Varchar,
+        points -> Int8,
         owner_user -> Nullable<Uuid>,
         is_deleted -> Bool,
     }
@@ -74,6 +76,7 @@ table! {
         email -> Varchar,
         authenticator -> Varchar,
         participate_in_leaderboards -> Bool,
+        individual_points -> Int8,
         is_active -> Bool,
         is_admin -> Bool,
         team_id -> Nullable<Uuid>,

@@ -9,7 +9,7 @@ pub struct Team {
     pub id: Uuid,
     pub name: String,
     pub join_code: String,
-    pub points: i32,
+    pub points: i64,
     pub owner_user: Option<Uuid>,
     pub is_deleted: bool,
 }
@@ -19,7 +19,7 @@ pub struct Team {
 pub struct NewTeam<'a> {
     pub name: &'a str,
     pub join_code: &'a str,
-    pub points: i32,
+    pub points: i64,
     pub owner_user: Option<Uuid>,
     pub is_deleted: bool,
 }

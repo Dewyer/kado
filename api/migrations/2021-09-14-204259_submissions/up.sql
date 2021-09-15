@@ -5,6 +5,7 @@ CREATE TABLE submissions
     problem_id UUID NOT NULL,
     seed INT NOT NULL,
     test_count INT NOT NULL,
+    correct BOOL NULL,
     sample_index INT NULL,
     started_at TIMESTAMP NOT NULL,
     finished_at TIMESTAMP NULL,

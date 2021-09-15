@@ -90,6 +90,7 @@ impl TeamService {
                 name: &payload.name,
                 join_code: &self.get_new_join_code_for_team(),
                 owner_user: Some(user.id),
+                points: 0,
                 is_deleted: false,
             }, &td)?;
 

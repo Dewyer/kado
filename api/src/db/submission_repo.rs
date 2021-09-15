@@ -32,6 +32,8 @@ pub trait SubmissionRepo {
     fn find_latest_submission_by_user_and_problem_with_tests(&self, user_id: Uuid, problem_id: Uuid, td: &ITransaction) -> anyhow::Result<(Submission, Vec<SubmissionTest>)>;
 
     fn find_by_id_with_tests(&self, submission_id: Uuid, td: &ITransaction) -> anyhow::Result<(Submission, Vec<SubmissionTest>)>;
+
+    fn find_correct_submissions_for_users_and_problem(&self, user_ids: Vec<Uuid>, problem_id: Uuid, td: &ITransaction) -> anyhow::Result<Vec<Submission>>;
 }
 
 pub struct DbSubmissionRepo {
@@ -121,6 +123,18 @@ impl SubmissionRepo for DbSubmissionRepo {
         let tests = self.find_submission_tests_by_submission(submission.id, td)?;
 
         Ok((submission, tests))
+    }
+
+    fn find_correct_submissions_for_users_and_problem(&self, user_ids: Vec<Uuid>, problem_id: Uuid, td: &ITransaction) -> anyhow::Result<Vec<Submission>> {
+        submissions::table
+            .select(submissions::all_columns)
+            .filter(
+                submissions::owner_id.eq_any(user_ids)
+                    .and(submissions::correct.eq(true))
+                    .and(submissions::problem_id.eq(problem_id)),
+            )
+            .load::<Submission>(td.get_db_connection())
+            .map_err(|_| anyhow::Error::msg("Submissions couldn't be loaded!"))
     }
 }
 

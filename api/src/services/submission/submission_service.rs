@@ -16,12 +16,15 @@ use rand::Rng;
 use crate::models::http::responses::{StartSubmissionResponse, GetTestInputResponse, SendTestOutputResponse};
 use crate::models::submission::submission_test::{SubmissionTest, NewSubmissionTest};
 use crate::db::team_repo::{DbTeamRepo, ITeamRepo};
+use uuid::Uuid;
+use crate::db::user_repo::{IUserRepo, DbUserRepo};
 
 const SUBMISSION_TEST_TIMEOUT: i64 = 10;
 
 pub struct SubmissionService {
     submission_repo: ISubmissionRepo,
     problem_repo: IProblemRepo,
+    user_repo: IUserRepo,
     team_repo: ITeamRepo,
     tm: TransactionManager,
 }
@@ -30,12 +33,14 @@ impl SubmissionService {
     pub fn new(
         submission_repo: ISubmissionRepo,
         problem_repo: IProblemRepo,
+        user_repo: IUserRepo,
         team_repo: ITeamRepo,
         tm: TransactionManager,
     ) -> Self {
         Self {
             submission_repo,
             problem_repo,
+            user_repo,
             team_repo,
             tm,
         }
@@ -63,6 +68,7 @@ impl SubmissionService {
             seed,
             test_count: gen_res.test_count,
             sample_index: request.sample_index,
+            correct: None,
             started_at: now_naive,
             finished_at: None,
         }, td)
@@ -75,12 +81,16 @@ impl SubmissionService {
 
         let submissions_made = self.submission_repo.find_submissions_by_user_and_problem(user.id, problem.id, td)?;
         if submissions_made.len() >= problem.max_submissions as usize {
-            bail!("Max submission attempts reached.")
+            bail!("Max submission attempts reached.");
         }
 
         let open_submission = submissions_made.iter().find(|sb| sb.finished_at.is_none());
         if open_submission.is_some() {
             bail!("There is an open submission made by you for this problem, finish that or let it time out first.");
+        }
+
+        if submissions_made.iter().any(|sub| sub.correct.contains(&true)) {
+            bail!("You already have a correct submission for this problem");
         }
 
         Ok(())
@@ -163,18 +173,42 @@ impl SubmissionService {
         Ok(())
     }
 
-    fn handle_submission_finished(&self, mut submission: Submission, problem: &Problem, mut user: User, last_test: &SubmissionTest, td: &ITransaction) -> anyhow::Result<()> {
-        submission.finished_at = last_test.finished_at;
+    fn get_diminishing_returns_on_points(&self, max_p: i64, sub_count: usize) -> i64 {
+        const R: f64 = 0.2;
+        max_p*std::f64::consts::E.powf(-R*(sub_count as f64)).floor() as i64
+    }
+
+    fn handle_team_member_submission_completion(&self, user: &User, team_id: Uuid, problem: &Problem, td: &ITransaction) -> anyhow::Result<()> {
+        let (mut team, team_members) = self.team_repo.find_by_id_with_users(team_id, td)?;
+        let submissions_for_team_members = self.submission_repo.find_correct_submissions_for_users_and_problem(team_members.iter().map(|usr| usr.id).collect(), problem.id, td)?;
+        team.points += self.get_diminishing_returns_on_points(problem.base_point_value, submissions_for_team_members.len());
+
+        self.team_repo.save(&team, td)?;
+        Ok(())
+    }
+
+    fn handle_submission_finished(&self, mut submission: Submission, problem: &Problem, mut user: User, existing_tests: &Vec<SubmissionTest>, updated_last_test: &SubmissionTest ,td: &ITransaction) -> anyhow::Result<()> {
+        let existing_tests_without_last = existing_tests.iter().filter(|test| test.id != updated_last_test.id).collect::<Vec<&SubmissionTest>>();
+        if existing_tests_without_last.iter().any(|test| !test.correct.unwrap_or(false)) || !updated_last_test.correct.unwrap_or(false) {
+            return Ok(());
+        }
+
+        submission.finished_at = updated_last_test.finished_at;
+        submission.correct = Some(true);
         self.submission_repo.save(&submission, td)?;
+
         user.individual_points += problem.base_point_value;
+        if let Some(team_id) = user.team_id {
+            self.handle_team_member_submission_completion(&user, team_id, problem, td)?;
+        }
 
-
+        self.user_repo.save(&user, td)?;
         Ok(())
     }
 
     fn submit_test_output(&self, mut test: SubmissionTest, request: &SendTestOutputRequest, user: User, td: &ITransaction) -> anyhow::Result<SubmissionTest> {
         let (submission, existing_tests) = self.submission_repo.find_by_id_with_tests(test.submission_id, td)?;
-        let problem = self.problem_repo.crud().find_by_id(submission.problem_id)?;
+        let problem = self.problem_repo.crud().find_by_id(submission.problem_id, td)?;
         let code_name = CodeName::from_string(&problem.code_name)?;
 
         let support = self.get_problem_support(code_name.clone());
@@ -188,8 +222,8 @@ impl SubmissionService {
         test.output = Some(request.output.to_string());
         self.submission_repo.save_test(&test, td)?;
 
-        if submission.test_count == existing_tests.len() {
-            self.handle_submission_finished(submission, &problem, user, &test, td)?;
+        if submission.test_count as usize == existing_tests.len() {
+            self.handle_submission_finished(submission, &problem, user, &existing_tests,&test, td)?;
         }
 
         Ok(test)
@@ -215,6 +249,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for SubmissionService {
 
     fn from_request(req: &'a Request<'r>) -> request::Outcome<SubmissionService, Self::Error> {
         let submission_repo = req.guard::<DbSubmissionRepo>()?;
+        let user_repo = req.guard::<DbUserRepo>()?;
         let team_repo = req.guard::<DbTeamRepo>()?;
         let problem_repo = req.guard::<DbProblemRepo>()?;
         let db_tm = req.guard::<TransactionManager>()?;
@@ -222,6 +257,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for SubmissionService {
         request::Outcome::Success(SubmissionService::new(
             Box::new(submission_repo),
             Box::new(problem_repo),
+            Box::new(user_repo),
             Box::new(team_repo),
             db_tm,
         ))

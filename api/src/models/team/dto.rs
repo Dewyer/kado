@@ -6,7 +6,7 @@ pub struct TeamFullyPopulatedDto {
     pub id: String,
     pub name: String,
     pub join_code: Option<String>,
-    pub points: i32,
+    pub points: i64,
     pub owner_user: Option<UserDto>,
     pub members: Vec<UserDto>,
 }

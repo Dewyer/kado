@@ -138,6 +138,7 @@ impl AuthService {
                 participate_in_leaderboards: payload.participate_in_leaderboards,
                 is_active: true,
                 is_admin: false,
+                individual_points: 0,
                 team_id: None,
             },
             tr,
