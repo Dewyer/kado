@@ -10,6 +10,7 @@ import {ApiGuidePage} from "src/components/pages/ApiGuidePage/ApiGuidePage";
 import {ProblemsPage} from "src/components/pages/ProblemsPage/ProblemsPage";
 import {ProblemDetailsPage} from "src/components/pages/ProblemDetailsPage/ProblemDetailsPage";
 import {IndividualLeaderboardPage} from "src/components/pages/IndividualLeaderboardPage/IndividualLeaderboardPage";
+import {TeamLeaderboardPage} from "../components/pages/TeamLeaderboardPage/TeamLeaderboardPage";
 
 const Routes = () => {
 	const userLoaded = useSelector(makeSelectUserInitiallyLoaded());
@@ -22,6 +23,7 @@ const Routes = () => {
 			<ProtectedRoute exact path={GLOBAL_ROUTES.PROBLEMS} component={ProblemsPage} />
 			<ProtectedRoute exact path={GLOBAL_ROUTES.TEAM} component={TeamPage} />
 			<ProtectedRoute exact path={GLOBAL_ROUTES.INDIVIDUAL_LEADERBOARD} component={IndividualLeaderboardPage} />
+			<ProtectedRoute exact path={GLOBAL_ROUTES.TEAM_LEADERBOARD} component={TeamLeaderboardPage} />
 			<ProtectedRoute path={`${GLOBAL_ROUTES.PROBLEM_DETAILS}/:codeName`} component={ProblemDetailsPage} />
 
 			<Redirect to="/" />

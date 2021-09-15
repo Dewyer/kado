@@ -7,6 +7,7 @@ import {GLOBAL_ROUTES} from "src/routing/routingConstants";
 import {useDispatch, useSelector} from "react-redux";
 import {makeSelectUser} from "src/store/selectors/global.selectors";
 import {logoutAction} from "src/store/actions/global";
+import {Dropdown} from "semantic-ui-react";
 
 export const MenuLayout: React.FC = () => {
     const dispatch = useDispatch();
@@ -22,8 +23,8 @@ export const MenuLayout: React.FC = () => {
         return history.location.pathname === route;
     };
 
-    const getTabClasses = (route: string) => {
-        return classNames("item", { active: isTabActive(route) });
+    const getTabClasses = (route: string, routeTwo?: string) => {
+        return classNames("item", { active: isTabActive(route) || (routeTwo ? isTabActive(routeTwo) : false) });
     };
 
     return <div className={classNames(styles.MenuLayout, "ui secondary pointing menu")}>
@@ -39,9 +40,22 @@ export const MenuLayout: React.FC = () => {
                 <Link to={GLOBAL_ROUTES.TEAM} className={getTabClasses(GLOBAL_ROUTES.TEAM)}>
                     Team
                 </Link>
-                <Link to={GLOBAL_ROUTES.INDIVIDUAL_LEADERBOARD} className={getTabClasses(GLOBAL_ROUTES.INDIVIDUAL_LEADERBOARD)}>
-                    Leaderboard
-                </Link>
+                <Dropdown className={getTabClasses(GLOBAL_ROUTES.INDIVIDUAL_LEADERBOARD, GLOBAL_ROUTES.TEAM_LEADERBOARD)} item text='Leaderboard'>
+                    <Dropdown.Menu>
+                        <Dropdown.Item
+                            className={classNames({ active: isTabActive(GLOBAL_ROUTES.INDIVIDUAL_LEADERBOARD) })}
+                            onClick={() => history.push(GLOBAL_ROUTES.INDIVIDUAL_LEADERBOARD)}
+                        >
+                            Individual
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                            className={classNames({ active: isTabActive(GLOBAL_ROUTES.TEAM_LEADERBOARD) })}
+                            onClick={() => history.push(GLOBAL_ROUTES.TEAM_LEADERBOARD)}
+                        >
+                            Team
+                        </Dropdown.Item>
+                    </Dropdown.Menu>
+                </Dropdown>
                 <Link to={GLOBAL_ROUTES.API_GUIDE} className={getTabClasses(GLOBAL_ROUTES.API_GUIDE)}>
                     Api Guide
                 </Link>
