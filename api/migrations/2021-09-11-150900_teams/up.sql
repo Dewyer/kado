@@ -7,5 +7,6 @@ CREATE TABLE teams
     last_gained_points_at TIMESTAMP NULL,
     owner_user UUID NULL,
     is_deleted BOOL NOT NULL,
+    created_at TIMESTAMP NOT NULL,
     FOREIGN KEY (owner_user) REFERENCES users (id) ON DELETE CASCADE
 );

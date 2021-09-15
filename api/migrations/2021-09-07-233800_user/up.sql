@@ -11,5 +11,6 @@ CREATE TABLE users
     individual_points BIGINT NOT NULL,
     last_gained_points_at TIMESTAMP NULL,
     is_active BOOL NOT NULL DEFAULT TRUE,
-    is_admin BOOL NOT NULL DEFAULT FALSE
+    is_admin BOOL NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL
 );

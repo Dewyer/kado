@@ -7,7 +7,7 @@ use crate::errors::ServiceError;
 
 pub mod team_repo;
 pub mod crud_repo;
-pub mod offset_limit;
+pub mod pagination;
 pub mod user_repo;
 pub mod api_token_repo;
 pub mod problem_repo;

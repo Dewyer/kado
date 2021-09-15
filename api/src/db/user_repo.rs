@@ -7,9 +7,17 @@ use crate::db::transaction_manager::ITransaction;
 use crate::errors::ServiceError;
 use crate::models::user::db::{NewUser, User};
 use crate::schema::users;
+use crate::schema::teams;
+use crate::models::utils::PaginationOptions;
+use crate::models::team::Team;
+use crate::db::pagination::*;
+use uuid::Uuid;
+use diesel::dsl::count_star;
 
 crud_repo!(UserCrudRepo, DbUserCrudRepo, users, User, NewUser, "Users");
 pub type IUserCrudRepo = Box<dyn UserCrudRepo>;
+
+pub const DEFAULT_USER_PAGE_SIZE: usize = 25;
 
 pub trait UserRepo {
     fn crud(&self) -> &IUserCrudRepo;
@@ -24,6 +32,10 @@ pub trait UserRepo {
     ) -> anyhow::Result<User>;
 
     fn save(&self, user: &User, td: &ITransaction) -> anyhow::Result<User>;
+
+    fn list_leaderboard_participating_paginated_with_teams(&self, pagination: &PaginationOptions, td: &ITransaction) -> anyhow::Result<(Vec<(User, Option<Team>)>, usize)>;
+
+    fn find_leaderboard_rank_of_user(&self, user: &User, td: &ITransaction) -> anyhow::Result<usize>;
 }
 
 pub struct DbUserRepo {
@@ -64,24 +76,38 @@ impl UserRepo for DbUserRepo {
             .map_err(|er| anyhow::Error::from(er))
     }
 
-    /*
-    (
-                users::username.eq(&user.username),
-                users::email.eq(&user.email),
-                users::authenticator.eq(&user.authenticator),
-                users::participate_in_leaderboards.eq(&user.participate_in_leaderboards),
-                users::is_active.eq(&user.is_active),
-                users::is_admin.eq(&user.is_admin),
-                users::team_id.eq(&user.team_id),
-            )
-    */
-
     fn save(&self, user: &User, td: &ITransaction) -> anyhow::Result<User> {
         diesel::update(users::table)
             .filter(users::id.eq(user.id))
             .set(user)
             .get_result(td.get_db_connection())
             .map_err(|_| anyhow::Error::msg("Can't save user!"))
+    }
+
+    fn list_leaderboard_participating_paginated_with_teams(&self, pagination: &PaginationOptions, td: &ITransaction) -> anyhow::Result<(Vec<(User, Option<Team>)>, usize)> {
+        users::table
+            .order((users::individual_points.desc(), users::last_gained_points_at.desc().nulls_last(), users::created_at.desc()))
+            .filter(users::participate_in_leaderboards.eq(true))
+            .left_join(teams::table)
+            .paginate(pagination.page as i64)
+            .per_page(std::cmp::min(pagination.per_page.unwrap_or(DEFAULT_USER_PAGE_SIZE), DEFAULT_USER_PAGE_SIZE) as i64)
+            .load_and_count_pages::<(User, Option<Team>)>(td.get_db_connection())
+            .map(|(vv, nn)| (vv, nn as usize))
+            .map_err(|_| anyhow::Error::msg("Can't load leaderboard!"))
+    }
+
+    fn find_leaderboard_rank_of_user(&self, user: &User, td: &ITransaction) -> anyhow::Result<usize> {
+        users::table
+            .filter(users::participate_in_leaderboards
+                .eq(true)
+                .and(users::individual_points.le(user.individual_points))
+                .and(users::last_gained_points_at.le(&user.last_gained_points_at))
+                .and(users::created_at.le(user.created_at))
+            )
+            .select(count_star())
+            .first::<i64>(td.get_db_connection())
+            .map(|vv| (vv+1) as usize)
+            .map_err(|_| anyhow::Error::msg("Can't load user's rank!"))
     }
 }
 

@@ -67,6 +67,7 @@ table! {
         last_gained_points_at -> Nullable<Timestamp>,
         owner_user -> Nullable<Uuid>,
         is_deleted -> Bool,
+        created_at -> Timestamp,
     }
 }
 
@@ -81,6 +82,7 @@ table! {
         last_gained_points_at -> Nullable<Timestamp>,
         is_active -> Bool,
         is_admin -> Bool,
+        created_at -> Timestamp,
         team_id -> Nullable<Uuid>,
     }
 }

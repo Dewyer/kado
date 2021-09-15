@@ -92,6 +92,7 @@ impl TeamService {
                 points: 0,
                 last_gained_points_at: None,
                 is_deleted: false,
+                created_at: UtilsService::naive_now(),
             }, &td)?;
 
             user.team_id = Some(new_team.id);

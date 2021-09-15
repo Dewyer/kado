@@ -139,6 +139,7 @@ impl AuthService {
                 is_admin: false,
                 individual_points: 0,
                 last_gained_points_at: None,
+                created_at: UtilsService::naive_now(),
                 team_id: None,
             },
             tr,

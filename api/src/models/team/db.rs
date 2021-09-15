@@ -14,6 +14,7 @@ pub struct Team {
     pub last_gained_points_at: Option<NaiveDateTime>,
     pub owner_user: Option<Uuid>,
     pub is_deleted: bool,
+    pub created_at: NaiveDateTime,
 }
 
 #[derive(Insertable)]
@@ -25,4 +26,5 @@ pub struct NewTeam<'a> {
     pub last_gained_points_at: Option<NaiveDateTime>,
     pub owner_user: Option<Uuid>,
     pub is_deleted: bool,
+    pub created_at: NaiveDateTime,
 }

@@ -2,7 +2,8 @@ use serde::Serialize;
 use uuid::Uuid;
 use chrono::NaiveDateTime;
 use crate::schema::users;
-use crate::models::user::UserDto;
+use crate::models::user::{UserDto, UserLeaderboardEntryDto};
+use crate::models::team::Team;
 
 #[derive(Queryable, Serialize, AsChangeset)]
 #[table_name = "users"]
@@ -17,6 +18,7 @@ pub struct User {
     pub last_gained_points_at: Option<NaiveDateTime>,
     pub is_active: bool,
     pub is_admin: bool,
+    pub created_at: NaiveDateTime,
     pub team_id: Option<Uuid>,
 }
 
@@ -31,6 +33,7 @@ pub struct NewUser<'a> {
     pub last_gained_points_at: Option<NaiveDateTime>,
     pub is_active: bool,
     pub is_admin: bool,
+    pub created_at: NaiveDateTime,
     pub team_id: Option<Uuid>,
 }
 
@@ -45,6 +48,16 @@ impl User {
             last_gained_points_at: self.last_gained_points_at.map(|dt| dt.to_string()),
             is_admin: self.is_admin.clone(),
             team_id: self.team_id.map(|el| el.to_string()),
+        }
+    }
+
+    pub fn to_leaderboard_dto(&self, rank: usize, team: Option<Team>) -> UserLeaderboardEntryDto {
+        UserLeaderboardEntryDto {
+            id: self.id.to_string(),
+            rank,
+            username: self.username.clone(),
+            individual_points: self.individual_points,
+            team_name: team.map(|tt| tt.name.clone()),
         }
     }
 }

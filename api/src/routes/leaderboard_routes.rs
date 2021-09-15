@@ -1,7 +1,7 @@
 use rocket_okapi::openapi;
 use crate::models::http::api_result::AnyApiResult;
 use crate::guards::{AccessToken, AuthTokenGuard};
-use crate::models::http::responses::{GetProblemsResponse, GetProblemDetailsResponse};
+use crate::models::http::responses::{GetIndividualLeaderboardResponse};
 use crate::services::leaderboard_service::LeaderboardService;
 use crate::models::utils::PaginationOptions;
 
@@ -13,7 +13,7 @@ pub fn get_individual_leaderboard(
     per_page: Option<usize>,
     page: usize,
     leaderboard_service: LeaderboardService,
-) -> AnyApiResult<GetProblemsResponse> {
+) -> AnyApiResult<GetIndividualLeaderboardResponse> {
     leaderboard_service
         .get_individual_leaderboard(user_guard, PaginationOptions {
             per_page,
