@@ -25,9 +25,13 @@ pub trait SubmissionRepo {
 
     fn save(&self, submission: &Submission, td: &ITransaction) -> anyhow::Result<Submission>;
 
+    fn save_test(&self, test: &SubmissionTest, td: &ITransaction) -> anyhow::Result<SubmissionTest>;
+
     fn find_submissions_by_user_and_problem(&self, user_id: Uuid, problem_id: Uuid, td: &ITransaction) -> anyhow::Result<Vec<Submission>>;
 
     fn find_latest_submission_by_user_and_problem_with_tests(&self, user_id: Uuid, problem_id: Uuid, td: &ITransaction) -> anyhow::Result<(Submission, Vec<SubmissionTest>)>;
+
+    fn find_by_id_with_tests(&self, submission_id: Uuid, td: &ITransaction) -> anyhow::Result<(Submission, Vec<SubmissionTest>)>;
 }
 
 pub struct DbSubmissionRepo {
@@ -71,6 +75,14 @@ impl SubmissionRepo for DbSubmissionRepo {
             .map_err(|_| anyhow::Error::msg("Can't save submission!"))
     }
 
+    fn save_test(&self, test: &SubmissionTest, td: &ITransaction) -> anyhow::Result<SubmissionTest> {
+        diesel::update(submission_tests::table)
+            .filter(submission_tests::id.eq(test.id))
+            .set(test)
+            .get_result(td.get_db_connection())
+            .map_err(|_| anyhow::Error::msg("Can't save submission test!"))
+    }
+
     fn find_submissions_by_user_and_problem(&self, user_id: Uuid, problem_id: Uuid, td: &ITransaction) -> anyhow::Result<Vec<Submission>> {
         submissions::table
             .select(submissions::all_columns)
@@ -88,6 +100,20 @@ impl SubmissionRepo for DbSubmissionRepo {
                 submissions::owner_id.eq(user_id)
                     .and(submissions::problem_id.eq(problem_id))
                     .and(submissions::finished_at.is_null()),
+            )
+            .first::<Submission>(td.get_db_connection())
+            .map_err(|_| anyhow::Error::msg("Submission not found!!"))?;
+
+        let tests = self.find_submission_tests_by_submission(submission.id, td)?;
+
+        Ok((submission, tests))
+    }
+
+    fn find_by_id_with_tests(&self, submission_id: Uuid, td: &ITransaction) -> anyhow::Result<(Submission, Vec<SubmissionTest>)> {
+        let submission = submissions::table
+            .select(submissions::all_columns)
+            .filter(
+                submissions::id.eq(submission_id)
             )
             .first::<Submission>(td.get_db_connection())
             .map_err(|_| anyhow::Error::msg("Submission not found!!"))?;

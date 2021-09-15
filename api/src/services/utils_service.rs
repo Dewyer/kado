@@ -12,6 +12,12 @@ impl UtilsService {
         NaiveDateTime::from_timestamp(now.timestamp(),0)
     }
 
+    pub fn time_within_seconds(time: chrono::NaiveDateTime, seconds: i64) -> bool {
+        let now = Self::naive_now();
+
+        (now.timestamp() - time.timestamp()).abs() <= seconds
+    }
+
     pub fn parse_uuid(id_str: &str) -> anyhow::Result<Uuid> {
         Uuid::parse_str(id_str)
             .map(|v| v)

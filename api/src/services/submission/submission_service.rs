@@ -11,14 +11,18 @@ use crate::models::problem::Problem;
 use crate::models::user::User;
 use crate::models::submission::{Submission, NewSubmission};
 use crate::db::submission_repo::{ISubmissionRepo, DbSubmissionRepo};
-use crate::services::submission::support::{IProblemSupport, CamelCaseProblemSupport, SubmissionGenerationPayload, SubmissionTestGenerationPayload, SubmissionTestGenerationResult};
+use crate::services::submission::support::{IProblemSupport, CamelCaseProblemSupport, SubmissionGenerationPayload, SubmissionTestGenerationPayload, SubmissionTestGenerationResult, VerificationPayload};
 use rand::Rng;
 use crate::models::http::responses::{StartSubmissionResponse, GetTestInputResponse, SendTestOutputResponse};
 use crate::models::submission::submission_test::{SubmissionTest, NewSubmissionTest};
+use crate::db::team_repo::{DbTeamRepo, ITeamRepo};
+
+const SUBMISSION_TEST_TIMEOUT: i64 = 10;
 
 pub struct SubmissionService {
     submission_repo: ISubmissionRepo,
     problem_repo: IProblemRepo,
+    team_repo: ITeamRepo,
     tm: TransactionManager,
 }
 
@@ -26,11 +30,13 @@ impl SubmissionService {
     pub fn new(
         submission_repo: ISubmissionRepo,
         problem_repo: IProblemRepo,
+        team_repo: ITeamRepo,
         tm: TransactionManager,
     ) -> Self {
         Self {
             submission_repo,
             problem_repo,
+            team_repo,
             tm,
         }
     }
@@ -149,15 +155,56 @@ impl SubmissionService {
         })
     }
 
-    fn assert_can_send_test_output(&self, )
+    fn assert_can_submit_test_output(&self, test: &SubmissionTest) -> anyhow::Result<()> {
+        if !UtilsService::time_within_seconds(test.started_at, SUBMISSION_TEST_TIMEOUT) {
+            bail!("Test submission timed out!");
+        }
 
-    pub fn send_test_output(&self, _user_guard: AuthTokenGuard<ApiToken>, test_id: String, request: SendTestOutputRequest) -> anyhow::Result<SendTestOutputResponse> {
+        Ok(())
+    }
+
+    fn handle_submission_finished(&self, mut submission: Submission, problem: &Problem, mut user: User, last_test: &SubmissionTest, td: &ITransaction) -> anyhow::Result<()> {
+        submission.finished_at = last_test.finished_at;
+        self.submission_repo.save(&submission, td)?;
+        user.individual_points += problem.base_point_value;
+
+
+        Ok(())
+    }
+
+    fn submit_test_output(&self, mut test: SubmissionTest, request: &SendTestOutputRequest, user: User, td: &ITransaction) -> anyhow::Result<SubmissionTest> {
+        let (submission, existing_tests) = self.submission_repo.find_by_id_with_tests(test.submission_id, td)?;
+        let problem = self.problem_repo.crud().find_by_id(submission.problem_id)?;
+        let code_name = CodeName::from_string(&problem.code_name)?;
+
+        let support = self.get_problem_support(code_name.clone());
+        let verification_result = support.verify_output(VerificationPayload {
+            test: &test,
+            output: &request.output,
+        })?;
+
+        test.correct = Some(verification_result.correct);
+        test.finished_at = Some(UtilsService::naive_now());
+        test.output = Some(request.output.to_string());
+        self.submission_repo.save_test(&test, td)?;
+
+        if submission.test_count == existing_tests.len() {
+            self.handle_submission_finished(submission, &problem, user, &test, td)?;
+        }
+
+        Ok(test)
+    }
+
+    pub fn send_test_output(&self, user_guard: AuthTokenGuard<ApiToken>, test_id: String, request: SendTestOutputRequest) -> anyhow::Result<SendTestOutputResponse> {
         self.tm.transaction(|td| {
             let test_uuid = UtilsService::parse_uuid(&test_id)?;
             let test = self.submission_repo.crud_tests().find_by_id(test_uuid, &td)?;
+            self.assert_can_submit_test_output(&test)?;
+
+            let new_test = self.submit_test_output(test, &request, user_guard.user, &td)?;
 
             Ok(SendTestOutputResponse {
-                correct: false,
+                correct: new_test.correct.unwrap_or(false),
             })
         })
     }
@@ -168,12 +215,14 @@ impl<'a, 'r> FromRequest<'a, 'r> for SubmissionService {
 
     fn from_request(req: &'a Request<'r>) -> request::Outcome<SubmissionService, Self::Error> {
         let submission_repo = req.guard::<DbSubmissionRepo>()?;
+        let team_repo = req.guard::<DbTeamRepo>()?;
         let problem_repo = req.guard::<DbProblemRepo>()?;
         let db_tm = req.guard::<TransactionManager>()?;
 
         request::Outcome::Success(SubmissionService::new(
             Box::new(submission_repo),
             Box::new(problem_repo),
+            Box::new(team_repo),
             db_tm,
         ))
     }

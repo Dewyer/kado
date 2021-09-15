@@ -1,4 +1,4 @@
-use crate::services::submission::support::{ProblemSupport, SubmissionGenerationPayload, SubmissionGenerationResult, SubmissionTestGenerationPayload, SubmissionTestGenerationResult};
+use crate::services::submission::support::{ProblemSupport, SubmissionGenerationPayload, SubmissionGenerationResult, SubmissionTestGenerationPayload, SubmissionTestGenerationResult, VerificationPayload, VerificationResult};
 
 pub struct CamelCaseProblemSupport {
 }
@@ -20,6 +20,12 @@ impl ProblemSupport for CamelCaseProblemSupport {
         Ok(SubmissionTestGenerationResult {
             input: serde_json::Value::Null,
             test_class: "".to_string(),
+        })
+    }
+
+    fn verify_output(&self, _payload: VerificationPayload) -> anyhow::Result<VerificationResult> {
+        Ok(VerificationResult {
+            correct: false,
         })
     }
 }

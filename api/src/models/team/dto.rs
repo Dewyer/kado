@@ -6,6 +6,7 @@ pub struct TeamFullyPopulatedDto {
     pub id: String,
     pub name: String,
     pub join_code: Option<String>,
+    pub points: i32,
     pub owner_user: Option<UserDto>,
     pub members: Vec<UserDto>,
 }
@@ -20,6 +21,7 @@ impl TeamFullyPopulatedDto {
             id: team.id.to_string(),
             name: team.name.clone(),
             join_code: if can_see_join_code { Some(team.join_code.clone()) } else { None },
+            points: team.points,
             owner_user,
             members,
         }

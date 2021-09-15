@@ -4,6 +4,7 @@ pub struct UserDto {
     pub username: String,
     pub email: String,
     pub participate_in_leaderboards: bool,
+    pub individual_points: i32,
     pub is_admin: bool,
     pub team_id: Option<String>,
 }

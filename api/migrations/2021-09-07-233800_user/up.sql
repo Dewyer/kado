@@ -8,6 +8,7 @@ CREATE TABLE users
     email VARCHAR NOT NULL UNIQUE,
     authenticator VARCHAR NOT NULL,
     participate_in_leaderboards BOOL NOT NULL DEFAULT false,
+    individual_points INT NOT NULL,
     is_active BOOL NOT NULL DEFAULT TRUE,
     is_admin BOOL NOT NULL DEFAULT FALSE
 );

@@ -13,6 +13,7 @@ pub struct User {
     pub email: String,
     pub authenticator: String,
     pub participate_in_leaderboards: bool,
+    pub individual_points: i32,
     pub is_active: bool,
     pub is_admin: bool,
     pub team_id: Option<Uuid>,
@@ -25,6 +26,7 @@ pub struct NewUser<'a> {
     pub email: &'a str,
     pub authenticator: &'a str,
     pub participate_in_leaderboards: bool,
+    pub individual_points: i32,
     pub is_active: bool,
     pub is_admin: bool,
     pub team_id: Option<Uuid>,
@@ -37,6 +39,7 @@ impl User {
             username: self.username.clone(),
             email: self.email.clone(),
             participate_in_leaderboards: self.participate_in_leaderboards.clone(),
+            individual_points: self.individual_points,
             is_admin: self.is_admin.clone(),
             team_id: self.team_id.map(|el| el.to_string()),
         }
