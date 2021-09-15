@@ -40,7 +40,7 @@ export const PaginatedTable = <T extends Identifiable,>(props: React.PropsWithCh
             </Table.Body>
             <Table.Footer>
                 <Table.Row>
-                    <Table.HeaderCell colSpan='3'>
+                    <Table.HeaderCell colSpan={columns.length+''}>
                         <Menu floated='right' pagination>
                             <Menu.Item onClick={() => setPage(page-1)} as='a' icon>
                                 <Icon name='chevron left' />

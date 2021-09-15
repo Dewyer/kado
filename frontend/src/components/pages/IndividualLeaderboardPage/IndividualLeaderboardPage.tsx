@@ -12,13 +12,13 @@ const getLeaderboardColumns = (): ColumnDefinition<UserLeaderboardEntryDto>[]  =
 			cell: (user) => <>{user.rank}.</>
 		},
 		{
-			name: "Username",
-			cell: (user) => <>{user.username}</>
+			name: "Points",
+			cell: (user) => <>{user.individual_points} pts</>
 		},
 		{
-			name: "Team",
-			cell: (user) => <>{user.team_name}</>
-		}
+			name: "Username / Team",
+			cell: (user) => <>{user.username}{user.team_name ? ` (${user.team_name})` : ''}</>
+		},
 	];
 };
 
@@ -29,9 +29,13 @@ export const IndividualLeaderboardPage: React.FC = () => {
 		page,
 	});
 
+	const userRanking = leaderboardQuery.data?.user_ranking;
+
 	return (
 		<PageLayout contentClassName={styles.IndividualLeaderboardPage}>
 			<h3 className={"ui header"}>Individual leaderboard</h3>
+
+			{userRanking && <span>You: {userRanking.rank}. - {userRanking.username}{userRanking.team_name ? ` - ${userRanking.team_name}` : ''}</span>}
 
 			<PaginatedTable
 				page={page}

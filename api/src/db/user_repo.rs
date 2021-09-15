@@ -102,14 +102,14 @@ impl UserRepo for DbUserRepo {
         users::table
             .filter(users::participate_in_leaderboards
                 .eq(true)
-                .and(users::individual_points.le(user.individual_points))
-                .and(users::last_gained_points_at.le(&user.last_gained_points_at))
-                .and(users::created_at.le(user.created_at))
-                .and(users::participate_in_leaderboards.eq(true))
+                .and(users::individual_points.ge(user.individual_points).or(
+                    users::individual_points.eq(&user.individual_points).and(users::last_gained_points_at.ge(&user.last_gained_points_at))
+                        .or(users::last_gained_points_at.eq(&user.last_gained_points_at).and(users::created_at.ge(&user.created_at)))
+                ))
             )
             .select(count_star())
             .first::<i64>(td.get_db_connection())
-            .map(|vv| vv as usize)
+            .map(|vv| (vv-1) as usize)
             .map_err(|_| anyhow::Error::msg("Can't load user's rank!"))
     }
 }

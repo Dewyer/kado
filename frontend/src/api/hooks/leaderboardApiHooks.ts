@@ -10,6 +10,7 @@ export const useFetchIndividualLeaderboard = (pagination: PaginationOptions): Us
         async () => LeaderboardApiService.getIndividualLeaderboard(pagination),
         {
             onError: () => { toastPopper({ message: "Getting leaderboard failed!" }) },
+            keepPreviousData: true,
         },
     );
 };
