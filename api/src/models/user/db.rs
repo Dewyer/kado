@@ -1,6 +1,6 @@
 use serde::Serialize;
 use uuid::Uuid;
-
+use chrono::NaiveDateTime;
 use crate::schema::users;
 use crate::models::user::UserDto;
 
@@ -14,6 +14,7 @@ pub struct User {
     pub authenticator: String,
     pub participate_in_leaderboards: bool,
     pub individual_points: i64,
+    pub last_gained_points_at: Option<NaiveDateTime>,
     pub is_active: bool,
     pub is_admin: bool,
     pub team_id: Option<Uuid>,
@@ -27,6 +28,7 @@ pub struct NewUser<'a> {
     pub authenticator: &'a str,
     pub participate_in_leaderboards: bool,
     pub individual_points: i64,
+    pub last_gained_points_at: Option<NaiveDateTime>,
     pub is_active: bool,
     pub is_admin: bool,
     pub team_id: Option<Uuid>,
@@ -40,6 +42,7 @@ impl User {
             email: self.email.clone(),
             participate_in_leaderboards: self.participate_in_leaderboards.clone(),
             individual_points: self.individual_points,
+            last_gained_points_at: self.last_gained_points_at.map(|dt| dt.to_string()),
             is_admin: self.is_admin.clone(),
             team_id: self.team_id.map(|el| el.to_string()),
         }

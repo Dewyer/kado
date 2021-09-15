@@ -7,6 +7,7 @@ pub struct TeamFullyPopulatedDto {
     pub name: String,
     pub join_code: Option<String>,
     pub points: i64,
+    pub last_gained_points_at: Option<String>,
     pub owner_user: Option<UserDto>,
     pub members: Vec<UserDto>,
 }
@@ -22,8 +23,17 @@ impl TeamFullyPopulatedDto {
             name: team.name.clone(),
             join_code: if can_see_join_code { Some(team.join_code.clone()) } else { None },
             points: team.points,
+            last_gained_points_at: team.last_gained_points_at.map(|dt| dt.to_string()),
             owner_user,
             members,
         }
     }
+}
+
+#[derive(serde::Serialize, serde::Deserialize, rocket_okapi::JsonSchema, Clone)]
+pub struct TeamLeaderboardEntryDto {
+    pub id: String,
+    pub rank: usize,
+    pub name: String,
+    pub points: i64,
 }

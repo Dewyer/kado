@@ -90,6 +90,7 @@ impl TeamService {
                 join_code: &self.get_new_join_code_for_team(),
                 owner_user: Some(user.id),
                 points: 0,
+                last_gained_points_at: None,
                 is_deleted: false,
             }, &td)?;
 

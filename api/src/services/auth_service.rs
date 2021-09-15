@@ -138,6 +138,7 @@ impl AuthService {
                 is_active: true,
                 is_admin: false,
                 individual_points: 0,
+                last_gained_points_at: None,
                 team_id: None,
             },
             tr,

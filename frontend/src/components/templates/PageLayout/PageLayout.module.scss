@@ -5,7 +5,7 @@
   height: 100vh;
 
   grid-template-columns: 1fr;
-  grid-template-rows:4rem 1fr 4rem;
+  grid-template-rows:4rem 1fr 4.5rem;
   grid-template-areas: 'header'
     'content'
     'footer';
@@ -17,6 +17,12 @@
 
 .FooterLayout {
   grid-area: footer;
+  margin-bottom: 1rem;
+
+  & > a {
+    color: #4183C4 !important;
+    text-decoration: underline;
+  }
 }
 
 

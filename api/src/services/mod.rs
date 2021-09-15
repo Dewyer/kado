@@ -6,3 +6,4 @@ pub mod auth_service;
 pub mod problem_service;
 pub mod api_token_service;
 pub mod submission;
+pub mod leaderboard_service;

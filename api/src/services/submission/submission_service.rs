@@ -188,6 +188,7 @@ impl SubmissionService {
         let (mut team, team_members) = self.team_repo.find_by_id_with_users(team_id, td)?;
         let submissions_for_team_members = self.submission_repo.find_correct_submissions_for_users_and_problem(team_members.iter().map(|usr| usr.id).collect(), problem.id, td)?;
         team.points += self.get_diminishing_returns_on_points(problem.base_point_value, submissions_for_team_members.len());
+        team.last_gained_points_at = user.last_gained_points_at.clone();
 
         self.team_repo.save(&team, td)?;
         Ok(())
@@ -205,7 +206,7 @@ impl SubmissionService {
         submission.correct = Some(true);
 
         self.submission_repo.save(&submission, td)?;
-
+        user.last_gained_points_at = updated_last_test.finished_at.clone();
         user.individual_points += problem.base_point_value;
         if let Some(team_id) = user.team_id {
             self.handle_team_member_submission_completion(&user, team_id, problem, td)?;
@@ -217,6 +218,10 @@ impl SubmissionService {
 
     fn submit_test_output(&self, mut test: SubmissionTest, request: &SendTestOutputRequest, user: User, td: &ITransaction) -> anyhow::Result<SubmissionTest> {
         let (submission, existing_tests) = self.submission_repo.find_by_id_with_tests(test.submission_id, td)?;
+        if submission.owner_id != user.id {
+            bail!("Current user doesn't own this test.");
+        }
+
         let problem = self.problem_repo.crud().find_by_id(submission.problem_id, td)?;
         let code_name = CodeName::from_string(&problem.code_name)?;
 
