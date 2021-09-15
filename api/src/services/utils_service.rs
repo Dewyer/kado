@@ -9,7 +9,7 @@ pub struct UtilsService {}
 impl UtilsService {
     pub fn naive_now() -> chrono::NaiveDateTime {
         let now = Utc::now();
-        NaiveDateTime::from_timestamp(now.timestamp(),0)
+        NaiveDateTime::from_timestamp(now.timestamp(), 0)
     }
 
     pub fn time_within_seconds(time: chrono::NaiveDateTime, seconds: i64) -> bool {

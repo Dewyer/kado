@@ -51,7 +51,6 @@ impl TeamService {
                         team: None,
                     })
                 }
-
             } else {
                 Ok(GetUsersTeamResponse {
                     team: None,

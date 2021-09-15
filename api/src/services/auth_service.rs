@@ -129,7 +129,6 @@ impl AuthService {
         email: &str,
         tr: &ITransaction,
     ) -> anyhow::Result<AuthorizingResponse> {
-
         let created_user = self.user_repo.create(
             &NewUser {
                 username: &payload.username,

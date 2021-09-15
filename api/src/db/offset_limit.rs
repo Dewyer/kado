@@ -27,8 +27,8 @@ pub struct OffsetLimited<T> {
 
 impl<T> OffsetLimited<T> {
     pub fn load_and_count<U>(self, conn: &PgConnection) -> QueryResult<(Vec<U>, i64)>
-    where
-        Self: LoadQuery<PgConnection, (U, i64)>,
+        where
+            Self: LoadQuery<PgConnection, (U, i64)>,
     {
         let results = self.load::<(U, i64)>(conn)?;
         let total = results.get(0).map(|x| x.1).unwrap_or(0);
@@ -44,8 +44,8 @@ impl<T: Query> Query for OffsetLimited<T> {
 impl<T> RunQueryDsl<PgConnection> for OffsetLimited<T> {}
 
 impl<T> QueryFragment<Pg> for OffsetLimited<T>
-where
-    T: QueryFragment<Pg>,
+    where
+        T: QueryFragment<Pg>,
 {
     fn walk_ast(&self, mut out: AstPass<Pg>) -> QueryResult<()> {
         out.push_sql("SELECT *, COUNT(*) OVER () FROM (");

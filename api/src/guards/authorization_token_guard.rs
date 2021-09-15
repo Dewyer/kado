@@ -65,8 +65,7 @@ impl<'a, 'r, T: AuthTokenDef> FromRequest<'a, 'r> for AuthTokenGuard<T> {
         let token = T::get_token_from_request(req);
 
         let user_res = if T::is_api_token()
-        { api_token_service.get_authenticated_user_by_api_token(token) }
-        else { auth_service.get_authenticated_user_by_authorization_token(token) };
+        { api_token_service.get_authenticated_user_by_api_token(token) } else { auth_service.get_authenticated_user_by_authorization_token(token) };
 
         if let Ok(user) = user_res {
             request::Outcome::Success(AuthTokenGuard {

@@ -45,7 +45,7 @@ fn cors_fairing() -> Cors {
         allowed_origins,
         ..CorsOptions::default()
     })
-    .expect("Cors fairing cannot be created")
+        .expect("Cors fairing cannot be created")
 }
 
 pub fn rocket() -> rocket::Rocket {

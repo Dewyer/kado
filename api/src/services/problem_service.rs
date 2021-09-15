@@ -31,7 +31,7 @@ impl ProblemService {
             let next_problem = self.problem_repo.find_next_available_problem(now_naive, &td).ok();
 
             Ok(GetProblemsResponse {
-                next_problem_available_at: next_problem.map(|pr| pr.available_from.map_or("".to_string(),|el| el.to_string())),
+                next_problem_available_at: next_problem.map(|pr| pr.available_from.map_or("".to_string(), |el| el.to_string())),
                 problems: available_problems.into_iter().map(|pr| pr.to_dto()).collect(),
             })
         })

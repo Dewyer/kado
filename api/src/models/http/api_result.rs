@@ -13,9 +13,9 @@ use serde::Serialize;
 
 #[derive(serde::Serialize, JsonSchema)]
 pub enum ApiResult<D, E>
-where
-    D: Serialize + JsonSchema,
-    E: Display,
+    where
+        D: Serialize + JsonSchema,
+        E: Display,
 {
     Ok(D),
     Err(E),
@@ -24,9 +24,9 @@ where
 pub type AnyApiResult<D> = ApiResult<D, anyhow::Error>;
 
 impl<D, E> From<Result<D, E>> for ApiResult<D, E>
-where
-    D: Serialize + JsonSchema,
-    E: Display,
+    where
+        D: Serialize + JsonSchema,
+        E: Display,
 {
     fn from(res: Result<D, E>) -> Self {
         match res {
@@ -37,9 +37,9 @@ where
 }
 
 impl<D, E> Into<Result<D, E>> for ApiResult<D, E>
-where
-    D: Serialize + JsonSchema,
-    E: Display,
+    where
+        D: Serialize + JsonSchema,
+        E: Display,
 {
     fn into(self) -> Result<D, E> {
         match self {
@@ -55,9 +55,9 @@ pub struct ErrorResponse {
 }
 
 impl<'r, D, E> Responder<'r> for ApiResult<D, E>
-where
-    D: Serialize + JsonSchema,
-    E: Display,
+    where
+        D: Serialize + JsonSchema,
+        E: Display,
 {
     fn respond_to(self, req: &Request) -> response::Result<'r> {
         match self {
@@ -70,7 +70,7 @@ where
                 let mut resp_err = Json(ErrorResponse {
                     error: format!("{}", err),
                 })
-                .respond_to(req)?;
+                    .respond_to(req)?;
                 resp_err.set_status(Status::InternalServerError);
                 Ok(resp_err)
             }

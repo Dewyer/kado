@@ -1,7 +1,7 @@
 use rocket_okapi::openapi;
 use crate::models::http::api_result::AnyApiResult;
 use crate::guards::{AccessToken, AuthTokenGuard};
-use crate::models::http::responses::{ GetApiTokenResponse};
+use crate::models::http::responses::{GetApiTokenResponse};
 use crate::services::api_token_service::ApiTokenService;
 
 #[openapi]

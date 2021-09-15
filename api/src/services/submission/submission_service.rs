@@ -74,7 +74,7 @@ impl SubmissionService {
         }, td)
     }
 
-    fn assert_can_start_submission(&self,user: &User, problem: &Problem, request: &StartSubmissionRequest, td: &ITransaction) -> anyhow::Result<()> {
+    fn assert_can_start_submission(&self, user: &User, problem: &Problem, request: &StartSubmissionRequest, td: &ITransaction) -> anyhow::Result<()> {
         if problem.sample_count >= request.sample_index.unwrap_or(0) {
             bail!("Sample index is larger then the number of samples available");
         }
@@ -175,7 +175,7 @@ impl SubmissionService {
 
     fn get_diminishing_returns_on_points(&self, max_p: i64, sub_count: usize) -> i64 {
         const R: f64 = 0.2;
-        max_p*std::f64::consts::E.powf(-R*(sub_count as f64)).floor() as i64
+        max_p * std::f64::consts::E.powf(-R * (sub_count as f64)).floor() as i64
     }
 
     fn handle_team_member_submission_completion(&self, user: &User, team_id: Uuid, problem: &Problem, td: &ITransaction) -> anyhow::Result<()> {
@@ -187,7 +187,7 @@ impl SubmissionService {
         Ok(())
     }
 
-    fn handle_submission_finished(&self, mut submission: Submission, problem: &Problem, mut user: User, existing_tests: &Vec<SubmissionTest>, updated_last_test: &SubmissionTest ,td: &ITransaction) -> anyhow::Result<()> {
+    fn handle_submission_finished(&self, mut submission: Submission, problem: &Problem, mut user: User, existing_tests: &Vec<SubmissionTest>, updated_last_test: &SubmissionTest, td: &ITransaction) -> anyhow::Result<()> {
         let existing_tests_without_last = existing_tests.iter().filter(|test| test.id != updated_last_test.id).collect::<Vec<&SubmissionTest>>();
         if existing_tests_without_last.iter().any(|test| !test.correct.unwrap_or(false)) || !updated_last_test.correct.unwrap_or(false) {
             return Ok(());
@@ -223,7 +223,7 @@ impl SubmissionService {
         self.submission_repo.save_test(&test, td)?;
 
         if submission.test_count as usize == existing_tests.len() {
-            self.handle_submission_finished(submission, &problem, user, &existing_tests,&test, td)?;
+            self.handle_submission_finished(submission, &problem, user, &existing_tests, &test, td)?;
         }
 
         Ok(test)

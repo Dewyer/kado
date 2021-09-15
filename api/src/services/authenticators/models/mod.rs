@@ -1,4 +1,3 @@
-
 mod authorizer;
 mod authentication_payload;
 mod authentication_result;
