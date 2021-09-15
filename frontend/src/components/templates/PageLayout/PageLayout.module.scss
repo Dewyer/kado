@@ -19,9 +19,13 @@
   grid-area: footer;
   margin-bottom: 1rem;
 
-  & > a {
+  & > span > a {
     color: #4183C4 !important;
     text-decoration: underline;
+  }
+
+  & > span {
+    padding-left: 1rem;
   }
 }
 

@@ -8,6 +8,7 @@ export const TeamLeaderboardPage: React.FC = () => {
 	return (
 		<PageLayout contentClassName={styles.TeamLeaderboardPage}>
 			<h3 className={"ui header"}>Team leaderboard</h3>
+			<code>// TODO</code>
 		</PageLayout>
 	);
 };

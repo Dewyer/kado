@@ -10,7 +10,7 @@ import {ApiGuidePage} from "src/components/pages/ApiGuidePage/ApiGuidePage";
 import {ProblemsPage} from "src/components/pages/ProblemsPage/ProblemsPage";
 import {ProblemDetailsPage} from "src/components/pages/ProblemDetailsPage/ProblemDetailsPage";
 import {IndividualLeaderboardPage} from "src/components/pages/IndividualLeaderboardPage/IndividualLeaderboardPage";
-import {TeamLeaderboardPage} from "../components/pages/TeamLeaderboardPage/TeamLeaderboardPage";
+import {TeamLeaderboardPage} from "src/components/pages/TeamLeaderboardPage/TeamLeaderboardPage";
 
 const Routes = () => {
 	const userLoaded = useSelector(makeSelectUserInitiallyLoaded());
