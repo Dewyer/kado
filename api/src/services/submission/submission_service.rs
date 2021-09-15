@@ -168,6 +168,10 @@ impl SubmissionService {
     }
 
     fn assert_can_submit_test_output(&self, test: &SubmissionTest) -> anyhow::Result<()> {
+        if test.correct.is_some() {
+            bail!("Test output already submitted.");
+        }
+
         if !UtilsService::time_within_seconds(test.started_at, SUBMISSION_TEST_TIMEOUT) {
             bail!("Test submission timed out!");
         }

@@ -25,6 +25,7 @@ export const TeamDetailsView: React.FC<TeamDetailsViewProps> = (props) => {
             <h2 className="ui header">Team: {team.name}</h2>
             {userIsOwner ? <span>You are the owner of this team.</span> : <span>{team.owner_user?.username} is the owner of the team!</span>}
             {userIsOwner && <ViewJoinCode team={team} />}
+            <span>Teams points: <b>{team.points} pts</b></span>
             <TeamMemberList
                 team={team}
             />
