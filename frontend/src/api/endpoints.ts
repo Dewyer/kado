@@ -11,4 +11,5 @@ export const Endpoints = {
     GET_PROBLEM_DETAILS: "/api/problems",
     GET_API_TOKEN: "/api/api-token",
     REFRESH_API_TOKEN: "/api/refresh-api-token",
+    INDIVIDUAL_LEADERBOARD: "/api/leaderboard/individual",
 }

@@ -89,11 +89,13 @@ impl UserRepo for DbUserRepo {
             .order((users::individual_points.desc(), users::last_gained_points_at.desc().nulls_last(), users::created_at.desc()))
             .filter(users::participate_in_leaderboards.eq(true))
             .left_join(teams::table)
-            .paginate(pagination.page as i64)
+            .paginate((pagination.page + 1) as i64)
             .per_page(std::cmp::min(pagination.per_page.unwrap_or(DEFAULT_USER_PAGE_SIZE), DEFAULT_USER_PAGE_SIZE) as i64)
             .load_and_count_pages::<(User, Option<Team>)>(td.get_db_connection())
             .map(|(vv, nn)| (vv, nn as usize))
-            .map_err(|_| anyhow::Error::msg("Can't load leaderboard!"))
+            .map_err(|_| {
+                anyhow::Error::msg("Can't load leaderboard!")
+            })
     }
 
     fn find_leaderboard_rank_of_user(&self, user: &User, td: &ITransaction) -> anyhow::Result<usize> {
@@ -103,10 +105,11 @@ impl UserRepo for DbUserRepo {
                 .and(users::individual_points.le(user.individual_points))
                 .and(users::last_gained_points_at.le(&user.last_gained_points_at))
                 .and(users::created_at.le(user.created_at))
+                .and(users::participate_in_leaderboards.eq(true))
             )
             .select(count_star())
             .first::<i64>(td.get_db_connection())
-            .map(|vv| (vv+1) as usize)
+            .map(|vv| vv as usize)
             .map_err(|_| anyhow::Error::msg("Can't load user's rank!"))
     }
 }

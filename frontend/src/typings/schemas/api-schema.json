@@ -183,6 +183,31 @@
         }
       }
     },
+    "/leaderboard/individual": {
+      "get": {
+        "description": "Get individual leaderboard",
+        "operationId": "leaderboardindividual",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/GetIndividualLeaderboardResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/problems": {
       "get": {
         "description": "Get all available problems",
@@ -632,6 +657,34 @@
           }
         }
       },
+      "GetIndividualLeaderboardResponse": {
+        "type": "object",
+        "required": [
+          "leaderboard",
+          "page_count"
+        ],
+        "properties": {
+          "leaderboard": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserLeaderboardEntryDto"
+            }
+          },
+          "page_count": {
+            "type": "integer",
+            "format": "uint",
+            "minimum": 0
+          },
+          "user_ranking": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserLeaderboardEntryDto"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
       "GetProblemDetailsResponse": {
         "type": "object",
         "required": [
@@ -1062,6 +1115,36 @@
             "type": "boolean"
           },
           "team_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "UserLeaderboardEntryDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "individual_points",
+          "rank",
+          "username"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "individual_points": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "uint",
+            "minimum": 0
+          },
+          "team_name": {
             "type": "string",
             "nullable": true
           },

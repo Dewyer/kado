@@ -8,3 +8,8 @@ export type IdType = string | number;
 export interface Identifiable {
 	id?: string | number;
 }
+
+export interface PaginationOptions {
+	perPage?: number;
+	page: number;
+}

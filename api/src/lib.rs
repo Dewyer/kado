@@ -71,6 +71,7 @@ pub fn rocket() -> rocket::Rocket {
                 routes::submission_routes::start_submission,
                 routes::submission_routes::get_test_input,
                 routes::submission_routes::send_test_output,
+                routes::leaderboard_routes::get_individual_leaderboard,
             ],
         )
         .mount("/swagger", make_swagger_ui(&get_swagger_config()))
