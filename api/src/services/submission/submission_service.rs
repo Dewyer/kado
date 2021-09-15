@@ -19,7 +19,7 @@ use crate::db::team_repo::{DbTeamRepo, ITeamRepo};
 use uuid::Uuid;
 use crate::db::user_repo::{IUserRepo, DbUserRepo};
 
-const SUBMISSION_TEST_TIMEOUT: i64 = 10;
+const SUBMISSION_TEST_TIMEOUT: i64 = 1000000;
 
 pub struct SubmissionService {
     submission_repo: ISubmissionRepo,
@@ -54,7 +54,7 @@ impl SubmissionService {
 
     fn create_submission(&self, user: &User, problem: &Problem, request: &StartSubmissionRequest, td: &ITransaction) -> anyhow::Result<Submission> {
         let now_naive = UtilsService::naive_now();
-        let code_name = CodeName::from_string(&request.problem_id)?;
+        let code_name = CodeName::from_string(&request.problem)?;
         let support = self.get_problem_support(code_name.clone());
         let seed = rand::thread_rng().gen_range(0, 1000000);
         let gen_payload = SubmissionGenerationPayload {
@@ -75,7 +75,7 @@ impl SubmissionService {
     }
 
     fn assert_can_start_submission(&self, user: &User, problem: &Problem, request: &StartSubmissionRequest, td: &ITransaction) -> anyhow::Result<()> {
-        if problem.sample_count >= request.sample_index.unwrap_or(0) {
+        if problem.sample_count-1 < request.sample_index.unwrap_or(0) {
             bail!("Sample index is larger then the number of samples available");
         }
 
@@ -99,7 +99,7 @@ impl SubmissionService {
     pub fn start_submission(&self, user_guard: AuthTokenGuard<ApiToken>, request: StartSubmissionRequest) -> anyhow::Result<StartSubmissionResponse> {
         self.tm.transaction(|td| {
             let now_naive = UtilsService::naive_now();
-            let problem = self.problem_repo.find_available_problem_by_code(&request.problem_id, now_naive, &td)?;
+            let problem = self.problem_repo.find_available_problem_by_code(&request.problem, now_naive, &td)?;
             self.assert_can_start_submission(&user_guard.user, &problem, &request, &td)?;
 
             let new_submission = self.create_submission(&user_guard.user, &problem, &request, &td)?;
@@ -148,7 +148,7 @@ impl SubmissionService {
 
     pub fn get_test_input(&self, user_guard: AuthTokenGuard<ApiToken>, request: GetTestInputRequest) -> anyhow::Result<GetTestInputResponse> {
         self.tm.transaction(|td| {
-            let code_name = request.code_name;
+            let code_name = request.problem;
             let user = user_guard.user;
             let now_naive = UtilsService::naive_now();
             CodeName::from_string(&code_name)?;
@@ -157,9 +157,11 @@ impl SubmissionService {
             let (submission, submission_tests) = self.submission_repo.find_latest_submission_by_user_and_problem_with_tests(user.id, problem.id, &td)?;
             self.assert_can_start_new_test(&submission, &submission_tests)?;
 
-            let (_, generated_test) = self.create_submission_test(&problem, &submission, &submission_tests, &td)?;
+            let (new_test, generated_test) = self.create_submission_test(&problem, &submission, &submission_tests, &td)?;
 
             Ok(GetTestInputResponse {
+                test_id: new_test.id.to_string(),
+                deadline: now_naive.timestamp() + SUBMISSION_TEST_TIMEOUT,
                 input: generated_test.input,
             })
         })
@@ -175,7 +177,7 @@ impl SubmissionService {
 
     fn get_diminishing_returns_on_points(&self, max_p: i64, sub_count: usize) -> i64 {
         const R: f64 = 0.2;
-        max_p * std::f64::consts::E.powf(-R * (sub_count as f64)).floor() as i64
+        (max_p * std::f64::consts::E.powf(-R * (sub_count as f64))).floor() as i64
     }
 
     fn handle_team_member_submission_completion(&self, user: &User, team_id: Uuid, problem: &Problem, td: &ITransaction) -> anyhow::Result<()> {
@@ -188,13 +190,16 @@ impl SubmissionService {
     }
 
     fn handle_submission_finished(&self, mut submission: Submission, problem: &Problem, mut user: User, existing_tests: &Vec<SubmissionTest>, updated_last_test: &SubmissionTest, td: &ITransaction) -> anyhow::Result<()> {
+        submission.finished_at = updated_last_test.finished_at;
         let existing_tests_without_last = existing_tests.iter().filter(|test| test.id != updated_last_test.id).collect::<Vec<&SubmissionTest>>();
         if existing_tests_without_last.iter().any(|test| !test.correct.unwrap_or(false)) || !updated_last_test.correct.unwrap_or(false) {
+            submission.correct = Some(false);
+            self.submission_repo.save(&submission, td)?;
+
             return Ok(());
         }
-
-        submission.finished_at = updated_last_test.finished_at;
         submission.correct = Some(true);
+
         self.submission_repo.save(&submission, td)?;
 
         user.individual_points += problem.base_point_value;

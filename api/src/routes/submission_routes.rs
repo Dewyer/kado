@@ -7,7 +7,7 @@ use crate::models::http::requests::{StartSubmissionRequest, SendTestOutputReques
 use crate::models::http::responses::{StartSubmissionResponse, GetTestInputResponse, SendTestOutputResponse};
 
 #[openapi]
-#[post("/start-submission", format = "json", data = "<request>")]
+#[post("/submissions/start-submission", format = "json", data = "<request>")]
 /// Start a new submission
 pub fn start_submission(
     user_guard: AuthTokenGuard<ApiToken>,
@@ -20,7 +20,7 @@ pub fn start_submission(
 }
 
 #[openapi]
-#[put("/test-input", format = "json", data = "<request>")]
+#[put("/submissions/test", format = "json", data = "<request>")]
 /// Get input for a new test
 pub fn get_test_input(
     user_guard: AuthTokenGuard<ApiToken>,
@@ -33,7 +33,7 @@ pub fn get_test_input(
 }
 
 #[openapi]
-#[post("/test-input/<test_id>", format = "json", data = "<request>")]
+#[post("/submissions/test/<test_id>", format = "json", data = "<request>")]
 /// Send output for an existing test
 pub fn send_test_output(
     user_guard: AuthTokenGuard<ApiToken>,

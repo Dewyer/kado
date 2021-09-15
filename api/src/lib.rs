@@ -68,6 +68,9 @@ pub fn rocket() -> rocket::Rocket {
                 routes::problem_routes::get_problem_details,
                 routes::api_token_routes::get_api_token,
                 routes::api_token_routes::refresh_api_token,
+                routes::submission_routes::start_submission,
+                routes::submission_routes::get_test_input,
+                routes::submission_routes::send_test_output,
             ],
         )
         .mount("/swagger", make_swagger_ui(&get_swagger_config()))
