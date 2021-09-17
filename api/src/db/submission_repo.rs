@@ -7,7 +7,7 @@ use crate::db::transaction_manager::ITransaction;
 use crate::errors::ServiceError;
 use crate::models::submission::{NewSubmission, Submission};
 use crate::schema::submissions;
-use chrono::NaiveDateTime;
+
 use crate::schema::submission_tests;
 use uuid::Uuid;
 use crate::models::submission::submission_test::{SubmissionTest, NewSubmissionTest};
