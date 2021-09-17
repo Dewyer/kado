@@ -8,6 +8,6 @@ export interface LogoProps {
 
 export const Logo: React.FC<LogoProps> = (props) => {
     return <div className={classNames(styles.Logo, props.className)}>
-        <span>Snap</span> Problems
+        <span>Snap</span> Challenge
     </div>;
 };
