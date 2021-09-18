@@ -38,7 +38,7 @@ For us to know who is trying to create a submission we need you to include your 
 
 In the *X-Api-Token* HTTP header (more about headers [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers)).
 
-If you think your api token was compromised (shared it with anyone or showed it to anyone) consider refreshing it and using the newly gotten token.
+If you think your api token was compromised (shared it with anyone or showed it to anyone) consider refreshing it and using the new token your older token will be invalidated.
 
 #### Submission API Specification
 The API is available at: *${process.env.REACT_APP_BASE_URL}*
