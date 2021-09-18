@@ -64,6 +64,7 @@ table! {
         name -> Varchar,
         join_code -> Varchar,
         points -> Int8,
+        participate_in_leaderboards -> Bool,
         last_gained_points_at -> Nullable<Timestamp>,
         owner_user -> Nullable<Uuid>,
         is_deleted -> Bool,

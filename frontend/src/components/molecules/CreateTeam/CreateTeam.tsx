@@ -7,6 +7,7 @@ import {CreateTeamFormData} from "./CreateTeam.types";
 import {validateCreateTeamForm} from "./CreateTeam.validation";
 import {useCreateTeamMutation} from "../../../api/hooks/teamApiHooks";
 import {queryClient} from "../../../api/queryClient";
+import {FieldCheckbox} from "../../atoms/FieldCheckbox/FieldCheckbox";
 
 export interface CreateTeamProps {
 }
@@ -17,6 +18,7 @@ export const CreateTeam: React.FC<CreateTeamProps> = (props) => {
     const onSubmit = async (values: CreateTeamFormData) => {
         await createTeamMutation.mutateAsync({
             name: values.name,
+            participate_in_leaderboards: values.participateInLeaderBoard,
         });
 
         await queryClient.invalidateQueries("FetchUserTeam");
@@ -28,6 +30,7 @@ export const CreateTeam: React.FC<CreateTeamProps> = (props) => {
         <Form<CreateTeamFormData>
             initialValues={{
                 name: "",
+                participateInLeaderBoard: false,
             }}
             onSubmit={onSubmit}
             validate={validateCreateTeamForm}
@@ -36,14 +39,21 @@ export const CreateTeam: React.FC<CreateTeamProps> = (props) => {
                     <div className="field">
                         <label>Team name</label>
                         <Field<string>
+                            containerClassName={styles.FormField}
                             name="name"
                             component={FieldTextInput}
                             placeHolder="ex: Labosch"
                             type="text"
                         />
                     </div>
+                    <Field<boolean>
+                        name="participateInLeaderBoard"
+                        component={FieldCheckbox}
+                        label={"Show my team on leaderboards"}
+                        type="checkbox"
+                    />
                     <button
-                        className={classNames("ui button primary", { loading: createTeamMutation.isLoading })}
+                        className={classNames("ui button primary", styles.FormField, { loading: createTeamMutation.isLoading })}
                         type="submit"
                         disabled={submitting || !valid || createTeamMutation.isLoading}
                     >

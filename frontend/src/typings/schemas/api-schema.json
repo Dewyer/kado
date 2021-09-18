@@ -208,6 +208,31 @@
         }
       }
     },
+    "/leaderboard/team": {
+      "get": {
+        "description": "Get team leaderboard",
+        "operationId": "leaderboardteam",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/GetTeamLeaderboardResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/problems": {
       "get": {
         "description": "Get all available problems",
@@ -616,11 +641,15 @@
       "CreateTeamRequest": {
         "type": "object",
         "required": [
-          "name"
+          "name",
+          "participate_in_leaderboards"
         ],
         "properties": {
           "name": {
             "type": "string"
+          },
+          "participate_in_leaderboards": {
+            "type": "boolean"
           }
         }
       },
@@ -718,6 +747,34 @@
             "items": {
               "$ref": "#/components/schemas/ProblemDto"
             }
+          }
+        }
+      },
+      "GetTeamLeaderboardResponse": {
+        "type": "object",
+        "required": [
+          "leaderboard",
+          "page_count"
+        ],
+        "properties": {
+          "leaderboard": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamLeaderboardEntryDto"
+            }
+          },
+          "page_count": {
+            "type": "integer",
+            "format": "uint",
+            "minimum": 0
+          },
+          "user_team_ranking": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TeamLeaderboardEntryDto"
+              }
+            ],
+            "nullable": true
           }
         }
       },
@@ -1080,6 +1137,32 @@
           "points": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "TeamLeaderboardEntryDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "points",
+          "rank"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "points": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "uint",
+            "minimum": 0
           }
         }
       },

@@ -4,6 +4,7 @@ CREATE TABLE teams
     name VARCHAR NOT NULL UNIQUE,
     join_code VARCHAR NOT NULL,
     points BIGINT NOT NULL,
+    participate_in_leaderboards BOOL NOT NULL DEFAULT false,
     last_gained_points_at TIMESTAMP NULL,
     owner_user UUID NULL,
     is_deleted BOOL NOT NULL,

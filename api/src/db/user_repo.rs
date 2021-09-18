@@ -11,7 +11,6 @@ use crate::schema::teams;
 use crate::models::utils::PaginationOptions;
 use crate::models::team::Team;
 use crate::db::pagination::*;
-
 use diesel::dsl::count_star;
 
 crud_repo!(UserCrudRepo, DbUserCrudRepo, users, User, NewUser, "Users");

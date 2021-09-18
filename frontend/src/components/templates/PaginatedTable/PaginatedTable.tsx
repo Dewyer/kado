@@ -47,7 +47,7 @@ export const PaginatedTable = <T extends Identifiable,>(props: React.PropsWithCh
                             </Menu.Item>
                             {page !== 0 && <Menu.Item onClick={() => setPage(page-1)} as='a'>{page-1}</Menu.Item>}
                             <Menu.Item as='a'>{page}</Menu.Item>
-                            {page !== pageCount-1 && <Menu.Item onClick={() => setPage(page+1)} as='a'>{page+1}</Menu.Item>}
+                            {page <= pageCount-1 && <Menu.Item onClick={() => setPage(page+1)} as='a'>{page+1}</Menu.Item>}
                             <Menu.Item onClick={() => setPage(page+1)} as='a' icon>
                                 <Icon name='chevron right' />
                             </Menu.Item>
