@@ -35,7 +35,7 @@ export const IndividualLeaderboardPage: React.FC = () => {
 		<PageLayout contentClassName={styles.IndividualLeaderboardPage}>
 			<h3 className={"ui header"}>Individual leaderboard</h3>
 
-			{userRanking && <span>You: {userRanking.rank}. - {userRanking.username}{userRanking.team_name ? ` - ${userRanking.team_name}` : ''}</span>}
+			{userRanking && <span>You: {userRanking.rank}. - {userRanking.username}{userRanking.team_name ? ` - ${userRanking.team_name}` : ''} - {userRanking.individual_points}pts</span>}
 
 			<PaginatedTable
 				page={page}

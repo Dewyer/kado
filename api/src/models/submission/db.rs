@@ -2,7 +2,7 @@ use serde::Serialize;
 use uuid::Uuid;
 use chrono::NaiveDateTime;
 use crate::schema::submissions;
-use crate::models::submission::SubmissionDto;
+use crate::models::submission::{SubmissionDto, SubmissionMinimalDto};
 
 #[derive(Queryable, Serialize, AsChangeset)]
 #[table_name = "submissions"]
@@ -43,6 +43,15 @@ impl Submission {
             sample_index: self.sample_index.clone(),
             started_at: self.started_at.timestamp(),
             finished_at: self.finished_at.map(|td| td.timestamp()),
+        }
+    }
+
+    pub fn to_minimal_dto(&self) -> SubmissionMinimalDto {
+        SubmissionMinimalDto {
+            id: self.id.to_string(),
+            test_count: self.test_count,
+            sample_index: self.sample_index.clone(),
+            started_at: self.started_at.timestamp(),
         }
     }
 }

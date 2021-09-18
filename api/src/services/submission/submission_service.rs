@@ -19,7 +19,8 @@ use crate::db::team_repo::{DbTeamRepo, ITeamRepo};
 use uuid::Uuid;
 use crate::db::user_repo::{IUserRepo, DbUserRepo};
 
-const SUBMISSION_TEST_TIMEOUT: i64 = 1000000;
+const SUBMISSION_TIMEOUT_PER_TEST: i64 = 3*60; // 15 minutes
+const SUBMISSION_TEST_TIMEOUT: i64 = 60; // 1 minute
 
 pub struct SubmissionService {
     submission_repo: ISubmissionRepo,
@@ -105,12 +106,20 @@ impl SubmissionService {
             let new_submission = self.create_submission(&user_guard.user, &problem, &request, &td)?;
 
             Ok(StartSubmissionResponse {
-                submission: new_submission.to_dto(),
+                submission: new_submission.to_minimal_dto(),
             })
         })
     }
 
-    fn assert_can_start_new_test(&self, submission: &Submission, existing_tests: &Vec<SubmissionTest>) -> anyhow::Result<()> {
+    fn assert_can_start_new_test(&self, submission: &Submission, existing_tests: &Vec<SubmissionTest>, user: &User) -> anyhow::Result<()> {
+        if submission.owner_id != user.id {
+            bail!("You don't have access to this submission.");
+        }
+
+        if !UtilsService::time_within_seconds(submission.started_at, SUBMISSION_TIMEOUT_PER_TEST * submission.test_count as i64) {
+            bail!("Submission timed out!");
+        }
+
         let open_test = existing_tests.iter().find(|test| test.finished_at.is_none());
         if open_test.is_some() {
             bail!("You already have an open test running, submit it before getting new inputs!");
@@ -148,14 +157,13 @@ impl SubmissionService {
 
     pub fn get_test_input(&self, user_guard: AuthTokenGuard<ApiToken>, request: GetTestInputRequest) -> anyhow::Result<GetTestInputResponse> {
         self.tm.transaction(|td| {
-            let code_name = request.problem;
             let user = user_guard.user;
             let now_naive = UtilsService::naive_now();
-            CodeName::from_string(&code_name)?;
+            let submission_id = UtilsService::parse_uuid(&request.submission)?;
+            let (submission, submission_tests) = self.submission_repo.find_by_id_with_tests(submission_id, &td)?;
+            let problem = self.problem_repo.crud().find_by_id(submission.problem_id, &td)?;
 
-            let problem = self.problem_repo.find_available_problem_by_code(&code_name, now_naive, &td)?;
-            let (submission, submission_tests) = self.submission_repo.find_latest_submission_by_user_and_problem_with_tests(user.id, problem.id, &td)?;
-            self.assert_can_start_new_test(&submission, &submission_tests)?;
+            self.assert_can_start_new_test(&submission, &submission_tests, &user)?;
 
             let (new_test, generated_test) = self.create_submission_test(&problem, &submission, &submission_tests, &td)?;
 
