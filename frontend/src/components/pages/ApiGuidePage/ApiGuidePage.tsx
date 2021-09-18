@@ -61,12 +61,48 @@ Response body
         "id": "<submision id>",
         "test_count": <how many tests your solution will have to complete to be considered completed>,
         "sample_index": <the sample index if you specified any>,
-        "started_at": <the unix timestamp your solution was started at>,
+        "started_at": <the UTC timestamp your solution was started at>,
     }
 }
 \`\`\`
 
+##### Starting a test (getting the test input) - PUT - /api/submissions/test
+Used to create a get a new test for a submission, has to be called *test_count* times.
 
+Request body (Content-Type header must be set to *application/json*):
+\`\`\`
+{
+    "submission": "<submision id>"
+}
+\`\`\`
+
+Response body
+\`\`\`
+{
+    "test_id": "<test id>",
+    "deadline": <the deadline for test result submission as a UTC timestamp>,
+    "input": <program input JSON>
+}
+\`\`\`
+
+##### Submit test results (sending test output) - POST - /api/submissions/test/<test_id>
+Used to submit test output for a previosly started test.
+
+Request body (Content-Type header must be set to *application/json*):
+\`\`\`
+{
+    "output": <output generated for the input JSON>
+}
+\`\`\`
+
+Response body
+\`\`\`
+{
+    "correct": <true if the test output was correct>
+}
+\`\`\`
+
+After you complete all tests for a given submission if you go to the problem's details page you should see your submission as correct and completed.
 
 `;
 
