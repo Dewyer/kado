@@ -49,6 +49,10 @@ impl AuthService {
         Hmac::new_varkey(&self.config.secret).map_err(|_| anyhow::Error::msg("Cant get JWT key!"))
     }
 
+    pub fn is_admin_key_correct(&self, key: String) -> bool {
+        key == self.config.admin_key
+    }
+
     fn sign_jwt_for_user(
         &self,
         user: &User,

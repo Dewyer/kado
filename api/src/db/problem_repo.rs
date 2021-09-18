@@ -9,10 +9,14 @@ use crate::models::problem::{NewProblem, Problem};
 use crate::schema::problems;
 use chrono::NaiveDateTime;
 use crate::schema::problem_statements;
-use crate::models::problem::problem_statement::ProblemStatement;
+use crate::models::problem::problem_statement::{ProblemStatement, NewProblemStatement};
 
 crud_repo!(ProblemCrudRepo, DbProblemCrudRepo, problems, Problem, NewProblem, "Problems");
 pub type IProblemCrudRepo = Box<dyn ProblemCrudRepo>;
+
+crud_repo!(ProblemStatementCrudRepo, DbProblemStatementCrudRepo, problem_statements, ProblemStatement, NewProblemStatement, "Problem statement");
+pub type IProblemStatementCrudRepo = Box<dyn ProblemStatementCrudRepo>;
+
 
 #[macro_export]
 macro_rules! full_availability {
@@ -24,6 +28,8 @@ macro_rules! full_availability {
 pub trait ProblemRepo {
     fn crud(&self) -> &IProblemCrudRepo;
 
+    fn crud_statement(&self) -> &IProblemStatementCrudRepo;
+
     fn save(&self, problem: &Problem, td: &ITransaction) -> anyhow::Result<Problem>;
 
     fn find_available_problems(&self, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<Vec<Problem>>;
@@ -32,17 +38,21 @@ pub trait ProblemRepo {
 
     fn find_available_problem_by_code(&self, code_name: &str, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<Problem>;
 
+    fn find_problem_by_code(&self, code_name: &str, td: &ITransaction) -> anyhow::Result<Problem>;
+
     fn find_available_problem_by_code_name_populated(&self, code_name: &str, now: NaiveDateTime, td: &ITransaction) -> anyhow::Result<(Problem, ProblemStatement)>;
 }
 
 pub struct DbProblemRepo {
     crud: IProblemCrudRepo,
+    crud_statement: IProblemStatementCrudRepo,
 }
 
 impl DbProblemRepo {
     pub fn new() -> Self {
         Self {
             crud: Box::new(DbProblemCrudRepo {}),
+            crud_statement: Box::new(DbProblemStatementCrudRepo {}),
         }
     }
 }
@@ -50,6 +60,10 @@ impl DbProblemRepo {
 impl ProblemRepo for DbProblemRepo {
     fn crud(&self) -> &IProblemCrudRepo {
         &self.crud
+    }
+
+    fn crud_statement(&self) -> &IProblemStatementCrudRepo {
+        &self.crud_statement
     }
 
     fn save(&self, problem: &Problem, td: &ITransaction) -> anyhow::Result<Problem> {
@@ -92,6 +106,14 @@ impl ProblemRepo for DbProblemRepo {
                 problems::is_deleted.eq(false)
                     .and(problems::code_name.eq(code_name))
                     .and(full)
+            ).first::<Problem>(td.get_db_connection())
+            .map_err(|_| anyhow::Error::msg("Problem not found!"))
+    }
+
+    fn find_problem_by_code(&self, code_name: &str, td: &ITransaction) -> anyhow::Result<Problem> {
+        problems::table
+            .filter(
+                problems::code_name.eq(code_name)
             ).first::<Problem>(td.get_db_connection())
             .map_err(|_| anyhow::Error::msg("Problem not found!"))
     }

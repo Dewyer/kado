@@ -73,6 +73,7 @@ pub fn rocket() -> rocket::Rocket {
                 routes::submission_routes::send_test_output,
                 routes::leaderboard_routes::get_individual_leaderboard,
                 routes::leaderboard_routes::get_team_leaderboard,
+                routes::admin_routes::update_problem_statement,
             ],
         )
         .mount("/swagger", make_swagger_ui(&get_swagger_config()))

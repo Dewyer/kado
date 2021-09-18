@@ -8,6 +8,9 @@ use crate::models::problem::{ProblemFullyPopulatedDto};
 use crate::services::utils_service::UtilsService;
 use crate::db::submission_repo::{ISubmissionRepo, DbSubmissionRepo};
 use crate::guards::{AccessToken, AuthTokenGuard};
+use crate::models::http::requests::UpdateProblemStatementRequest;
+use crate::models::problem::code_name::CodeName;
+use crate::models::problem::problem_statement::NewProblemStatement;
 
 pub struct ProblemService {
     problem_repo: IProblemRepo,
@@ -52,6 +55,27 @@ impl ProblemService {
                 problem: ProblemFullyPopulatedDto::from_problem_and_statement(&problem_and_statement.0, &problem_and_statement.1),
                 submissions: submissions.into_iter().map(|sub| sub.to_dto()).collect(),
             })
+        })
+    }
+
+    pub fn update_problem_statement_by_admin(&self, request: UpdateProblemStatementRequest) -> anyhow::Result<()> {
+        self.tm.transaction(|td| {
+            CodeName::from_string(&request.problem)?;
+            let mut problem = self.problem_repo.find_problem_by_code(&request.problem, &td)?;
+            let statement = self.problem_repo.crud_statement().find_by_id(problem.problem_statement_id, &td)?;
+
+            if statement.problem_statement == request.statement {
+                return Ok(());
+            }
+
+            let new_statement = self.problem_repo.crud_statement().insert(&NewProblemStatement {
+                problem_statement: &request.statement,
+                version: &request.version,
+            }, &td)?;
+            problem.problem_statement_id = new_statement.id;
+            self.problem_repo.save(&problem, &td)?;
+
+            Ok(())
         })
     }
 }

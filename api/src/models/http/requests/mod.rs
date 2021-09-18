@@ -7,7 +7,9 @@ mod leave_team_request;
 mod start_submission;
 mod send_test_output_request;
 mod get_test_input_request;
+mod update_problem_statement_request;
 
+pub use update_problem_statement_request::*;
 pub use get_test_input_request::*;
 pub use send_test_output_request::*;
 pub use start_submission::*;

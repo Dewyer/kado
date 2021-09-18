@@ -5,3 +5,4 @@ pub mod problem_routes;
 pub mod api_token_routes;
 pub mod submission_routes;
 pub mod leaderboard_routes;
+pub mod admin_routes;
