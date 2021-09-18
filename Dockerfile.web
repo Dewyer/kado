@@ -5,6 +5,7 @@ RUN apt-get update \
     && apt-get install -y ca-certificates tzdata libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 RUN USER=root cargo new --bin api
+COPY google-jwt-verify google-jwt-verify
 WORKDIR ./api
 COPY api/Cargo.toml ./Cargo.toml
 RUN cargo build --release

@@ -2,6 +2,7 @@ use crate::models::submission::submission_test::SubmissionTest;
 
 pub struct SubmissionGenerationPayload {
     pub seed: i32,
+    pub sample_index: Option<i32>,
 }
 
 pub struct SubmissionGenerationResult {
@@ -11,6 +12,7 @@ pub struct SubmissionGenerationResult {
 pub struct SubmissionTestGenerationPayload {
     pub seed: i32,
     pub test_index: usize,
+    pub sample_index: Option<i32>,
 }
 
 pub struct SubmissionTestGenerationResult {

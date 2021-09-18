@@ -60,6 +60,7 @@ impl SubmissionService {
         let seed = rand::thread_rng().gen_range(0, 1000000);
         let gen_payload = SubmissionGenerationPayload {
             seed,
+            sample_index: request.sample_index.clone(),
         };
         let gen_res = support.generate_submission_details(gen_payload)?;
 
@@ -139,6 +140,7 @@ impl SubmissionService {
         let input_res = support.generate_submission_test_input(SubmissionTestGenerationPayload {
             test_index: existing_tests.len(),
             seed: submission.seed,
+            sample_index: submission.sample_index.clone(),
         })?;
 
         Ok((

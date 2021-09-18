@@ -8,7 +8,7 @@ impl CamelCaseProblemSupport {
     }
 }
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, serde::Deserialize)]
 struct CamelCaseInput {
     word: String,
 }
@@ -18,16 +18,10 @@ struct CamelCaseOutput {
     word_count: i32,
 }
 
-impl ProblemSupport for CamelCaseProblemSupport {
-    fn generate_submission_details(&self, _payload: SubmissionGenerationPayload) -> anyhow::Result<SubmissionGenerationResult> {
-        Ok(SubmissionGenerationResult {
-            test_count: 1,
-        })
-    }
-
-    fn generate_submission_test_input(&self, _payload: SubmissionTestGenerationPayload) -> anyhow::Result<SubmissionTestGenerationResult> {
+impl CamelCaseProblemSupport {
+    fn get_input_for(&self, val: &str) -> anyhow::Result<SubmissionTestGenerationResult> {
         let input = serde_json::to_value(CamelCaseInput {
-            word: "camelCaseIsLol".to_string(),
+            word: val.to_string(),
         }).map_err(|_| anyhow::Error::msg("Invalid input!"))?;
 
         Ok(SubmissionTestGenerationResult {
@@ -35,12 +29,29 @@ impl ProblemSupport for CamelCaseProblemSupport {
             test_class: "".to_string(),
         })
     }
+}
+
+impl ProblemSupport for CamelCaseProblemSupport {
+    fn generate_submission_details(&self, _payload: SubmissionGenerationPayload) -> anyhow::Result<SubmissionGenerationResult> {
+        Ok(SubmissionGenerationResult {
+            test_count: 1,
+        })
+    }
+
+    fn generate_submission_test_input(&self, payload: SubmissionTestGenerationPayload) -> anyhow::Result<SubmissionTestGenerationResult> {
+        if payload.sample_index.is_some() {
+            self.get_input_for("camelCaseIsLol")
+        } else {
+            self.get_input_for("helloWorld")
+        }
+    }
 
     fn verify_output(&self, payload: VerificationPayload) -> anyhow::Result<VerificationResult> {
+        let input = serde_json::from_str::<CamelCaseInput>(&payload.test.input)?;
         let output = serde_json::from_value::<CamelCaseOutput>(payload.output.clone())?;
 
         Ok(VerificationResult {
-            correct: output.word_count == 4,
+            correct: if input.word == "helloWorld" { output.word_count == 2 } else { output.word_count == 4 },
         })
     }
 }
