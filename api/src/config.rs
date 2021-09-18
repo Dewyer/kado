@@ -56,9 +56,14 @@ pub fn from_env() -> Config {
     database_config.insert("url", Value::from(database_url));
     databases.insert("diesel_postgres_pool", Value::from(database_config));
 
-    Config::build(environment)
-        .environment(environment)
-        .address("127.0.0.1")
+    let mut builder =     Config::build(environment)
+        .environment(environment);
+
+    if env::var("PROD").unwrap_or("false".to_string()) != "true" {
+        builder = builder.address("127.0.0.1");
+    }
+
+    builder
         .port(port)
         .extra("databases", databases)
         .finalize()

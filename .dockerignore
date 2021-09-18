@@ -1,0 +1,7 @@
+*/target
+*/.env
+*/.gitignore
+*/Dockerfile
+
+frontend
+admin
