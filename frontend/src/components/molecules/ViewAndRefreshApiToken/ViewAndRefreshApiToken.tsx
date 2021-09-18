@@ -29,7 +29,7 @@ export const ViewAndRefreshApiToken: React.FC = () => {
 
     return (
         <div className={styles.ViewAndRefreshApiToken}>
-            <h4 className={"ui header"}>Your api token: </h4>
+            <h4 className={"ui header"}>Your api token: (this is a sensitive don't share with anyone)</h4>
             <div className={styles.ControlRow}>
                 <CustomTextInput
                     type={"password"}

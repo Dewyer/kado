@@ -33,6 +33,40 @@ The communication between your program and our verification programs is done thr
 - You can attempt to create a solution as many times as the problem allows you to (dependant on difficulty)
 - If you want to test your integration or your solution (but don't feel confident enough to do it live) you can create a submission that isn't worth any points and doesn't reduce your remaining solution attempts and just contains sample data.
 
+#### Authentication to the API
+For us to know who is trying to create a submission we need you to include your secret **api token** (copiable on the top of the page) in every request you make.
+
+In the *X-Api-Token* HTTP header (more about headers [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers)).
+
+If you think your api token was compromised (shared it with anyone or showed it to anyone) consider refreshing it and using the newly gotten token.
+
+#### Submission API Specification
+The API is available at: *${process.env.REACT_APP_BASE_URL}*
+
+##### Creating a submission - POST - /api/submissions/start-submission
+Used to create a new submission.
+
+Request body (Content-Type header must be set to *application/json*):
+\`\`\`
+{
+    "problem": "<problem id>",
+    "sample_index": <optional, index of the sample you want to use, don't include this field for live submissions>
+}
+\`\`\`
+
+Response body
+\`\`\`
+{
+    "submission": {
+        "id": "<submision id>",
+        "test_count": <how many tests your solution will have to complete to be considered completed>,
+        "sample_index": <the sample index if you specified any>,
+        "started_at": <the unix timestamp your solution was started at>,
+    }
+}
+\`\`\`
+
+
 
 `;
 
