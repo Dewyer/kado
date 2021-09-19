@@ -4,3 +4,4 @@ pub mod naive_date_time;
 pub mod requests;
 pub mod responses;
 pub mod access_claim;
+pub mod uploaded_file;

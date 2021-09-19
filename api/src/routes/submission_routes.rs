@@ -6,8 +6,8 @@ use rocket_contrib::json::Json;
 use crate::models::http::requests::{StartSubmissionRequest, SendTestOutputRequest, GetTestInputRequest};
 use crate::models::http::responses::{StartSubmissionResponse, GetTestInputResponse, SendTestOutputResponse};
 use rocket::Data;
-use crate::models::http::html_file::UploadedFile;
 use rocket::http::ContentType;
+use crate::models::http::uploaded_file::UploadedFile;
 
 #[openapi]
 #[post("/submissions/start-submission", format = "json", data = "<request>")]
@@ -49,19 +49,15 @@ pub fn send_test_output(
         .into()
 }
 
-#[post("/submissions/upload-proof/<problem_code>", data = "<file_data>")]
+#[post("/submissions/upload-proof/<problem_code>", data="<file>")]
 pub fn upload_proof_api(
     problem_code: String,
-    content_type: &ContentType,
-    file_data: Data,
+    file: UploadedFile,
     user_guard: AuthTokenGuard<ApiToken>,
     submission_service: SubmissionService,
 ) -> Json<OkErrorResponse> {
 
-    let res = submission_service.upload_proof(&mut user_guard.user.clone(), UploadedFile {
-        content_type: content_type.clone(),
-        data: file_data,
-    }, problem_code);
+    let res = submission_service.upload_proof(&mut user_guard.user.clone(), file, problem_code);
     println!("{:?}", res);
 
     Json(OkErrorResponse {

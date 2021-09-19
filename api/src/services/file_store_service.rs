@@ -22,7 +22,7 @@ impl FileStoreService {
         }
     }
 
-    pub fn store_file(&self, file_name: &str, file_data: Data) -> anyhow::Result<()> {
+    pub fn store_file(&self, file_name: &str, temp_path: &str) -> anyhow::Result<()> {
         let credentials = Credentials::new(Some(&self.config.aws_access_key), Some(&self.config.aws_secret_key),None,None, None)
             .map_err(|_| anyhow::Error::msg("Cant parse credentials"))?;
         let region = "eu-central-1".parse().unwrap();
@@ -30,19 +30,7 @@ impl FileStoreService {
         let bucket = Bucket::new(&self.config.aws_bucket, region, credentials)
             .map_err(|_| anyhow::Error::msg("Cant create bucket"))?;
 
-        let temp_f_name = format!("temp/{}.zip", CryptoService::get_random_string(8));
-        let temp_exists = fs::metadata(Path::new("temp")).is_ok();
-        if !temp_exists {
-            fs::create_dir(Path::new("temp"));
-        }
-
-        let temp_name = Path::new(&temp_f_name);
-        file_data.stream_to_file(temp_name.clone())
-            .map_err(|err| {
-                println!("internal err: {:?}", err);
-                anyhow::Error::msg("Cant write local file")
-            })?;
-
+        let temp_name = Path::new(&temp_path);
         let cont = fs::read(temp_name.clone()).map_err(|_| anyhow::Error::msg("read err"))?;
 
         let (_, code) = bucket.put_object_blocking(&file_name,&cont[..])

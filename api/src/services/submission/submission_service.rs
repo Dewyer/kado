@@ -21,7 +21,7 @@ use crate::db::user_repo::{IUserRepo, DbUserRepo};
 use chrono::NaiveDateTime;
 use crate::schema::submissions::dsl::submissions;
 use crate::services::file_store_service::FileStoreService;
-use crate::models::http::html_file::UploadedFile;
+use crate::models::http::uploaded_file::UploadedFile;
 
 const SUBMISSION_TIMEOUT_PER_TEST: i64 = 3*60; // 15 minutes
 const SUBMISSION_TEST_TIMEOUT: i64 = 60; // 1 minute
@@ -300,7 +300,7 @@ impl SubmissionService {
             let now_str = UtilsService::naive_now().format("%Y-%m-%d-%H:%M:%S");
             let file_name = format!("{}/{}-{}.zip", user.username, problem.code_name, now_str);
 
-            // self.file_store.store_file(&file_name, file_data)?;
+            self.file_store.store_file(&file_name, &file_data.local_path)?;
 
             correct_submission.proof_file_path = Some(file_name);
             self.submission_repo.save(&correct_submission, &td)?;
