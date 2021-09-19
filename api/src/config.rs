@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::env;
 
-use rocket::config::{Config, Environment, Value};
+use rocket::config::{Config, Environment, Value, Limits};
 use rocket::fairing::AdHoc;
 use rocket_okapi::swagger_ui::SwaggerUIConfig;
 
@@ -18,7 +18,8 @@ pub struct AppConfig {
     pub admin_key: String,
     pub google_client_id: String,
     pub aws_access_key: String,
-    pub secret_key: String,
+    pub aws_secret_key: String,
+    pub aws_bucket: String,
 }
 
 impl AppConfig {
@@ -38,7 +39,8 @@ impl AppConfig {
                 secret: secret.into_bytes(),
                 admin_key: env::var("ADMIN_KEY").expect("No admin key in environment!"),
                 aws_access_key: env::var("A_AWS_ACCESS_KEY").expect("No aws key in environment!"),
-                secret_key: env::var("A_SECRET_KEY").expect("No aws secret key in environment!"),
+                aws_secret_key: env::var("A_SECRET_KEY").expect("No aws secret key in environment!"),
+                aws_bucket: env::var("A_AWS_BUCKET").expect("No aws bucket in environment!")
             }))
         })
     }
@@ -70,6 +72,9 @@ pub fn from_env() -> Config {
     builder
         .port(port)
         .extra("databases", databases)
+        .limits(Limits::new()
+                    .limit("forms", 3 * 1024 * 1024)
+                    .limit("json", 3 * 1024 * 1024))
         .finalize()
         .unwrap()
 }

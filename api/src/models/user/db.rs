@@ -5,7 +5,7 @@ use crate::schema::users;
 use crate::models::user::{UserDto, UserLeaderboardEntryDto};
 use crate::models::team::Team;
 
-#[derive(Queryable, Serialize, AsChangeset)]
+#[derive(Queryable, Serialize, AsChangeset, Clone)]
 #[table_name = "users"]
 #[changeset_options(treat_none_as_null = "true")]
 pub struct User {

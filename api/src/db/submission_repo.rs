@@ -1,13 +1,11 @@
 use diesel::prelude::*;
 use rocket::request::FromRequest;
 use rocket::{request, Request};
-
 use crate::crud_repo;
 use crate::db::transaction_manager::ITransaction;
 use crate::errors::ServiceError;
 use crate::models::submission::{NewSubmission, Submission};
 use crate::schema::submissions;
-
 use crate::schema::submission_tests;
 use uuid::Uuid;
 use crate::models::submission::submission_test::{SubmissionTest, NewSubmissionTest};
@@ -34,6 +32,8 @@ pub trait SubmissionRepo {
     fn find_by_id_with_tests(&self, submission_id: Uuid, td: &ITransaction) -> anyhow::Result<(Submission, Vec<SubmissionTest>)>;
 
     fn find_correct_submissions_for_users_and_problem(&self, user_ids: Vec<Uuid>, problem_id: Uuid, td: &ITransaction) -> anyhow::Result<Vec<Submission>>;
+
+    fn find_correct_submission_for_user_and_problem(&self, user_id: Uuid, problem_id: Uuid, td: &ITransaction) -> anyhow::Result<Submission>;
 }
 
 pub struct DbSubmissionRepo {
@@ -135,6 +135,18 @@ impl SubmissionRepo for DbSubmissionRepo {
             )
             .load::<Submission>(td.get_db_connection())
             .map_err(|_| anyhow::Error::msg("Submissions couldn't be loaded!"))
+    }
+
+    fn find_correct_submission_for_user_and_problem(&self, user_id: Uuid, problem_id: Uuid, td: &ITransaction) -> anyhow::Result<Submission> {
+        submissions::table
+            .select(submissions::all_columns)
+            .filter(
+                submissions::owner_id.eq(user_id)
+                    .and(submissions::correct.eq(true))
+                    .and(submissions::problem_id.eq(problem_id)),
+            )
+            .first::<Submission>(td.get_db_connection())
+            .map_err(|_| anyhow::Error::msg("Correct submission couldn't be found!"))
     }
 }
 

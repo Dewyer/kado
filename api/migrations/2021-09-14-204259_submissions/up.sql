@@ -6,6 +6,7 @@ CREATE TABLE submissions
     seed INT NOT NULL,
     test_count INT NOT NULL,
     correct BOOL NULL,
+    proof_file_path VARCHAR NULL,
     sample_index INT NULL,
     started_at TIMESTAMP NOT NULL,
     finished_at TIMESTAMP NULL,

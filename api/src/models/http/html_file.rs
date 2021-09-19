@@ -1,7 +1,8 @@
 use std::io::Read;
 
 use rocket::response::{self, Responder, Stream};
-use rocket::Request;
+use rocket::{Request, Data};
+use rocket::http::ContentType;
 
 pub struct HtmlFile<T>
     where
@@ -20,4 +21,10 @@ impl<'r, T> Responder<'r> for HtmlFile<T>
 
         response::Result::Ok(content_response)
     }
+}
+
+
+pub struct UploadedFile {
+    pub content_type: ContentType,
+    pub data: Data,
 }

@@ -1,7 +1,7 @@
 use crate::db::transaction_manager::{TransactionManager, ITransaction};
 use rocket::request::FromRequest;
 use crate::errors::ServiceError;
-use rocket::{Request, request};
+use rocket::{Request, request, Data};
 use crate::guards::{AuthTokenGuard, ApiToken};
 use crate::models::http::requests::{StartSubmissionRequest, SendTestOutputRequest, GetTestInputRequest};
 use crate::db::problem_repo::{IProblemRepo, DbProblemRepo};
@@ -18,6 +18,10 @@ use crate::models::submission::submission_test::{SubmissionTest, NewSubmissionTe
 use crate::db::team_repo::{DbTeamRepo, ITeamRepo};
 use uuid::Uuid;
 use crate::db::user_repo::{IUserRepo, DbUserRepo};
+use chrono::NaiveDateTime;
+use crate::schema::submissions::dsl::submissions;
+use crate::services::file_store_service::FileStoreService;
+use crate::models::http::html_file::UploadedFile;
 
 const SUBMISSION_TIMEOUT_PER_TEST: i64 = 3*60; // 15 minutes
 const SUBMISSION_TEST_TIMEOUT: i64 = 60; // 1 minute
@@ -27,6 +31,7 @@ pub struct SubmissionService {
     problem_repo: IProblemRepo,
     user_repo: IUserRepo,
     team_repo: ITeamRepo,
+    file_store: FileStoreService,
     tm: TransactionManager,
 }
 
@@ -36,6 +41,7 @@ impl SubmissionService {
         problem_repo: IProblemRepo,
         user_repo: IUserRepo,
         team_repo: ITeamRepo,
+        file_store: FileStoreService,
         tm: TransactionManager,
     ) -> Self {
         Self {
@@ -43,6 +49,7 @@ impl SubmissionService {
             problem_repo,
             user_repo,
             team_repo,
+            file_store,
             tm,
         }
     }
@@ -71,6 +78,7 @@ impl SubmissionService {
             test_count: gen_res.test_count,
             sample_index: request.sample_index,
             correct: None,
+            proof_file_path: None,
             started_at: now_naive,
             finished_at: None,
         }, td)
@@ -204,6 +212,18 @@ impl SubmissionService {
         Ok(())
     }
 
+    fn handle_user_correct_and_complete_submission_to_problem(&self, user: &mut User, problem: &Problem, at: &NaiveDateTime, td: &ITransaction) -> anyhow::Result<()> {
+        user.last_gained_points_at = Some(at.clone());
+        user.individual_points += problem.base_point_value;
+        if let Some(team_id) = user.team_id {
+            self.handle_team_member_submission_completion(&user, team_id, problem, td)?;
+        }
+
+        self.user_repo.save(&user, td)?;
+
+        Ok(())
+    }
+
     fn handle_submission_finished(&self, mut submission: Submission, problem: &Problem, mut user: User, existing_tests: &Vec<SubmissionTest>, updated_last_test: &SubmissionTest, td: &ITransaction) -> anyhow::Result<()> {
         submission.finished_at = updated_last_test.finished_at;
         let existing_tests_without_last = existing_tests.iter().filter(|test| test.id != updated_last_test.id).collect::<Vec<&SubmissionTest>>();
@@ -216,13 +236,8 @@ impl SubmissionService {
         submission.correct = Some(true);
 
         self.submission_repo.save(&submission, td)?;
-        user.last_gained_points_at = updated_last_test.finished_at.clone();
-        user.individual_points += problem.base_point_value;
-        if let Some(team_id) = user.team_id {
-            self.handle_team_member_submission_completion(&user, team_id, problem, td)?;
-        }
+        // self.handle_user_correct_and_complete_submission_to_problem(&mut user, problem, &updated_last_test.finished_at.unwrap_or(UtilsService::naive_now()), td)?;
 
-        self.user_repo.save(&user, td)?;
         Ok(())
     }
 
@@ -246,7 +261,7 @@ impl SubmissionService {
         test.output = Some(request.output.to_string());
         self.submission_repo.save_test(&test, td)?;
 
-        if submission.test_count as usize == existing_tests.len() {
+        if submission.test_count as usize == existing_tests.len() || !verification_result.correct {
             self.handle_submission_finished(submission, &problem, user, &existing_tests, &test, td)?;
         }
 
@@ -266,6 +281,34 @@ impl SubmissionService {
             })
         })
     }
+
+    fn assert_can_upload_proof(&self, submission: &Submission) -> anyhow::Result<()> {
+        if submission.proof_file_path.is_some() {
+            bail!("Proof already uploaded!");
+        }
+
+        Ok(())
+    }
+
+    pub fn upload_proof(&self, user: &mut User, file_data: UploadedFile, problem_code_name: String) -> anyhow::Result<()> {
+        self.tm.transaction(|td| {
+            CodeName::from_string(&problem_code_name)?;
+            let problem = self.problem_repo.find_problem_by_code(&problem_code_name, &td)?;
+            let mut correct_submission = self.submission_repo.find_correct_submission_for_user_and_problem(user.id, problem.id, &td)?;
+            self.assert_can_upload_proof(&correct_submission)?;
+
+            let now_str = UtilsService::naive_now().format("%Y-%m-%d-%H:%M:%S");
+            let file_name = format!("{}/{}-{}.zip", user.username, problem.code_name, now_str);
+
+            // self.file_store.store_file(&file_name, file_data)?;
+
+            correct_submission.proof_file_path = Some(file_name);
+            self.submission_repo.save(&correct_submission, &td)?;
+
+            self.handle_user_correct_and_complete_submission_to_problem(user, &problem, &correct_submission.finished_at.unwrap_or(UtilsService::naive_now()), &td)?;
+            Ok(())
+        })
+    }
 }
 
 impl<'a, 'r> FromRequest<'a, 'r> for SubmissionService {
@@ -276,6 +319,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for SubmissionService {
         let user_repo = req.guard::<DbUserRepo>()?;
         let team_repo = req.guard::<DbTeamRepo>()?;
         let problem_repo = req.guard::<DbProblemRepo>()?;
+        let file_store = req.guard::<FileStoreService>()?;
         let db_tm = req.guard::<TransactionManager>()?;
 
         request::Outcome::Success(SubmissionService::new(
@@ -283,6 +327,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for SubmissionService {
             Box::new(problem_repo),
             Box::new(user_repo),
             Box::new(team_repo),
+            file_store,
             db_tm,
         ))
     }

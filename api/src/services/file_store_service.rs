@@ -2,9 +2,11 @@ use s3::{Bucket, Region};
 use s3::creds::Credentials;
 use rocket::request::FromRequest;
 use crate::errors::ServiceError;
-use rocket::{Request, request, State};
+use rocket::{Request, request, State, Data};
 use crate::config::AppConfig;
 use rocket::http::Status;
+use std::path::Path;
+use crate::services::crypto_service::CryptoService;
 use std::fs;
 
 pub struct FileStoreService {
@@ -20,17 +22,41 @@ impl FileStoreService {
         }
     }
 
-    pub fn upload(&self) -> anyhow::Result<()> {
-        /*
-        let credentials = Credentials::new(ACCESS_KEY,SECRET_KEY,None,None)
-            .map_err(|_| anyhow::Error::msg("Cant parse credentials"))?;;
+    pub fn store_file(&self, file_name: &str, file_data: Data) -> anyhow::Result<()> {
+        let credentials = Credentials::new(Some(&self.config.aws_access_key), Some(&self.config.aws_secret_key),None,None, None)
+            .map_err(|_| anyhow::Error::msg("Cant parse credentials"))?;
         let region = "eu-central-1".parse().unwrap();
 
-        let bucket = Bucket::new("qpacode", region, credentials)
+        let bucket = Bucket::new(&self.config.aws_bucket, region, credentials)
             .map_err(|_| anyhow::Error::msg("Cant create bucket"))?;
-        let file: Vec<u8> = fs::read("file_path");
-        let (_, code) = bucket.put("/test.file", &file, "text/plain").unwrap();
-        */
+
+        let temp_f_name = format!("temp/{}.zip", CryptoService::get_random_string(8));
+        let temp_exists = fs::metadata(Path::new("temp")).is_ok();
+        if !temp_exists {
+            fs::create_dir(Path::new("temp"));
+        }
+
+        let temp_name = Path::new(&temp_f_name);
+        file_data.stream_to_file(temp_name.clone())
+            .map_err(|err| {
+                println!("internal err: {:?}", err);
+                anyhow::Error::msg("Cant write local file")
+            })?;
+
+        let cont = fs::read(temp_name.clone()).map_err(|_| anyhow::Error::msg("read err"))?;
+
+        let (_, code) = bucket.put_object_blocking(&file_name,&cont[..])
+            .map_err(|err| {
+                println!("internal err: {:?}", err);
+
+                anyhow::Error::msg("Cant upload local file")
+            })?;
+
+        if code != 200 {
+            bail!("Failed to upload file!");
+        }
+
+        Ok(())
     }
 }
 

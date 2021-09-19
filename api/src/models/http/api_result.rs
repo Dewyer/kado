@@ -50,8 +50,13 @@ impl<D, E> Into<Result<D, E>> for ApiResult<D, E>
 }
 
 #[derive(serde::Serialize, JsonSchema)]
+pub struct OkErrorResponse {
+    pub error: String,
+}
+
+#[derive(serde::Serialize, JsonSchema)]
 pub struct ErrorResponse {
-    error: String,
+    pub error: String,
 }
 
 impl<'r, D, E> Responder<'r> for ApiResult<D, E>

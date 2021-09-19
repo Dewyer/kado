@@ -5,6 +5,7 @@ pub struct SubmissionDto {
     pub problem_id: String,
     pub test_count: i32,
     pub correct: Option<bool>,
+    pub proof_file_path: Option<String>,
     pub sample_index: Option<i32>,
     pub started_at: i64,
     pub finished_at: Option<i64>,

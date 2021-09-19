@@ -53,7 +53,8 @@
 		"schema:fetch": "node ./tools/fetch-schema.js",
 		"schema:generate": "node ./tools/schema-codegen.js --srcPath ./src/typings/ --destPath ./src/typings/api --separatedFiles true",
 		"schema:codegen": "yarn schema:fetch && yarn schema:generate",
-		"predeploy": "npm run build",
+		"copy-cname": "cp ./CNAME ./build/CNAME",
+		"predeploy": "yarn build && yarn copy-cname",
 		"deploy": "gh-pages -d build"
 	},
 	"eslintConfig": {
