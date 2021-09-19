@@ -45,6 +45,7 @@ google-jwt-verify = { path = "../google-jwt-verify" }
 
 lazy_static = "1.4.0"
 rust-s3 = "0.26.4"
+infer = "0.3"
 
 [dependencies.rocket_contrib]
 version = "*"

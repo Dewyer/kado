@@ -31,13 +31,21 @@ fn process_entries(entries: Entries) -> anyhow::Result<UploadedFile> {
     let file = files.into_iter().next().ok_or_else(|| anyhow::Error::msg("no file field!"))?;
 
     if let SavedData::File(file_data, _) = file.data {
+        let kind = infer::get_from_path(file_data.clone())
+            .map_err(|_| anyhow::Error::msg("File type couldn't be identified."))?
+            .ok_or_else(|| anyhow::Error::msg("File type unknown"))?;
+
+        if kind.mime_type() != "application/zip" {
+            return Err(anyhow::Error::msg("File type not zip"));
+        }
+
         if std::fs::metadata("./temp").is_err() {
             std::fs::create_dir("./temp");
         }
 
         let temp_f = format!("./temp/{}.zip", CryptoService::get_random_string(8));
         std::fs::copy(file_data.clone(), Path::new(&temp_f));
-        
+
         Ok(UploadedFile::new(temp_f))
     } else {
         Err(anyhow::Error::msg("Not a file or a zip or good, actually you are just bad!"))
