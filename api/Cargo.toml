@@ -43,6 +43,7 @@ hmac = "0.10"
 google-jwt-verify = { path = "../google-jwt-verify" }
 
 lazy_static = "1.4.0"
+rust-s3 = "0.26.4"
 
 [dependencies.rocket_contrib]
 version = "*"
