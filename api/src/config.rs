@@ -17,6 +17,8 @@ pub struct AppConfig {
     pub secret: Vec<u8>,
     pub admin_key: String,
     pub google_client_id: String,
+    pub aws_access_key: String,
+    pub secret_key: String,
 }
 
 impl AppConfig {
@@ -35,6 +37,8 @@ impl AppConfig {
                 google_client_id: env::var("GOOGLE_CLIENT_ID").expect("No google client id in environment!"),
                 secret: secret.into_bytes(),
                 admin_key: env::var("ADMIN_KEY").expect("No admin key in environment!"),
+                aws_access_key: env::var("A_AWS_ACCESS_KEY").expect("No aws key in environment!"),
+                secret_key: env::var("A_SECRET_KEY").expect("No aws secret key in environment!"),
             }))
         })
     }

@@ -2,7 +2,7 @@
 	"name": "voiting-fe",
 	"version": "0.1.0",
 	"private": true,
-	"homepage": "http://dewyer.github.io/kado",
+	"homepage": "http://snapchallange.ratki.me",
 	"dependencies": {
 		"@codegena/oapi3ts-cli": "^2.1.10-alpha.8",
 		"@testing-library/jest-dom": "^5.14.1",
