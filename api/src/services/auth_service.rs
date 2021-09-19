@@ -18,6 +18,7 @@ use crate::models::http::access_claim::AccessClaim;
 use crate::models::http::requests::{CheckUserRequest, RegisterRequest, LoginRequest};
 use crate::services::authenticators::ExternalAuthenticatorService;
 use crate::services::authenticators::models::{AuthenticationPayload, Authorizer};
+use crate::blocklists::{BLOCK_LIST};
 
 pub const REFRESH_TOKEN_EXPIRATION_SECONDS: u64 = 3 * 24 * 60 * 60;
 // 3 days
@@ -152,6 +153,20 @@ impl AuthService {
         self.authorize_user(&created_user)
     }
 
+    fn assert_username_not_blocked(&self, username: &str) -> anyhow::Result<()> {
+        if username == "anonymous" {
+            bail!("Your name can't be anonymous.");
+        }
+
+        for bl in BLOCK_LIST.iter() {
+            if username.contains(bl) {
+                return Err(anyhow::Error::msg(format!("Blocked, username contains: {}", bl)));
+            }
+        }
+
+        Ok(())
+    }
+
     pub fn register_user(&self, payload: RegisterRequest) -> anyhow::Result<AuthorizingResponse> {
         self.tm.transaction(|tr| {
             let authorizer = Authorizer::from_string(payload.authorizer.clone())?;
@@ -159,6 +174,8 @@ impl AuthService {
                 authorizer,
                 token: payload.token.clone(),
             })?;
+
+            self.assert_username_not_blocked(&payload.username)?;
 
             let existing_user =
                 self.user_repo

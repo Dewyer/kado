@@ -33,11 +33,11 @@ pub struct NewTeam<'a> {
 }
 
 impl Team {
-    pub fn to_leaderboard_dto(&self, rank: usize) -> TeamLeaderboardEntryDto {
+    pub fn to_leaderboard_dto(&self, rank: usize, anonymous: bool) -> TeamLeaderboardEntryDto {
         TeamLeaderboardEntryDto {
             id: self.id.to_string(),
             rank,
-            name: self.name.clone(),
+            name: if anonymous { "anonymous".to_string() } else { self.name.clone() },
             points: self.points,
         }
     }

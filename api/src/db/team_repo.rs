@@ -97,8 +97,8 @@ impl TeamRepo for DbTeamRepo {
 
     fn list_leaderboard_participating_paginated(&self, pagination: &PaginationOptions, td: &ITransaction) -> anyhow::Result<(Vec<Team>, usize)> {
         teams::table
-            .order((teams::points.desc(), teams::last_gained_points_at.desc().nulls_last(), teams::created_at.desc()))
-            .filter(teams::participate_in_leaderboards.eq(true).and(teams::is_deleted.eq(false)))
+            .order((teams::points.desc(), teams::last_gained_points_at.asc().nulls_last(), teams::created_at.asc()))
+            .filter(teams::is_deleted.eq(false))
             .paginate((pagination.page + 1) as i64)
             .per_page(std::cmp::min(pagination.per_page.unwrap_or(DEFAULT_USER_PAGE_SIZE), DEFAULT_USER_PAGE_SIZE) as i64)
             .load_and_count_pages::<Team>(td.get_db_connection())
@@ -110,12 +110,10 @@ impl TeamRepo for DbTeamRepo {
 
     fn find_leaderboard_rank_of_team(&self, team: &Team, td: &ITransaction) -> anyhow::Result<usize> {
         teams::table
-            .filter(teams::participate_in_leaderboards
-                .eq(true)
-                .and(teams::is_deleted.eq(false))
+            .filter(teams::is_deleted.eq(false)
                 .and(teams::points.ge(team.points).or(
-                    teams::points.eq(&team.points).and(teams::last_gained_points_at.ge(&team.last_gained_points_at))
-                        .or(teams::last_gained_points_at.eq(&team.last_gained_points_at).and(teams::created_at.ge(&team.created_at)))
+                    teams::points.eq(&team.points).and(teams::last_gained_points_at.le(&team.last_gained_points_at))
+                        .or(teams::last_gained_points_at.eq(&team.last_gained_points_at).and(teams::created_at.le(&team.created_at)))
                 ))
             )
             .select(count_star())

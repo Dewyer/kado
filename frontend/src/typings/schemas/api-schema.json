@@ -10,6 +10,41 @@
     }
   ],
   "paths": {
+    "/admin/update-problem-statement": {
+      "post": {
+        "description": "Update problem statement",
+        "operationId": "adminupdate-problem-statement",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProblemStatementRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api-token": {
       "get": {
         "description": "Get active token for logged in user",
@@ -690,7 +725,8 @@
         "type": "object",
         "required": [
           "leaderboard",
-          "page_count"
+          "page_count",
+          "user_ranking"
         ],
         "properties": {
           "leaderboard": {
@@ -705,12 +741,7 @@
             "minimum": 0
           },
           "user_ranking": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/UserLeaderboardEntryDto"
-              }
-            ],
-            "nullable": true
+            "$ref": "#/components/schemas/UserLeaderboardEntryDto"
           }
         }
       },
@@ -781,10 +812,10 @@
       "GetTestInputRequest": {
         "type": "object",
         "required": [
-          "problem"
+          "submission"
         ],
         "properties": {
-          "problem": {
+          "submission": {
             "type": "string"
           }
         }
@@ -1050,7 +1081,7 @@
         ],
         "properties": {
           "submission": {
-            "$ref": "#/components/schemas/SubmissionDto"
+            "$ref": "#/components/schemas/SubmissionMinimalDto"
           }
         }
       },
@@ -1080,6 +1111,32 @@
             "type": "string"
           },
           "problem_id": {
+            "type": "string"
+          },
+          "sample_index": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "started_at": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "test_count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SubmissionMinimalDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "started_at",
+          "test_count"
+        ],
+        "properties": {
+          "id": {
             "type": "string"
           },
           "sample_index": {
@@ -1163,6 +1220,25 @@
             "type": "integer",
             "format": "uint",
             "minimum": 0
+          }
+        }
+      },
+      "UpdateProblemStatementRequest": {
+        "type": "object",
+        "required": [
+          "problem",
+          "statement",
+          "version"
+        ],
+        "properties": {
+          "problem": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
           }
         }
       },

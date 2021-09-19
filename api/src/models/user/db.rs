@@ -51,13 +51,13 @@ impl User {
         }
     }
 
-    pub fn to_leaderboard_dto(&self, rank: usize, team: Option<Team>) -> UserLeaderboardEntryDto {
+    pub fn to_leaderboard_dto(&self, rank: usize, team: Option<Team>, anonymous: bool) -> UserLeaderboardEntryDto {
         UserLeaderboardEntryDto {
             id: self.id.to_string(),
             rank,
-            username: self.username.clone(),
+            username: if anonymous { "anonymous".to_string() } else { self.username.clone() },
             individual_points: self.individual_points,
-            team_name: team.map(|tt| tt.name.clone()),
+            team_name: if anonymous { None } else { team.map(|tt| tt.name.clone()) } ,
         }
     }
 }

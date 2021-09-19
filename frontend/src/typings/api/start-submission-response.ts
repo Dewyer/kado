@@ -1,6 +1,6 @@
 /* tslint:disable */
-import { SubmissionDto } from './submission-dto';
+import { SubmissionMinimalDto } from './submission-minimal-dto';
 
 export interface StartSubmissionResponse {
-  submission: SubmissionDto;
+  submission: SubmissionMinimalDto;
 }

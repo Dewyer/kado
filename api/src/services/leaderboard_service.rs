@@ -38,27 +38,19 @@ impl LeaderboardService {
         }
     }
 
-    fn get_current_user_leaderboard_entry(&self, user: &User, td: &ITransaction) -> anyhow::Result<Option<UserLeaderboardEntryDto>> {
-        if !user.participate_in_leaderboards {
-            return Ok(None);
-        }
-
+    fn get_current_user_leaderboard_entry(&self, user: &User, td: &ITransaction) -> anyhow::Result<UserLeaderboardEntryDto> {
         let user_team = self.get_team_for_user(&user, td)?;
         let user_rank = self.user_repo.find_leaderboard_rank_of_user(&user, &td)?;
 
-        Ok(Some(user.to_leaderboard_dto(user_rank, user_team)))
+        Ok(user.to_leaderboard_dto(user_rank, user_team, false))
     }
 
     fn get_current_user_team_leaderboard_entry(&self, user: &User, td: &ITransaction) -> anyhow::Result<Option<TeamLeaderboardEntryDto>> {
         if let Some(team_id) = user.team_id {
             let team = self.team_repo.crud().find_by_id(team_id, td)?;
-            if !team.participate_in_leaderboards {
-                return Ok(None);
-            }
-
             let team_rank = self.team_repo.find_leaderboard_rank_of_team(&team, td)?;
 
-            Ok(Some(team.to_leaderboard_dto(team_rank)))
+            Ok(Some(team.to_leaderboard_dto(team_rank, false)))
         } else {
             Ok(None)
         }
@@ -71,7 +63,7 @@ impl LeaderboardService {
             .into_iter()
             .enumerate()
             .map(|(ii, user_with_team)| {
-                user_with_team.0.to_leaderboard_dto(ii+first_user_rank, user_with_team.1)
+                user_with_team.0.to_leaderboard_dto(ii+first_user_rank, user_with_team.1, !user_with_team.0.participate_in_leaderboards)
             })
             .collect::<Vec<UserLeaderboardEntryDto>>();
 
@@ -85,7 +77,7 @@ impl LeaderboardService {
             .into_iter()
             .enumerate()
             .map(|(ii, team)| {
-                team.to_leaderboard_dto(ii+first_team_rank)
+                team.to_leaderboard_dto(ii+first_team_rank, !team.participate_in_leaderboards)
             })
             .collect::<Vec<TeamLeaderboardEntryDto>>();
 

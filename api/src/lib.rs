@@ -1,6 +1,7 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 #![feature(option_result_contains)]
 #![recursion_limit = "256"]
+#![feature(const_for)]
 
 #[macro_use]
 extern crate anyhow;
@@ -11,6 +12,8 @@ extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
 extern crate thiserror;
+#[macro_use]
+extern crate lazy_static;
 
 use dotenv::dotenv;
 use rocket_contrib::json::JsonValue;
@@ -21,6 +24,7 @@ use rocket_okapi::swagger_ui::make_swagger_ui;
 
 use crate::config::get_swagger_config;
 
+mod blocklists;
 mod guards;
 mod config;
 mod db;

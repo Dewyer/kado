@@ -4,5 +4,5 @@ use crate::models::user::UserLeaderboardEntryDto;
 pub struct GetIndividualLeaderboardResponse {
     pub leaderboard: Vec<UserLeaderboardEntryDto>,
     pub page_count: usize,
-    pub user_ranking: Option<UserLeaderboardEntryDto>,
+    pub user_ranking: UserLeaderboardEntryDto,
 }

@@ -25,8 +25,8 @@ The individual (contributing to a team or not) with the highest rank at the end 
 	- Individuals are expected to register and then join a team (to earn QPA points)
 	- Each individual has their own points separate from the team's points they are in
 	- Points gained before joining a team will not count toward a team's overall points
-	- Teams can gain points for each individual's correct solutions to problems but the following additional rules apply:
-		- Subsequent solutions to the same problem give less and less points, so the amount gained for a new solution is calculated according to this formula: \`P * e^(-0.2 * (C+1))\` where P is the number of points assigned to the problem and C is how many correct previous solutions were submitted.
+	- Teams can gain points for each individual's correct solution to a problem but the following additional rules apply:
+		- Subsequent solutions to the same problem give less and less points, so the amount gained for a new solution is calculated according to the following formula: \`P * e^(-0.2 * (C+1))\` where P is the number of points assigned to the problem and C is how many correct previous solutions were submitted.
 		- Each individual in a team is expected to come up with a solution on it's own without any help from other teammates, submitting the same solution is considered to be plagiarism, we will be monitoring this very seriously
 	- Rankings for teams/individuals with the same amount of points are decided by looking at the time of the latest correct submission (earliest wins)
 
