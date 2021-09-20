@@ -10,6 +10,7 @@ import {useCheckUserMutation, useLoginUserMutation} from "../../../api/hooks/aut
 import {authorizedAction} from "../../../store/actions/global";
 import {AuthorizationResult} from "./LoginPage.types";
 import { GoogleLogin } from "src/components/templates/GoogleLogin/GoogleLogin";
+import {GithubLogin} from "../../templates/GithubLogin/GithubLogin";
 
 export const LoginPage: React.FC = () => {
     const history = useHistory();
@@ -45,11 +46,18 @@ export const LoginPage: React.FC = () => {
             {loggedIn && <span>You are already logged in, what do you want?</span>}
             {!loggedIn && <>
                 <span>To participate please log in with google:</span>
-                <GoogleLogin
-                    loading={loading}
-                    disabled={!!lastAuthResult}
-                    onAuthorization={onAuthorizationResult}
-                />
+                <div className={styles.LoginButtonsWrapper}>
+                    <GoogleLogin
+                        loading={loading}
+                        disabled={!!lastAuthResult}
+                        onAuthorization={onAuthorizationResult}
+                    />
+                    <GithubLogin
+                        loading={loading}
+                        disabled={!!lastAuthResult}
+                        onAuthorization={onAuthorizationResult}
+                    />
+                </div>
 
                 {lastAuthResult && <CompleteProfileForm
                     loginResponse={lastAuthResult}

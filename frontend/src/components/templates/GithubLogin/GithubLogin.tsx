@@ -1,7 +1,9 @@
 import React, {useCallback} from "react";
 import {toastPopper} from "../../../helpers/toastPopper";
 import {AuthorizationResult} from "../../pages/LoginPage/LoginPage.types";
-import OAuth2Login from 'react-simple-oauth2-login';
+import OAuth2Login from "react-simple-oauth2-login";
+import styles from "./GithubLogin.module.scss";
+import classNames from "classnames";
 
 export interface GithubLoginProps {
     loading?: boolean;
@@ -12,28 +14,36 @@ export interface GithubLoginProps {
 export const GithubLogin: React.FC<GithubLoginProps> = (props) => {
     const { loading, disabled, onAuthorization } = props;
 
-    const onGoogleLoginSuccessCallback = useCallback(async (response: GoogleLoginResponseFull) => {
-        if ('code' in response) {
-            toastPopper({ message:"You are offline and can't register!" });
+    const onSuccess = useCallback(async (response: { token?: string }) => {
+        if (disabled) {
+            return;
+        }
+
+        if (!response.token) {
+            toastPopper({ message:"We couldn't log you in with github!" });
             return;
         }
 
         onAuthorization({
-            authorizer: 'google',
-            token: response.tokenId,
+            authorizer: 'github',
+            token: response.token,
         });
 
-    }, [onAuthorization]);
+    }, [onAuthorization, disabled]);
 
     return (
-        <>
+        <div className={styles.GithubButtonWrapper}>
             <OAuth2Login
-                authorizationUrl="https://accounts.spotify.com/authorize"
+                buttonText={"Login with github"}
+                className={classNames("ui secondary button", { loading, disabled })}
+                authorizationUrl="https://github.com/login/oauth/authorize"
                 responseType="token"
-                clientId="9822046hvr4lnhi7g07grihpefahy5jb"
-                redirectUri="http://localhost:3000/oauth-callback"
+                clientId={process.env.REACT_APP_GITHUB_CLIENT_ID}
+                redirectUri={process.env.REACT_APP_GITHUB_REDIRECT}
                 onSuccess={onSuccess}
-                onFailure={onFailure}/>
-        </>
+                onFailure={onSuccess}
+                isCrossOrigin={true}
+            />
+        </div>
     );
 };

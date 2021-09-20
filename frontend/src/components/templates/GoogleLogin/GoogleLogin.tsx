@@ -26,12 +26,12 @@ export const GoogleLogin: React.FC<GoogleLoginProps> = (props) => {
     }, [onAuthorization]);
 
     return (
-        <>
+        <div>
             <GoogleLoginButton
                 onSuccess={onGoogleLoginSuccessCallback}
                 disabled={loading || !!disabled}
                 loading={loading}
             />
-        </>
+        </div>
     );
 };

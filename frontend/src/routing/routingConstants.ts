@@ -8,4 +8,5 @@ export const GLOBAL_ROUTES = {
 	INDIVIDUAL_LEADERBOARD: "/individual-leaderboard",
 	TEAM_LEADERBOARD: "/team-leaderboard",
 	TERMS_OF_USE_AND_PRIVACY_POLICY: "/tos-privacy",
+	OAUTH_CALLBACK: "/oauth-callback",
 };
