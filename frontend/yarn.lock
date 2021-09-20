@@ -10516,6 +10516,11 @@ react-side-effect@^2.1.0:
   resolved "https://registry.yarnpkg.com/react-side-effect/-/react-side-effect-2.1.1.tgz#66c5701c3e7560ab4822a4ee2742dee215d72eb3"
   integrity sha512-2FoTQzRNTncBVtnzxFOk2mCpcfxQpenBMbk5kSVBg5UcPqV9fRbgY2zhb7GTWWOlpFmAxhClBDlIq8Rsubz1yQ==
 
+react-simple-oauth2-login@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/react-simple-oauth2-login/-/react-simple-oauth2-login-0.5.1.tgz#e2ee3c54f5cd8c746ba3c049d110c741e5498c0a"
+  integrity sha512-wvYYQ5FslVAILGEqKL2lorc2XcTKvN7HKTf3oqPNgkUNfRBe2b0SZJxkUKclgbH6Y65dOaVbRs/JuSQr8J47MQ==
+
 react-sortablejs@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/react-sortablejs/-/react-sortablejs-6.0.0.tgz#ba75ded6dce3fa1b5b3b52c70d1928fcdee2003d"
