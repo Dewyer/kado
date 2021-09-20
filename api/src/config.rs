@@ -20,6 +20,11 @@ pub struct AppConfig {
     pub aws_access_key: String,
     pub aws_secret_key: String,
     pub aws_bucket: String,
+
+    pub github_client_id: String,
+    pub github_secret: String,
+    pub github_redirect_url: String,
+
 }
 
 impl AppConfig {
@@ -40,7 +45,10 @@ impl AppConfig {
                 admin_key: env::var("ADMIN_KEY").expect("No admin key in environment!"),
                 aws_access_key: env::var("A_AWS_ACCESS_KEY").expect("No aws key in environment!"),
                 aws_secret_key: env::var("A_SECRET_KEY").expect("No aws secret key in environment!"),
-                aws_bucket: env::var("A_AWS_BUCKET").expect("No aws bucket in environment!")
+                aws_bucket: env::var("A_AWS_BUCKET").expect("No aws bucket in environment!"),
+                github_client_id: env::var("GITHUB_CLIENT_ID").expect("No github client id in environment!"),
+                github_secret: env::var("GITHUB_SECRET").expect("No github client secret in environment!"),
+                github_redirect_url: env::var("GITHUB_REDIRECT_URL").expect("No github redirect utl in environment!"),
             }))
         })
     }

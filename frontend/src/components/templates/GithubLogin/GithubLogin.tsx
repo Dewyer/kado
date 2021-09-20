@@ -42,6 +42,7 @@ export const GithubLogin: React.FC<GithubLoginProps> = (props) => {
                 redirectUri={process.env.REACT_APP_GITHUB_REDIRECT}
                 onSuccess={onSuccess}
                 onFailure={onSuccess}
+                scope={"user:email"}
                 isCrossOrigin={true}
             />
         </div>
