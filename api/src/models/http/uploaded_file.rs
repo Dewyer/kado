@@ -73,7 +73,7 @@ impl FromDataSimple for UploadedFile {
                 return match process_upload(boundary, data) {
                     Ok(resp) => data::Outcome::Success(resp),
                     Err(_) => data::Outcome::Failure((
-                        Status::InternalServerError,
+                        Status::BadRequest,
                         ServiceError::ServiceGuardFailed,
                     ))
                 };
@@ -81,7 +81,7 @@ impl FromDataSimple for UploadedFile {
         }
 
         data::Outcome::Failure((
-            Status::InternalServerError,
+            Status::BadRequest,
             ServiceError::ServiceGuardFailed,
         ))
     }

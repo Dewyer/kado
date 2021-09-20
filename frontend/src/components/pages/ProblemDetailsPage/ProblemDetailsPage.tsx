@@ -7,6 +7,7 @@ import {PageLoader} from "../../templates/PageLoader/PageLoader";
 import {GLOBAL_ROUTES} from "src/routing/routingConstants";
 import {Markdown} from "src/components/templates/Markdown/Markdown";
 import {SubmissionsList} from "../../templates/SubmissionsList/SubmissionsList";
+import {CodeUpload} from "src/components/molecules/CodeUpload/CodeUpload";
 
 export const ProblemDetailsPage: React.FC = () => {
     const { codeName } = useParams<{ codeName: string }>();
@@ -25,6 +26,7 @@ export const ProblemDetailsPage: React.FC = () => {
     }
     const problem = problemQuery.data.problem;
     const submissions = problemQuery.data.submissions;
+    const hasCorrect = submissions.some((sub) => !!sub.correct);
 
     return (
         <PageLayout contentClassName={styles.ProblemDetailsPage}>
@@ -45,6 +47,8 @@ export const ProblemDetailsPage: React.FC = () => {
             <SubmissionsList
                 submissions={submissions}
             />
+
+            {hasCorrect && <CodeUpload />}
         </PageLayout>
     );
 };

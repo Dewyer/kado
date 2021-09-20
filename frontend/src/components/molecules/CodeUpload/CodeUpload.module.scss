@@ -1,0 +1,10 @@
+
+.CodeUpload {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+
+  & > button {
+    max-width: 15rem !important;
+  }
+}

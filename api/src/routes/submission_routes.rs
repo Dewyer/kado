@@ -49,29 +49,29 @@ pub fn send_test_output(
         .into()
 }
 
-#[post("/submissions/upload-proof/<problem_code>", data="<file>")]
+#[post("/submissions/code-upload/<problem_code>", data="<file>")]
 pub fn upload_proof_api(
     problem_code: String,
     file: UploadedFile,
     user_guard: AuthTokenGuard<ApiToken>,
     submission_service: SubmissionService,
 ) -> Json<OkErrorResponse> {
-
     let res = submission_service.upload_proof(&mut user_guard.user.clone(), file, problem_code);
-    println!("{:?}", res);
-
     Json(OkErrorResponse {
         error: if let Err(err) = res { format!("{}", err) } else { "".to_string() },
     })
 }
 
-/*
-#[post("/submissions/upload-proof-with-token/<problem_code>", data = "<file_data>")]
+
+#[post("/submissions/code-upload-with-token/<problem_code>", data = "<file>")]
 pub fn upload_proof_frontend(
     problem_code: String,
-    file_data: Data,
+    file: UploadedFile,
     user_guard: AuthTokenGuard<AccessToken>,
     submission_service: SubmissionService,
-) -> AnyApiResult<()> {
-    submission_service.upload_proof(&mut user_guard.user.clone(), file_data, problem_code).into()
-}*/
+) -> Json<OkErrorResponse> {
+    let res = submission_service.upload_proof(&mut user_guard.user.clone(), file, problem_code);
+    Json(OkErrorResponse {
+        error: if let Err(err) = res { format!("{}", err) } else { "".to_string() },
+    })
+}

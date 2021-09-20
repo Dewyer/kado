@@ -13,4 +13,5 @@ export const Endpoints = {
     REFRESH_API_TOKEN: "/api/refresh-api-token",
     INDIVIDUAL_LEADERBOARD: "/api/leaderboard/individual",
     TEAM_LEADERBOARD: "/api/leaderboard/team",
+    UPLOAD_CODE: "/files/api/submissions/code-upload-with-token"
 }
