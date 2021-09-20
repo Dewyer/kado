@@ -6,7 +6,7 @@ import {FieldError} from "../FieldError/FieldError";
 export type FieldCheckboxProps = {
     containerClassName?: string;
     input: FieldInputProps<boolean, HTMLElement>,
-    label?: string;
+    label?: React.ReactNode;
     meta: FieldMetaState<boolean>;
 };
 

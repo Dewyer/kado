@@ -1,5 +1,4 @@
 import React from "react";
-import {GoogleLoginResponseFull} from "src/components/molecules/GoogleLoginButton/GoogleLoginButton";
 import styles from "./CompleteProfileForm.module.scss";
 import { Form, Field } from 'react-final-form'
 import {CompleteProfileFormData} from "./CompleteProfileForm.types";
@@ -12,10 +11,13 @@ import {useDispatch} from "react-redux";
 import {authorizedAction} from "src/store/actions/global";
 import {history} from "src/helpers/history";
 import {GLOBAL_ROUTES} from "src/routing/routingConstants";
+import {AuthorizationResult} from "src/components/pages/LoginPage/LoginPage.types";
+import { Link } from "react-router-dom";
+import {toastPopper} from "../../../helpers/toastPopper";
 
 export interface CompleteProfileFormProps {
     containerClassName?: string;
-    loginResponse: GoogleLoginResponseFull,
+    loginResponse: AuthorizationResult,
 }
 
 export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = (props) => {
@@ -24,13 +26,13 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = (props) =
     const registerUserMutation = useRegisterUserMutation();
 
     const onSubmit = async (values: CompleteProfileFormData) => {
-        if ('code' in loginResponse) {
+        if (values.username === "69420") {
+            toastPopper({ message: "Nice" });
             return;
         }
 
         const authorizingResponse = await registerUserMutation.mutateAsync({
-            authorizer: "google",
-            token: loginResponse.tokenId,
+            ...loginResponse,
             username: values.username,
             participate_in_leaderboards: values.participateInLeaderBoard,
         });
@@ -52,6 +54,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = (props) =
                 initialValues={{
                     username: "",
                     participateInLeaderBoard: true,
+                    acceptTos: false,
                 }}
                 onSubmit={onSubmit}
                 validate={completeProfileFormValidation}
@@ -67,6 +70,12 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = (props) =
                             name="participateInLeaderBoard"
                             component={FieldCheckbox}
                             label={"Show me on leaderboards"}
+                            type="checkbox"
+                        />
+                        <Field<boolean>
+                            name="acceptTos"
+                            component={FieldCheckbox}
+                            label={<>I accept the <Link target={"_blank"} to={GLOBAL_ROUTES.TERMS_OF_USE_AND_PRIVACY_POLICY}>terms of use, privacy policy</Link> and the <Link target={"_blank"} to={GLOBAL_ROUTES.HOME}>rules</Link> </>}
                             type="checkbox"
                         />
 

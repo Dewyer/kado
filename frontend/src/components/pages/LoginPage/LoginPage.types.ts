@@ -1,0 +1,1 @@
+export interface AuthorizationResult { token: string, authorizer: string }

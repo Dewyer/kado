@@ -1,70 +1,58 @@
 import React, {useCallback, useState} from "react";
 import styles from "./LoginPage.module.scss";
 import { PageLayout } from "src/components/templates/PageLayout/PageLayout";
-import {GoogleLoginButton, GoogleLoginResponseFull} from "../../molecules/GoogleLoginButton/GoogleLoginButton";
 import {CompleteProfileForm} from "../../templates/CompleteProfileForm/CompleteProfileForm";
 import { useHistory } from "react-router-dom";
 import {GLOBAL_ROUTES} from "../../../routing/routingConstants";
-import {toastPopper} from "../../../helpers/toastPopper";
 import {useDispatch, useSelector} from "react-redux";
 import {makeSelectUser} from "../../../store/selectors/global.selectors";
 import {useCheckUserMutation, useLoginUserMutation} from "../../../api/hooks/authApiHooks";
-import {GoogleLoginResponse} from "react-google-login";
 import {authorizedAction} from "../../../store/actions/global";
+import {AuthorizationResult} from "./LoginPage.types";
+import { GoogleLogin } from "src/components/templates/GoogleLogin/GoogleLogin";
 
 export const LoginPage: React.FC = () => {
     const history = useHistory();
     const dispatch = useDispatch();
     const loggedIn = !!useSelector(makeSelectUser());
-    const [lastGoogleLoginResult, setLastGoogleLoginResult] = useState<GoogleLoginResponseFull>();
+    const [lastAuthResult, setLastAuthResult] = useState<AuthorizationResult>();
 
     const checkUserMutation = useCheckUserMutation();
     const loginUserMutation = useLoginUserMutation();
 
-    const handleExistingUser = useCallback(async (response: GoogleLoginResponse) => {
-        const authorizingResponse = await loginUserMutation.mutateAsync({
-            authorizer: 'google',
-            token: response.tokenId,
-        });
+    const handleExistingUser = useCallback(async (result: AuthorizationResult) => {
+        const authorizingResponse = await loginUserMutation.mutateAsync(result);
 
         dispatch(authorizedAction(authorizingResponse));
         history.push(GLOBAL_ROUTES.HOME);
     }, [history, dispatch, loginUserMutation]);
 
-    const onGoogleLoginSuccessCallback = useCallback(async (response: GoogleLoginResponseFull) => {
-        if ('code' in response) {
-            toastPopper({ message:"You are offline and can't register!" });
-            history.push(GLOBAL_ROUTES.HOME);
-            return;
-        }
-
-        const userCheckResponse = await checkUserMutation.mutateAsync({
-            authorizer: 'google',
-            token: response.tokenId,
-        });
+    const onAuthorizationResult = useCallback(async (result: AuthorizationResult) => {
+        const userCheckResponse = await checkUserMutation.mutateAsync(result);
 
         if (userCheckResponse.user_exists) {
-            await handleExistingUser(response);
+            await handleExistingUser(result);
             return;
         }
 
-        setLastGoogleLoginResult(response);
-    }, [setLastGoogleLoginResult, checkUserMutation, history, handleExistingUser]);
-    const googleLoginLoading = checkUserMutation.isLoading || loginUserMutation.isLoading;
+        setLastAuthResult(result);
+    }, [setLastAuthResult, checkUserMutation, history, handleExistingUser]);
+
+    const loading = checkUserMutation.isLoading || loginUserMutation.isLoading;
 
     return (
         <PageLayout contentClassName={styles.LoginPage}>
             {loggedIn && <span>You are already logged in, what do you want?</span>}
             {!loggedIn && <>
                 <span>To participate please log in with google:</span>
-                <GoogleLoginButton
-                    onSuccess={onGoogleLoginSuccessCallback}
-                    disabled={googleLoginLoading || !!lastGoogleLoginResult}
-                    loading={googleLoginLoading}
+                <GoogleLogin
+                    loading={loading}
+                    disabled={!!lastAuthResult}
+                    onAuthorization={onAuthorizationResult}
                 />
 
-                {lastGoogleLoginResult && <CompleteProfileForm
-                    loginResponse={lastGoogleLoginResult}
+                {lastAuthResult && <CompleteProfileForm
+                    loginResponse={lastAuthResult}
                     containerClassName={styles.CompleteProfileForm}
                 />}
             </>}

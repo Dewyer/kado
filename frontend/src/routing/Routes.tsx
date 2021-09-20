@@ -11,6 +11,7 @@ import {ProblemsPage} from "src/components/pages/ProblemsPage/ProblemsPage";
 import {ProblemDetailsPage} from "src/components/pages/ProblemDetailsPage/ProblemDetailsPage";
 import {IndividualLeaderboardPage} from "src/components/pages/IndividualLeaderboardPage/IndividualLeaderboardPage";
 import {TeamLeaderboardPage} from "src/components/pages/TeamLeaderboardPage/TeamLeaderboardPage";
+import {TermsOfUseAndPrivacyPolicy} from "src/components/pages/TermsOfUseAndPrivacyPolicy/TermsOfUseAndPrivacyPolicy";
 
 const Routes = () => {
 	const userLoaded = useSelector(makeSelectUserInitiallyLoaded());
@@ -19,6 +20,7 @@ const Routes = () => {
 		<Switch>
 			<Route exact path={GLOBAL_ROUTES.HOME} component={HomePage} />
 			<Route exact path={GLOBAL_ROUTES.LOGIN} component={LoginPage} />
+			<Route exact path={GLOBAL_ROUTES.TERMS_OF_USE_AND_PRIVACY_POLICY} component={TermsOfUseAndPrivacyPolicy} />
 			<ProtectedRoute exact path={GLOBAL_ROUTES.API_GUIDE} component={ApiGuidePage} />
 			<ProtectedRoute exact path={GLOBAL_ROUTES.PROBLEMS} component={ProblemsPage} />
 			<ProtectedRoute exact path={GLOBAL_ROUTES.TEAM} component={TeamPage} />
