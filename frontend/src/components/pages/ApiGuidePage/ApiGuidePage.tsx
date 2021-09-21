@@ -12,7 +12,7 @@ You might be wondering how you can submit a solution to earn points, this is the
 In this competition one of our goals was to let you use your favourite language, framework, library, environment etc...
 and also to grade solutions on **correctness** and not execution time or memory usage.
 
-With these constraints in mind we decided not to run your programs in a sandbox environment but to let you run it for us, we are just interested in seeing it give the correct answers.
+With these constraints in mind we decided not to run your programs in a sandbox environment but to let you run it for us, we are just interested in seeing your programs give the correct answers.
 
 The communication between your program and our verification programs is done through an **HTTP API** (more about them in general [here](https://searchapparchitecture.techtarget.com/definition/RESTful-API)).
 
@@ -21,7 +21,7 @@ The communication between your program and our verification programs is done thr
 - Integration - the part of your program that implements this communication interface with our servers
 - Problem - a problem to be solved (listed in the Problems page)
 - Submission - an attempt made to give a correct solution to a problem
-- Test - part of a solution, that includes us giving you an JSON input, and you giving us back a JSON output. Each submission can contain multiple tests.
+- Test - part of a solution, that includes us giving you a JSON input, and you giving us back a JSON output. Each submission can contain multiple tests. (Test inputs and correctness can be dependent on outputs given to previous tests too)
 
 #### Submission process
 - You write your program that contains both the integration and the solution part.
@@ -29,16 +29,20 @@ The communication between your program and our verification programs is done thr
 - Your program requests test inputs
 - Your program sends a request containing the desired output to the inputs gotten above
 - Repeat as many times as you are required to according to your submission
-- If give a valid output to all tests the submission is considered to be correct and you get the points for the problem
+- If give a valid output to all tests the submission is considered to be correct
+- After you have a correct solution you need to upload (for plagarism testing), this can either be done on the problem's details page, or through the API
 - You can attempt to create a solution as many times as the problem allows you to (dependant on difficulty)
 - If you want to test your integration or your solution (but don't feel confident enough to do it live) you can create a submission that isn't worth any points and doesn't reduce your remaining solution attempts and just contains sample data.
+- At the first incorrect test output your submission is closed
+- Submissions and tests can time out if you stop requesting/responding (timeout is ~10s per test but this is subject to change), a timed out test is considered to be incorrect
+- You can only have one "in-progress" submission at a time for reach problem
 
 #### Authentication to the API
-For us to know who is trying to create a submission we need you to include your secret **api token** (copiable on the top of the page) in every request you make.
+For us to know who is trying to create a submission we need you to include your secret **api token** (copiable on the top of the page) in every request you make
 
-In the *X-Api-Token* HTTP header (more about headers [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers)).
+in the *X-Api-Token* HTTP header (more about headers [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers)).
 
-If you think your api token was compromised (shared it with anyone or showed it to anyone) consider refreshing it and using the new token your older token will be invalidated.
+If you think your api token was compromised (shared it with anyone or showed it to anyone) consider refreshing it and using the new token, your older token will be invalidated.
 
 #### Submission API Specification
 The API is available at: *${process.env.REACT_APP_BASE_URL}*
@@ -67,7 +71,7 @@ Response body
 \`\`\`
 
 ##### Starting a test (getting the test input) - PUT - /api/submissions/test
-Used to create a get a new test for a submission, has to be called *test_count* times.
+Used to get a new test for a submission, has to be called *test_count* times.
 
 Request body (Content-Type header must be set to *application/json*):
 \`\`\`
@@ -85,7 +89,7 @@ Response body
 }
 \`\`\`
 
-##### Submit test results (sending test output) - POST - /api/submissions/test/<test_id>
+##### Submiting test results (sending test output) - POST - /api/submissions/test/<test_id>
 Used to submit test output for a previosly started test.
 
 Request body (Content-Type header must be set to *application/json*):
@@ -102,7 +106,26 @@ Response body
 }
 \`\`\`
 
-After you complete all tests for a given submission if you go to the problem's details page you should see your submission as correct and completed.
+After you complete all tests for a given submission if you go to the problem's details page you should see your submission as correct and you can upload your code.
+
+##### Uploading your code (fairness guarantee) - POST - /files/api/submissions/code-upload/<problem_id>/<original_name>
+Used to uplaod your solution code after a correct submission.
+- problem_id = the id of the problem you just solved
+- original_name = some name for the uploaded file (only you will be able to see this)
+
+Request body (Content-Type must be *multipart/form-data;*): more about this [here](https://programmer.help/blogs/how-does-http-file-upload-work.html)
+\`\`\`
+file: <your solution's source code in a .zip file>
+\`\`\`
+
+Response body (JSON)
+\`\`\`
+{
+    "error": <some error if the file upload failed, empty string otherwise>
+}
+\`\`\`
+
+After you uploaded your code the submission process is done and you should see your point total go up :D
 
 `;
 
