@@ -21,3 +21,11 @@
 		margin-right: 2rem;
 	}
 }
+
+.LoginButtonsWrapperSmall {
+	flex-direction: column;
+
+	& > * {
+		margin-bottom: 20px;
+	}
+}

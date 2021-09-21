@@ -33,13 +33,15 @@ const RightLoginMenu: React.FC<{
     onLogout: () => void,
 }> = (props) => {
     const history = useHistory();
+    const windowSize = useWindowSize();
+    const onSmallerScreen = windowSize.width && windowSize.width <= SMALLER_SIZE_BR;
 
     return (
         <div className="right menu">
             {props.children}
             {!!props.user ?
                 <>
-                    <span className="ui item">Logged in: {props.user?.username}</span>
+                    <span className={classNames("ui item", { [styles.SmallUsername]: onSmallerScreen })} >{onSmallerScreen ? "" : "Logged in:"} {props.user?.username}</span>
                     <a onClick={props.onLogout} className="ui item">
                         Logout
                     </a>
@@ -119,7 +121,7 @@ export const SmallScreenMenu: React.FC<NormalMenuProps> = (props) => {
 
     return (
         <>
-            <Logo className={"item"} />
+            <Logo className={"item"} small />
             <RightLoginMenu
                 user={user}
                 onLogout={onLogout}

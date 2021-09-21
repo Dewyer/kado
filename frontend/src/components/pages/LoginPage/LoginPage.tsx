@@ -10,13 +10,20 @@ import {useCheckUserMutation, useLoginUserMutation} from "../../../api/hooks/aut
 import {authorizedAction} from "../../../store/actions/global";
 import {AuthorizationResult} from "./LoginPage.types";
 import { GoogleLogin } from "src/components/templates/GoogleLogin/GoogleLogin";
-import {GithubLogin} from "../../templates/GithubLogin/GithubLogin";
+import {GithubLogin} from "src/components/templates/GithubLogin/GithubLogin";
 import {CheckUserResponse} from "../../../typings/api";
-import {toastPopper} from "../../../helpers/toastPopper";
+import {toastPopper} from "src/helpers/toastPopper";
+import {useWindowSize} from "src/hooks/useWindowSize";
+import classNames from "classnames";
+
+const SMALLER_SIZE_BR = 500;
 
 export const LoginPage: React.FC = () => {
     const history = useHistory();
     const dispatch = useDispatch();
+    const windowSize = useWindowSize();
+    const onSmallerScreen = windowSize.width && windowSize.width <= SMALLER_SIZE_BR;
+
     const loggedIn = !!useSelector(makeSelectUser());
     const [lastAuthResult, setLastAuthResult] = useState<AuthorizationResult>();
 
@@ -53,7 +60,7 @@ export const LoginPage: React.FC = () => {
             {loggedIn && <span>You are already logged in, what do you want?</span>}
             {!loggedIn && <>
                 <span>To participate please log in with google:</span>
-                <div className={styles.LoginButtonsWrapper}>
+                <div className={classNames(styles.LoginButtonsWrapper, { [styles.LoginButtonsWrapperSmall]: onSmallerScreen })}>
                     <GoogleLogin
                         loading={loading}
                         disabled={!!lastAuthResult}
