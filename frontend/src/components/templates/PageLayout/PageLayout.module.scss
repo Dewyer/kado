@@ -18,20 +18,30 @@
 .FooterLayout {
   grid-area: footer;
   margin-bottom: 1rem;
+}
 
-  & > span > a {
+.FooterLineContainer {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  padding-left: 1rem;
+  padding-bottom: 1rem;
+
+  & a {
     color: #4183C4 !important;
     text-decoration: underline;
   }
 
   & > span {
-    padding-left: 1rem;
-    padding-bottom: 1rem;
+    margin-right: 10px;
   }
 }
-
 
 .ContentLayout {
   padding: 1rem;
   grid-area: content;
+}
+
+.SmallerSizeFooter {
+  flex-direction: column;
 }
