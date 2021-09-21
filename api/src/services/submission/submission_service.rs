@@ -11,7 +11,7 @@ use crate::models::problem::Problem;
 use crate::models::user::User;
 use crate::models::submission::{Submission, NewSubmission};
 use crate::db::submission_repo::{ISubmissionRepo, DbSubmissionRepo};
-use crate::services::submission::support::{IProblemSupport, CamelCaseProblemSupport, SubmissionGenerationPayload, SubmissionTestGenerationPayload, SubmissionTestGenerationResult, VerificationPayload};
+use crate::services::submission::support::{IProblemSupport, SubmissionGenerationPayload, SubmissionTestGenerationPayload, SubmissionTestGenerationResult, VerificationPayload, SanityCheckProblemSupport};
 use rand::Rng;
 use crate::models::http::responses::{StartSubmissionResponse, GetTestInputResponse, SendTestOutputResponse};
 use crate::models::submission::submission_test::{SubmissionTest, NewSubmissionTest};
@@ -56,7 +56,7 @@ impl SubmissionService {
 
     fn get_problem_support(&self, code_name: CodeName) -> IProblemSupport {
         match code_name {
-            CodeName::CamelCase => Box::new(CamelCaseProblemSupport::new()),
+            CodeName::SanityCheck => Box::new(SanityCheckProblemSupport::new()),
         }
     }
 
@@ -64,7 +64,7 @@ impl SubmissionService {
         let now_naive = UtilsService::naive_now();
         let code_name = CodeName::from_string(&request.problem)?;
         let support = self.get_problem_support(code_name.clone());
-        let seed = rand::thread_rng().gen_range(0, 1000000);
+        let seed = rand::thread_rng().gen_range(i64::MIN..i64::MAX);
         let gen_payload = SubmissionGenerationPayload {
             seed,
             sample_index: request.sample_index.clone(),

@@ -11,7 +11,7 @@ pub struct Submission {
     pub id: Uuid,
     pub owner_id: Uuid,
     pub problem_id: Uuid,
-    pub seed: i32,
+    pub seed: i64,
     pub test_count: i32,
     pub correct: Option<bool>,
     pub proof_file_path: Option<String>,
@@ -26,7 +26,7 @@ pub struct Submission {
 pub struct NewSubmission {
     pub owner_id: Uuid,
     pub problem_id: Uuid,
-    pub seed: i32,
+    pub seed: i64,
     pub test_count: i32,
     pub correct: Option<bool>,
     pub proof_file_path: Option<String>,

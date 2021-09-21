@@ -32,7 +32,8 @@ thiserror = "1.0.25"
 anyhow = "1.0.40"
 
 # Rand
-rand = "0.7.3"
+rand = "0.8.4"
+rand_distr = "0.4.2"
 
 # Crypto
 sha2 = "0.9.5"

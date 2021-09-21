@@ -49,7 +49,7 @@ table! {
         id -> Uuid,
         owner_id -> Uuid,
         problem_id -> Uuid,
-        seed -> Int4,
+        seed -> Int8,
         test_count -> Int4,
         correct -> Nullable<Bool>,
         proof_file_path -> Nullable<Varchar>,

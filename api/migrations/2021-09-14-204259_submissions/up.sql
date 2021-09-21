@@ -3,7 +3,7 @@ CREATE TABLE submissions
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v1(),
     owner_id UUID NOT NULL,
     problem_id UUID NOT NULL,
-    seed INT NOT NULL,
+    seed bigint NOT NULL,
     test_count INT NOT NULL,
     correct BOOL NULL,
     proof_file_path VARCHAR NULL,

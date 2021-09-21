@@ -46,7 +46,7 @@ impl<Mime: FileMimeTrait> UploadedFile<Mime> {
     fn save_longer_temporarily(temp_temp_path: PathBuf) -> anyhow::Result<String> {
         if std::fs::metadata("./temp").is_err() {
             std::fs::create_dir("./temp")
-                .map_err(|_| anyhow::Error::msg("Temp directory can't be created"))?;;
+                .map_err(|_| anyhow::Error::msg("Temp directory can't be created"))?;
         }
 
         let temp_f = format!("./temp/{}.zip", CryptoService::get_random_string(8));
