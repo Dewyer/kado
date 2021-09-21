@@ -8,7 +8,9 @@ mod start_submission;
 mod send_test_output_request;
 mod get_test_input_request;
 mod update_problem_statement_request;
+mod exchange_github_code_request;
 
+pub use exchange_github_code_request::*;
 pub use update_problem_statement_request::*;
 pub use get_test_input_request::*;
 pub use send_test_output_request::*;

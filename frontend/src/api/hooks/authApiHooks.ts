@@ -1,5 +1,12 @@
 import {useMutation, UseMutationResult} from "react-query";
-import {AuthorizingResponse, CheckUserRequest, CheckUserResponse, LoginRequest, RegisterRequest} from "../../typings/api";
+import {
+    AuthorizingResponse,
+    CheckUserRequest,
+    CheckUserResponse, ExchangeGithubCodeRequest,
+    ExchangeGithubCodeResponse,
+    LoginRequest,
+    RegisterRequest
+} from "../../typings/api";
 import {toastPopper} from "../../helpers/toastPopper";
 import {AuthApiService} from "../apis/AuthApiService";
 
@@ -29,6 +36,16 @@ export const useCheckUserMutation = (): UseMutationResult<CheckUserResponse, unk
         async (request: CheckUserRequest) => AuthApiService.checkUser(request),
         {
             onError: () => { toastPopper({ message: "Logging in failed!" }) },
+        }
+    );
+};
+
+export const useExchangeGithubCodeMutation = (): UseMutationResult<ExchangeGithubCodeResponse, unknown, ExchangeGithubCodeRequest> => {
+    return useMutation(
+        ["ExchangeGithubCodeMutation"],
+        async (request: ExchangeGithubCodeRequest) => AuthApiService.exchangeGithubCode(request),
+        {
+            onError: () => { toastPopper({ message: "Github login failed!" }) },
         }
     );
 };

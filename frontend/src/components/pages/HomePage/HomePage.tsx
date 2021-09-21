@@ -31,7 +31,7 @@ The individual (contributing to a team or not) with the highest rank at the end 
 		- Each individual in a team is expected to come up with a solution on it's own, without any help from other teammates, submitting the same solution is considered to be plagiarism, we will be monitoring this very seriously.
 	- Rankings for teams/individuals with the same amount of points are decided by looking at the time of the latest correct submission (earliest wins)
 
-Have fun any happy problem solving, if encounter any problems please reach out to us at: *qpa@snapsoft.hu*.
+Have fun any happy problem solving, if encounter any problems please reach out to us at: *qpa-challenge@snapsoft.hu*.
 
 We also recommend using a desktop computer to use the site for the best experience.
 `;

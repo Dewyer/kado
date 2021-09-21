@@ -205,6 +205,10 @@ impl AuthService {
                 )
                 .map_err(|_| anyhow::Error::msg("Email address is not registered!"))?;
 
+            if existing_user.authenticator != payload.authorizer {
+                bail!("Uses different authenticator!");
+            }
+
             if !existing_user.is_active {
                 bail!("User is inactive!");
             }
@@ -215,7 +219,7 @@ impl AuthService {
 
     pub fn check_user(&self, payload: CheckUserRequest) -> anyhow::Result<CheckUserResponse> {
         self.tm.transaction(|tr| {
-            let authorizer = Authorizer::from_string(payload.authorizer)?;
+            let authorizer = Authorizer::from_string(payload.authorizer.clone())?;
             let external_auth_result = self.external_authenticator_service.authenticate(AuthenticationPayload {
                 authorizer,
                 token: payload.token,
@@ -232,6 +236,7 @@ impl AuthService {
 
             Ok(CheckUserResponse {
                 user_exists: existing_user.is_some(),
+                uses_different_authenticator: !existing_user.as_ref().map(|uu| uu.authenticator.clone()).contains(&payload.authorizer),
                 user_inactive: existing_user.map_or(false, |usr| usr.is_active),
             })
         })

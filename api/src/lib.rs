@@ -78,6 +78,7 @@ pub fn rocket() -> rocket::Rocket {
                 routes::leaderboard_routes::get_individual_leaderboard,
                 routes::leaderboard_routes::get_team_leaderboard,
                 routes::admin_routes::update_problem_statement,
+                routes::auth_routes::exchange_github_code,
             ],
         )
         .mount("/files/api", routes![

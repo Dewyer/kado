@@ -105,6 +105,41 @@
         }
       }
     },
+    "/auth/exchange-github-code": {
+      "post": {
+        "description": "Exchange github access code for token",
+        "operationId": "authexchange-github-code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeGithubCodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ExchangeGithubCodeResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/login": {
       "post": {
         "description": "Login an existing user",
@@ -662,13 +697,17 @@
         "type": "object",
         "required": [
           "user_exists",
-          "user_inactive"
+          "user_inactive",
+          "uses_different_authenticator"
         ],
         "properties": {
           "user_exists": {
             "type": "boolean"
           },
           "user_inactive": {
+            "type": "boolean"
+          },
+          "uses_different_authenticator": {
             "type": "boolean"
           }
         }
@@ -706,6 +745,28 @@
         ],
         "properties": {
           "error": {
+            "type": "string"
+          }
+        }
+      },
+      "ExchangeGithubCodeRequest": {
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "ExchangeGithubCodeResponse": {
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
             "type": "string"
           }
         }

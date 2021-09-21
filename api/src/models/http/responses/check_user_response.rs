@@ -2,4 +2,5 @@
 pub struct CheckUserResponse {
     pub user_inactive: bool,
     pub user_exists: bool,
+    pub uses_different_authenticator: bool,
 }

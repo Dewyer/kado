@@ -11,6 +11,8 @@ import {authorizedAction} from "../../../store/actions/global";
 import {AuthorizationResult} from "./LoginPage.types";
 import { GoogleLogin } from "src/components/templates/GoogleLogin/GoogleLogin";
 import {GithubLogin} from "../../templates/GithubLogin/GithubLogin";
+import {CheckUserResponse} from "../../../typings/api";
+import {toastPopper} from "../../../helpers/toastPopper";
 
 export const LoginPage: React.FC = () => {
     const history = useHistory();
@@ -21,7 +23,12 @@ export const LoginPage: React.FC = () => {
     const checkUserMutation = useCheckUserMutation();
     const loginUserMutation = useLoginUserMutation();
 
-    const handleExistingUser = useCallback(async (result: AuthorizationResult) => {
+    const handleExistingUser = useCallback(async (result: AuthorizationResult, userCheckResponse: CheckUserResponse) => {
+        if (userCheckResponse.uses_different_authenticator) {
+            toastPopper({ message: "There is an existing account with this e-mail address that uses a different login method." });
+            return;
+        }
+
         const authorizingResponse = await loginUserMutation.mutateAsync(result);
 
         dispatch(authorizedAction(authorizingResponse));
@@ -32,7 +39,7 @@ export const LoginPage: React.FC = () => {
         const userCheckResponse = await checkUserMutation.mutateAsync(result);
 
         if (userCheckResponse.user_exists) {
-            await handleExistingUser(result);
+            await handleExistingUser(result, userCheckResponse);
             return;
         }
 

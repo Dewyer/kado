@@ -9,4 +9,5 @@ export const GLOBAL_ROUTES = {
 	TEAM_LEADERBOARD: "/team-leaderboard",
 	TERMS_OF_USE_AND_PRIVACY_POLICY: "/privacy-policy",
 	OAUTH_CALLBACK: "/oauth-callback",
+	REPORT_PROBLEM: "/report-a-problem",
 };

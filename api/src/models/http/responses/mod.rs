@@ -10,7 +10,9 @@ mod get_test_input_response;
 mod send_test_output_response;
 mod get_individual_leaderboard_response;
 mod get_team_leaderboard_response;
+mod exchange_github_code_response;
 
+pub use exchange_github_code_response::*;
 pub use get_team_leaderboard_response::*;
 pub use get_individual_leaderboard_response::*;
 pub use send_test_output_response::*;

@@ -13,6 +13,7 @@ import {IndividualLeaderboardPage} from "src/components/pages/IndividualLeaderbo
 import {TeamLeaderboardPage} from "src/components/pages/TeamLeaderboardPage/TeamLeaderboardPage";
 import {TermsOfUseAndPrivacyPolicy} from "src/components/pages/TermsOfUseAndPrivacyPolicy/TermsOfUseAndPrivacyPolicy";
 import {OauthCallbackPage} from "src/components/pages/OauthCallbackPage/OauthCallbackPage";
+import {ReportProblem} from "src/components/pages/ReportProblem/ReportProblem";
 
 const Routes = () => {
 	const userLoaded = useSelector(makeSelectUserInitiallyLoaded());
@@ -22,6 +23,7 @@ const Routes = () => {
 			<Route exact path={GLOBAL_ROUTES.HOME} component={HomePage} />
 			<Route exact path={GLOBAL_ROUTES.LOGIN} component={LoginPage} />
 			<Route exact path={GLOBAL_ROUTES.OAUTH_CALLBACK} component={OauthCallbackPage} />
+			<Route exact path={GLOBAL_ROUTES.REPORT_PROBLEM} component={ReportProblem} />
 
 			<Route exact path={GLOBAL_ROUTES.TERMS_OF_USE_AND_PRIVACY_POLICY} component={TermsOfUseAndPrivacyPolicy} />
 			<ProtectedRoute exact path={GLOBAL_ROUTES.API_GUIDE} component={ApiGuidePage} />

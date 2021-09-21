@@ -3,8 +3,9 @@ use rocket_okapi::openapi;
 use crate::guards::{AuthTokenGuard, RefreshToken};
 use crate::models::http::api_result::{AnyApiResult};
 use crate::services::auth_service::AuthService;
-use crate::models::http::responses::{AuthorizingResponse, CheckUserResponse};
-use crate::models::http::requests::{CheckUserRequest, RegisterRequest, LoginRequest};
+use crate::models::http::responses::{AuthorizingResponse, CheckUserResponse, ExchangeGithubCodeResponse};
+use crate::models::http::requests::{CheckUserRequest, RegisterRequest, LoginRequest, ExchangeGithubCodeRequest};
+use crate::services::authenticators::github_authenticator_service::GithubAuthenticatorService;
 
 
 #[openapi]
@@ -53,5 +54,20 @@ pub fn refresh_token(
 ) -> AnyApiResult<AuthorizingResponse> {
     auth_service
         .authenticate_user_by_refresh_token(refresh_token_guard)
+        .into()
+}
+
+#[openapi]
+#[post("/auth/exchange-github-code", format = "json", data = "<request>")]
+/// Exchange github access code for token
+pub fn exchange_github_code(
+    request: Json<ExchangeGithubCodeRequest>,
+    github_auth_service: GithubAuthenticatorService,
+) -> AnyApiResult<ExchangeGithubCodeResponse> {
+    github_auth_service
+        .exchange_code_for_token(&request.0.code)
+        .map(|token| ExchangeGithubCodeResponse {
+            token,
+        })
         .into()
 }

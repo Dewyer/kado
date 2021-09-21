@@ -26,7 +26,7 @@ pub struct UserResponse {
 }
 
 impl GithubAuthenticatorService {
-    fn exchange_code_for_token(&self, code: &str) -> anyhow::Result<String> {
+    pub fn exchange_code_for_token(&self, code: &str) -> anyhow::Result<String> {
         let mut headers = header::HeaderMap::new();
         headers.insert("Accept", header::HeaderValue::from_static("application/json"));
 
@@ -47,8 +47,6 @@ impl GithubAuthenticatorService {
             .json::<HashMap<String, String>>()
             .map_err(|_| anyhow::Error::msg("Couldnt parse request from github!"))?;
 
-        println!("{:?} - kekw", resp);
-
         resp.get("access_token")
             .map(|v| v.to_string())
             .ok_or_else(|| anyhow::Error::msg("No access token in response!"))
@@ -68,8 +66,6 @@ impl GithubAuthenticatorService {
             .send()
             .map_err(|_| anyhow::Error::msg("Couldn make request to github!"))?;
 
-        println!("{} {}", resp_one.status(), token);
-
         let resp = resp_one
             .json::<UserResponse>()
             .map_err(|_| anyhow::Error::msg("Couldn parse request from github!"))?;
@@ -80,8 +76,7 @@ impl GithubAuthenticatorService {
 
 impl Authenticator for GithubAuthenticatorService {
     fn authenticate(&self, payload: AuthenticationPayload) -> anyhow::Result<AuthenticationResult> {
-        let token = self.exchange_code_for_token(&payload.token)?;
-        let email = self.get_user_email_from_token(&token)?;
+        let email = self.get_user_email_from_token(&payload.token)?;
 
         Ok(
             AuthenticationResult {
