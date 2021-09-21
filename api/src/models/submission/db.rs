@@ -4,7 +4,7 @@ use chrono::NaiveDateTime;
 use crate::schema::submissions;
 use crate::models::submission::{SubmissionDto, SubmissionMinimalDto};
 
-#[derive(Queryable, Serialize, AsChangeset)]
+#[derive(Queryable, Serialize, AsChangeset, Clone)]
 #[table_name = "submissions"]
 #[changeset_options(treat_none_as_null = "true")]
 pub struct Submission {
@@ -15,6 +15,7 @@ pub struct Submission {
     pub test_count: i32,
     pub correct: Option<bool>,
     pub proof_file_path: Option<String>,
+    pub proof_file_original_name: Option<String>,
     pub sample_index: Option<i32>,
     pub started_at: NaiveDateTime,
     pub finished_at: Option<NaiveDateTime>,
@@ -29,6 +30,7 @@ pub struct NewSubmission {
     pub test_count: i32,
     pub correct: Option<bool>,
     pub proof_file_path: Option<String>,
+    pub proof_file_original_name: Option<String>,
     pub sample_index: Option<i32>,
     pub started_at: NaiveDateTime,
     pub finished_at: Option<NaiveDateTime>,
@@ -43,6 +45,7 @@ impl Submission {
             test_count: self.test_count,
             correct: self.correct,
             proof_file_path: self.proof_file_path.clone(),
+            proof_file_original_name: self.proof_file_original_name.clone(),
             sample_index: self.sample_index.clone(),
             started_at: self.started_at.timestamp(),
             finished_at: self.finished_at.map(|td| td.timestamp()),

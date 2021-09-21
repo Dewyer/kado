@@ -53,6 +53,7 @@ table! {
         test_count -> Int4,
         correct -> Nullable<Bool>,
         proof_file_path -> Nullable<Varchar>,
+        proof_file_original_name -> Nullable<Varchar>,
         sample_index -> Nullable<Int4>,
         started_at -> Timestamp,
         finished_at -> Nullable<Timestamp>,

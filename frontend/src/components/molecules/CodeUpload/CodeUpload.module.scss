@@ -7,4 +7,9 @@
   & > button {
     max-width: 15rem !important;
   }
+
+  & > p:last-child {
+    margin-top: 10px;
+    font-weight: bold;
+  }
 }

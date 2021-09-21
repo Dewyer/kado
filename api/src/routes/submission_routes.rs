@@ -49,28 +49,30 @@ pub fn send_test_output(
         .into()
 }
 
-#[post("/submissions/code-upload/<problem_code>", data="<file>")]
+#[post("/submissions/code-upload/<problem_code>/<original_name>", data="<file>")]
 pub fn upload_proof_api(
     problem_code: String,
+    original_name: String,
     file: UploadedFile<ZipFile>,
     user_guard: AuthTokenGuard<ApiToken>,
     submission_service: SubmissionService,
 ) -> Json<OkErrorResponse> {
-    let res = submission_service.upload_proof(&mut user_guard.user.clone(), file, problem_code);
+    let res = submission_service.upload_proof(&mut user_guard.user.clone(), file, problem_code, original_name);
     Json(OkErrorResponse {
         error: if let Err(err) = res { format!("{}", err) } else { "".to_string() },
     })
 }
 
 
-#[post("/submissions/code-upload-with-token/<problem_code>", data = "<file>")]
+#[post("/submissions/code-upload-with-token/<problem_code>/<original_name>", data = "<file>")]
 pub fn upload_proof_frontend(
     problem_code: String,
+    original_name: String,
     file: UploadedFile<ZipFile>,
     user_guard: AuthTokenGuard<AccessToken>,
     submission_service: SubmissionService,
 ) -> Json<OkErrorResponse> {
-    let res = submission_service.upload_proof(&mut user_guard.user.clone(), file, problem_code);
+    let res = submission_service.upload_proof(&mut user_guard.user.clone(), file, problem_code, original_name);
     Json(OkErrorResponse {
         error: if let Err(err) = res { format!("{}", err) } else { "".to_string() },
     })

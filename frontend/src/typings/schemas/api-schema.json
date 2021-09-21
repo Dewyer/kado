@@ -1113,6 +1113,14 @@
           "problem_id": {
             "type": "string"
           },
+          "proof_file_original_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "proof_file_path": {
+            "type": "string",
+            "nullable": true
+          },
           "sample_index": {
             "type": "integer",
             "format": "int32",

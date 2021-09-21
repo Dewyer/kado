@@ -8,7 +8,7 @@ export const completeProfileFormValidation = (values: CompleteProfileFormData): 
         errors.username = "Required";
     }
 
-    if (values.username && (values.username?.length || 0) <= 4) {
+    if (values.username && (values.username?.length || 0) < 4) {
         errors.username = "Must be at least 4 characters long";
     }
 

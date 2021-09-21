@@ -26,7 +26,7 @@ export const ProblemDetailsPage: React.FC = () => {
     }
     const problem = problemQuery.data.problem;
     const submissions = problemQuery.data.submissions;
-    const hasCorrect = submissions.some((sub) => !!sub.correct);
+    const correctSubmission = submissions.find((sub) => !!sub.correct);
 
     return (
         <PageLayout contentClassName={styles.ProblemDetailsPage}>
@@ -48,7 +48,7 @@ export const ProblemDetailsPage: React.FC = () => {
                 submissions={submissions}
             />
 
-            {hasCorrect && <CodeUpload />}
+            {correctSubmission && <CodeUpload submission={correctSubmission} problemCodeName={codeName}/>}
         </PageLayout>
     );
 };

@@ -82,7 +82,7 @@ pub fn rocket() -> rocket::Rocket {
         )
         .mount("/files/api", routes![
             routes::submission_routes::upload_proof_api,
-            //routes::submission_routes::upload_proof_frontend,
+            routes::submission_routes::upload_proof_frontend,
         ])
         .mount("/swagger", make_swagger_ui(&get_swagger_config()))
         .attach(db::ConnPool::fairing())

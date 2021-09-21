@@ -65,7 +65,7 @@ impl<Mime: FileMimeTrait> UploadedFile<Mime> {
         let file = files.into_iter().next().ok_or_else(|| anyhow::Error::msg("no file field!"))?;
 
         if let SavedData::File(file_path_buf, _) = file.data {
-            let kind = infer::get_from_path(file_data.clone())
+            let kind = infer::get_from_path(file_path_buf.clone())
                 .map_err(|_| anyhow::Error::msg("File type couldn't be identified."))?
                 .ok_or_else(|| anyhow::Error::msg("File type unknown"))?;
 
@@ -82,7 +82,7 @@ impl<Mime: FileMimeTrait> UploadedFile<Mime> {
 
     pub fn from_multipart_data(boundary: &str, data: Data) -> anyhow::Result<UploadedFile<Mime>> {
         Ok(match Multipart::with_body(data.open(), boundary).save().temp() {
-            Full(entries) => process_entries(entries)?,
+            Full(entries) => Self::from_entries(entries)?,
             Partial(_, _) => {
                 return Err(anyhow::Error::msg("Partial request processing"));
             },

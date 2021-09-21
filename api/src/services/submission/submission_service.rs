@@ -79,6 +79,7 @@ impl SubmissionService {
             sample_index: request.sample_index,
             correct: None,
             proof_file_path: None,
+            proof_file_original_name: None,
             started_at: now_naive,
             finished_at: None,
         }, td)
@@ -130,7 +131,7 @@ impl SubmissionService {
 
     fn handle_timed_out_submission(&self, submission: &mut Submission, td: &ITransaction) -> anyhow::Result<()> {
         submission.correct = Some(false);
-        self.submission_repo.save(submission)?;
+        self.submission_repo.save(submission, td)?;
 
         Ok(())
     }
@@ -297,26 +298,31 @@ impl SubmissionService {
         })
     }
 
-    fn assert_can_upload_proof(&self, submission: &Submission) -> anyhow::Result<()> {
+    fn assert_can_upload_proof(&self, submission: &Submission, original_name: &str) -> anyhow::Result<()> {
         if submission.proof_file_path.is_some() {
             bail!("Proof already uploaded!");
+        }
+
+        if !original_name.ends_with(".zip") {
+            bail!("Original filename must end with .zip!");
         }
 
         Ok(())
     }
 
-    pub fn upload_proof(&self, user: &mut User, file_data: UploadedFile<ZipFile>, problem_code_name: String) -> anyhow::Result<()> {
+    pub fn upload_proof(&self, user: &mut User, file_data: UploadedFile<ZipFile>, problem_code_name: String, original_name: String) -> anyhow::Result<()> {
         self.tm.transaction(|td| {
             CodeName::from_string(&problem_code_name)?;
             let problem = self.problem_repo.find_problem_by_code(&problem_code_name, &td)?;
             let mut correct_submission = self.submission_repo.find_correct_submission_for_user_and_problem(user.id, problem.id, &td)?;
-            self.assert_can_upload_proof(&correct_submission)?;
+            self.assert_can_upload_proof(&correct_submission, &original_name)?;
 
             let now_str = UtilsService::naive_now().format("%Y-%m-%d-%H:%M:%S");
             let file_name = format!("{}/{}-{}.zip", user.username, problem.code_name, now_str);
 
             self.file_store.store_file(&file_name, &file_data.local_path)?;
 
+            correct_submission.proof_file_original_name = Some(original_name);
             correct_submission.proof_file_path = Some(file_name);
             self.submission_repo.save(&correct_submission, &td)?;
 

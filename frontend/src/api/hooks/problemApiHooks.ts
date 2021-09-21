@@ -19,6 +19,7 @@ export const useFetchProblemDetails = (codeName: string): UseQueryResult<GetProb
         async () => ProblemApiService.getProblemDetails(codeName),
         {
             enabled: !!codeName,
+            keepPreviousData: true,
             onError: () => { toastPopper({ message: "Getting problem details failed!" }) },
         },
     );
