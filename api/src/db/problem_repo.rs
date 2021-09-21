@@ -92,7 +92,7 @@ impl ProblemRepo for DbProblemRepo {
             .select(problems::all_columns)
             .filter(
                 problems::is_deleted.eq(false)
-                    .and(problems::available_from.is_not_null().and(problems::available_until.is_not_null().and(problems::available_until.ge(now)).or(problems::available_until.is_null())))
+                    .and(problems::available_from.is_not_null().and(problems::available_from.ge(now)).and(problems::available_until.is_not_null().and(problems::available_until.ge(now)).or(problems::available_until.is_null())))
             )
             .order(problems::available_from.desc())
             .first::<Problem>(td.get_db_connection())

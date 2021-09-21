@@ -19,7 +19,8 @@ const ListItem: React.FC<ListItemProps> = (props) => {
 
     const done = submission.correct !== null;
     const took = Math.floor((submission.finished_at || 0) - submission.started_at);
-    const doneRow = <>{submission.correct ? "✔️" : "❌"} - took: {took}s, {submission.correct ? "Good job 🤓" : ""}</>
+    let tookStr = submission.finished_at ? `took: ${took}s` : 'Timed out';
+    const doneRow = <>{submission.correct ? "✔️" : "❌"} - {tookStr}, {submission.correct ? "Good job 🤓" : ""}</>
     const notDoneRow = <>didn't finish evaluation</>;
 
     return (

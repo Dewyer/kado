@@ -3,7 +3,7 @@ import {PageLayout} from "src/components/templates/PageLayout/PageLayout";
 import {Markdown} from "../../templates/Markdown/Markdown";
 
 const pageContent = `
-### Snap Challange
+### Snap Challenge
 
 This program is part of Schönhertz Qpa 2021, and is a competitive programming style, multi-day competition.
 You can earn points that get converted to QPA points at the end.
