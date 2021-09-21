@@ -9,17 +9,17 @@ const pageContent = `
 
 You might be wondering how you can submit a solution to earn points, this is the topic we will cover on this page.
 
-In this competition one of our goals was to let you use your favourite language, framework, library, environment etc...
+In this competition, one of our goals was to let you use your favorite language, framework, library, environment, etc...
 and also to grade solutions on **correctness** and not execution time or memory usage.
 
-With these constraints in mind we decided not to run your programs in a sandbox environment but to let you run it for us, we are just interested in seeing your programs give the correct answers.
+With these constraints in mind, we decided not to run your programs in a sandbox environment but to let you run them for us, we are just interested in seeing your programs give the correct answers.
 
 The communication between your program and our verification programs is done through an **HTTP API** (more about them in general [here](https://searchapparchitecture.techtarget.com/definition/RESTful-API)).
 
 #### Concepts
 - JSON - javascript object notation (more about it [here](https://www.w3schools.com/js/js_json_intro.asp)) also the format we use to exchange data
 - Integration - the part of your program that implements this communication interface with our servers
-- Problem - a problem to be solved (listed in the Problems page)
+- Problem - a problem to be solved (listed on the Problems page)
 - Submission - an attempt made to give a correct solution to a problem
 - Test - part of a solution, that includes us giving you a JSON input, and you giving us back a JSON output. Each submission can contain multiple tests. (Test inputs and correctness can be dependent on outputs given to previous tests too)
 
@@ -29,8 +29,8 @@ The communication between your program and our verification programs is done thr
 - Your program requests test inputs
 - Your program sends a request containing the desired output to the inputs gotten above
 - Repeat as many times as you are required to according to your submission
-- If give a valid output to all tests the submission is considered to be correct
-- After you have a correct solution you need to upload (for plagarism testing), this can either be done on the problem's details page, or through the API
+- If you give a valid output to all tests the submission is considered to be correct
+- After you have a correct solution you need to upload (for plagiarism testing), this can either be done on the problem's details page or through the API
 - You can attempt to create a solution as many times as the problem allows you to (dependant on difficulty)
 - If you want to test your integration or your solution (but don't feel confident enough to do it live) you can create a submission that isn't worth any points and doesn't reduce your remaining solution attempts and just contains sample data.
 - At the first incorrect test output your submission is closed
@@ -38,11 +38,11 @@ The communication between your program and our verification programs is done thr
 - You can only have one "in-progress" submission at a time for reach problem
 
 #### Authentication to the API
-For us to know who is trying to create a submission we need you to include your secret **api token** (copiable on the top of the page) in every request you make
+For us to know who is trying to create a submission we need you to include your secret **API token** (copiable on the top of the page) in every request you make
 
 in the *X-Api-Token* HTTP header (more about headers [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers)).
 
-If you think your api token was compromised (shared it with anyone or showed it to anyone) consider refreshing it and using the new token, your older token will be invalidated.
+If you think your API token was compromised (shared it with anyone or showed it to anyone) consider refreshing it and using the new token, your older token will be invalidated.
 
 #### Submission API Specification
 The API is available at: *${process.env.REACT_APP_BASE_URL}*
@@ -90,7 +90,7 @@ Response body
 \`\`\`
 
 ##### Submiting test results (sending test output) - POST - /api/submissions/test/<test_id>
-Used to submit test output for a previosly started test.
+Used to submit test output for a previously started test.
 
 Request body (Content-Type header must be set to *application/json*):
 \`\`\`
@@ -121,7 +121,7 @@ file: <your solution's source code in a .zip file>
 Response body (JSON)
 \`\`\`
 {
-    "error": <some error if the file upload failed, empty string otherwise>
+    "error": <some error if the file upload failed, an empty string otherwise>
 }
 \`\`\`
 
