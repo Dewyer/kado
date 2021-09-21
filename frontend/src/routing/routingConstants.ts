@@ -7,6 +7,6 @@ export const GLOBAL_ROUTES = {
 	API_GUIDE: "/api-guide",
 	INDIVIDUAL_LEADERBOARD: "/individual-leaderboard",
 	TEAM_LEADERBOARD: "/team-leaderboard",
-	TERMS_OF_USE_AND_PRIVACY_POLICY: "/tos-privacy",
+	TERMS_OF_USE_AND_PRIVACY_POLICY: "/privacy-policy",
 	OAUTH_CALLBACK: "/oauth-callback",
 };

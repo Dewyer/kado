@@ -13,7 +13,7 @@ import {history} from "src/helpers/history";
 import {GLOBAL_ROUTES} from "src/routing/routingConstants";
 import {AuthorizationResult} from "src/components/pages/LoginPage/LoginPage.types";
 import { Link } from "react-router-dom";
-import {toastPopper} from "../../../helpers/toastPopper";
+import {toastPopper} from "src/helpers/toastPopper";
 
 export interface CompleteProfileFormProps {
     containerClassName?: string;
@@ -75,7 +75,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = (props) =
                         <Field<boolean>
                             name="acceptTos"
                             component={FieldCheckbox}
-                            label={<>I accept the <Link target={"_blank"} to={GLOBAL_ROUTES.TERMS_OF_USE_AND_PRIVACY_POLICY}>terms of use, privacy policy</Link> and the <Link target={"_blank"} to={GLOBAL_ROUTES.HOME}>rules</Link> </>}
+                            label={<>I accept the <Link target={"_blank"} to={GLOBAL_ROUTES.TERMS_OF_USE_AND_PRIVACY_POLICY}>privacy policy</Link> and the <Link target={"_blank"} to={GLOBAL_ROUTES.HOME}>rules</Link> </>}
                             type="checkbox"
                         />
 
