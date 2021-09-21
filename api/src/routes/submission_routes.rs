@@ -7,7 +7,7 @@ use crate::models::http::requests::{StartSubmissionRequest, SendTestOutputReques
 use crate::models::http::responses::{StartSubmissionResponse, GetTestInputResponse, SendTestOutputResponse};
 use rocket::Data;
 use rocket::http::ContentType;
-use crate::models::http::uploaded_file::UploadedFile;
+use crate::models::http::uploaded_file::{UploadedFile, ZipFile};
 
 #[openapi]
 #[post("/submissions/start-submission", format = "json", data = "<request>")]
@@ -52,7 +52,7 @@ pub fn send_test_output(
 #[post("/submissions/code-upload/<problem_code>", data="<file>")]
 pub fn upload_proof_api(
     problem_code: String,
-    file: UploadedFile,
+    file: UploadedFile<ZipFile>,
     user_guard: AuthTokenGuard<ApiToken>,
     submission_service: SubmissionService,
 ) -> Json<OkErrorResponse> {
@@ -66,7 +66,7 @@ pub fn upload_proof_api(
 #[post("/submissions/code-upload-with-token/<problem_code>", data = "<file>")]
 pub fn upload_proof_frontend(
     problem_code: String,
-    file: UploadedFile,
+    file: UploadedFile<ZipFile>,
     user_guard: AuthTokenGuard<AccessToken>,
     submission_service: SubmissionService,
 ) -> Json<OkErrorResponse> {

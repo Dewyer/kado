@@ -21,7 +21,7 @@ use crate::db::user_repo::{IUserRepo, DbUserRepo};
 use chrono::NaiveDateTime;
 use crate::schema::submissions::dsl::submissions;
 use crate::services::file_store_service::FileStoreService;
-use crate::models::http::uploaded_file::UploadedFile;
+use crate::models::http::uploaded_file::{UploadedFile, ZipFile};
 
 const SUBMISSION_TIMEOUT_PER_TEST: i64 = 3*60; // 15 minutes
 const SUBMISSION_TEST_TIMEOUT: i64 = 60; // 1 minute
@@ -84,6 +84,10 @@ impl SubmissionService {
         }, td)
     }
 
+    fn is_submission_timed_out(&self, submission: &Submission) -> bool {
+        UtilsService::time_within_seconds(submission.started_at, SUBMISSION_TIMEOUT_PER_TEST * submission.test_count as i64)
+    }
+
     fn assert_can_start_submission(&self, user: &User, problem: &Problem, request: &StartSubmissionRequest, td: &ITransaction) -> anyhow::Result<()> {
         if problem.sample_count-1 < request.sample_index.unwrap_or(0) {
             bail!("Sample index is larger then the number of samples available");
@@ -94,9 +98,13 @@ impl SubmissionService {
             bail!("Max submission attempts reached.");
         }
 
-        let open_submission = submissions_made.iter().find(|sb| sb.finished_at.is_none());
-        if open_submission.is_some() {
-            bail!("There is an open submission made by you for this problem, finish that or let it time out first.");
+        let open_submission = submissions_made.iter().find(|sb| sb.correct.is_none());
+        if let Some(open) = open_submission {
+            if self.is_submission_timed_out(open) {
+                self.handle_timed_out_submission(&mut open.clone(), td)?;
+            } else {
+                bail!("There is an open submission made by you for this problem, finish that or let it time out first.");
+            }
         }
 
         if submissions_made.iter().any(|sub| sub.correct.contains(&true)) {
@@ -120,12 +128,20 @@ impl SubmissionService {
         })
     }
 
-    fn assert_can_start_new_test(&self, submission: &Submission, existing_tests: &Vec<SubmissionTest>, user: &User) -> anyhow::Result<()> {
+    fn handle_timed_out_submission(&self, submission: &mut Submission, td: &ITransaction) -> anyhow::Result<()> {
+        submission.correct = Some(false);
+        self.submission_repo.save(submission)?;
+
+        Ok(())
+    }
+
+    fn assert_can_start_new_test(&self, submission: &mut Submission, existing_tests: &Vec<SubmissionTest>, user: &User, td: &ITransaction) -> anyhow::Result<()> {
         if submission.owner_id != user.id {
             bail!("You don't have access to this submission.");
         }
 
-        if !UtilsService::time_within_seconds(submission.started_at, SUBMISSION_TIMEOUT_PER_TEST * submission.test_count as i64) {
+        if !self.is_submission_timed_out(submission){
+            self.handle_timed_out_submission(submission, td)?;
             bail!("Submission timed out!");
         }
 
@@ -170,10 +186,10 @@ impl SubmissionService {
             let user = user_guard.user;
             let now_naive = UtilsService::naive_now();
             let submission_id = UtilsService::parse_uuid(&request.submission)?;
-            let (submission, submission_tests) = self.submission_repo.find_by_id_with_tests(submission_id, &td)?;
+            let (mut submission, submission_tests) = self.submission_repo.find_by_id_with_tests(submission_id, &td)?;
             let problem = self.problem_repo.crud().find_by_id(submission.problem_id, &td)?;
 
-            self.assert_can_start_new_test(&submission, &submission_tests, &user)?;
+            self.assert_can_start_new_test(&mut submission, &submission_tests, &user, &td)?;
 
             let (new_test, generated_test) = self.create_submission_test(&problem, &submission, &submission_tests, &td)?;
 
@@ -236,7 +252,6 @@ impl SubmissionService {
         submission.correct = Some(true);
 
         self.submission_repo.save(&submission, td)?;
-        // self.handle_user_correct_and_complete_submission_to_problem(&mut user, problem, &updated_last_test.finished_at.unwrap_or(UtilsService::naive_now()), td)?;
 
         Ok(())
     }
@@ -290,7 +305,7 @@ impl SubmissionService {
         Ok(())
     }
 
-    pub fn upload_proof(&self, user: &mut User, file_data: UploadedFile, problem_code_name: String) -> anyhow::Result<()> {
+    pub fn upload_proof(&self, user: &mut User, file_data: UploadedFile<ZipFile>, problem_code_name: String) -> anyhow::Result<()> {
         self.tm.transaction(|td| {
             CodeName::from_string(&problem_code_name)?;
             let problem = self.problem_repo.find_problem_by_code(&problem_code_name, &td)?;

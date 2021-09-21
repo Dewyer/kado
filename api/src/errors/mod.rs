@@ -7,6 +7,13 @@ pub enum ServiceError {
 }
 
 #[derive(Error, Debug, serde::Serialize)]
+pub enum UploadFileError {
+    #[error("FileUploadFailed")]
+    FileUploadFailed,
+}
+
+
+#[derive(Error, Debug, serde::Serialize)]
 pub enum AuthError {
     #[error("AdminAuthError")]
     AdminAuthError,
