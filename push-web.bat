@@ -1,0 +1,1 @@
+heroku container:release web

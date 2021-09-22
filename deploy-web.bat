@@ -1,0 +1,1 @@
+heroku container:push -R web
