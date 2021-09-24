@@ -34,11 +34,15 @@ mod routes;
 mod schema;
 mod services;
 
+use log::{info, error};
+use crate::services::logger::setup_logger_panic_on_fail;
+use rocket::fairing::AdHoc;
+use rocket::http::Status;
+
 #[catch(404)]
 fn not_found() -> JsonValue {
     json!({
-        "status": "errors",
-        "reason": "Resource was not found."
+        "error": "Resource was not found.",
     })
 }
 
@@ -55,6 +59,9 @@ fn cors_fairing() -> Cors {
 pub fn rocket() -> rocket::Rocket {
     dotenv().ok();
 
+    setup_logger_panic_on_fail();
+
+    info!("Starting server with logging.");
     rocket::custom(config::from_env())
         .mount(
             "/api",
@@ -88,6 +95,11 @@ pub fn rocket() -> rocket::Rocket {
         .mount("/swagger", make_swagger_ui(&get_swagger_config()))
         .attach(db::ConnPool::fairing())
         .attach(cors_fairing())
+        .attach(AdHoc::on_response("Log errors", |req, resp| {
+            if resp.status().code != 200 {
+                error!("Request error - {}, at: {}", resp.status(), req.route().map(|rr| rr.uri.to_string()).unwrap_or("".to_string()));
+            }
+        }))
         .attach(config::AppConfig::manage())
         .register(catchers![not_found])
 }

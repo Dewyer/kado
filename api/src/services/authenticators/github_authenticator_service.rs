@@ -7,6 +7,7 @@ use crate::services::authenticators::models::{AuthenticationResult, Authenticati
 use crate::services::authenticators::authenticator::Authenticator;
 use std::collections::HashMap;
 use reqwest::header;
+use log::{error, info};
 
 pub struct GithubAuthenticatorService {
     config: AppConfig,
@@ -49,12 +50,15 @@ impl GithubAuthenticatorService {
 
         let resp =
             resp_reqw.json::<HashMap<String, String>>()
-            .map_err(|_| anyhow::Error::msg("Couldnt parse request from github!"))?;
+            .map_err(|err| {
+                error!("Github response parsing error: {:?}", err);
+                anyhow::Error::msg("Couldnt parse request from github!")
+            })?;
 
         resp.get("access_token")
             .map(|v| v.to_string())
             .ok_or_else(|| {
-                println!("No access token in request, full response is: {}", serde_json::to_string(&resp).unwrap_or("".to_string()));
+                error!("No access token in request, full response is: {}", serde_json::to_string(&resp).unwrap_or("".to_string()));
                 anyhow::Error::msg("No access token in response!")
             })
     }
@@ -75,7 +79,11 @@ impl GithubAuthenticatorService {
 
         let resp = resp_one
             .json::<UserResponse>()
-            .map_err(|_| anyhow::Error::msg("Couldn parse request from github!"))?;
+            .map_err(|err| {
+                error!("No email in response, error: {:?}", err);
+
+                anyhow::Error::msg("Couldn parse request from github!")
+            })?;
 
         Ok(resp.email)
     }
