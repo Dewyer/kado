@@ -40,16 +40,23 @@ impl GithubAuthenticatorService {
         bdy.insert("client_secret", self.config.github_secret.clone());
         bdy.insert("redirect_uri", self.config.github_redirect_url.clone());
 
-        let resp: HashMap<String, String> = client.post("https://github.com/login/oauth/access_token")
+        let resp_reqw = client.post("https://github.com/login/oauth/access_token")
             .json(&bdy)
             .send()
-            .map_err(|_| anyhow::Error::msg("Couldn make request to github!"))?
-            .json::<HashMap<String, String>>()
+            .map_err(|_| anyhow::Error::msg("Couldn make request to github!"))?;
+
+        println!("Github Exchange response status: {}", resp_reqw.status());
+
+        let resp =
+            resp_reqw.json::<HashMap<String, String>>()
             .map_err(|_| anyhow::Error::msg("Couldnt parse request from github!"))?;
 
         resp.get("access_token")
             .map(|v| v.to_string())
-            .ok_or_else(|| anyhow::Error::msg("No access token in response!"))
+            .ok_or_else(|| {
+                println!("No access token in request, full response is: {}", serde_json::to_string(&resp).unwrap_or("".to_string()));
+                anyhow::Error::msg("No access token in response!")
+            })
     }
 
     fn get_user_email_from_token(&self, token: &str) -> anyhow::Result<String> {
