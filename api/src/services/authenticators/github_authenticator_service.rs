@@ -22,8 +22,9 @@ impl GithubAuthenticatorService {
 }
 
 #[derive(serde::Deserialize)]
-pub struct UserResponse {
+pub struct EmailsResponseItem {
     email: String,
+    primary: bool,
 }
 
 impl GithubAuthenticatorService {
@@ -73,19 +74,23 @@ impl GithubAuthenticatorService {
             .default_headers(headers)
             .build()?;
 
-        let resp_one = client.get("https://api.github.com/user")
+        let resp_one = client.get("https://api.github.com/user/emails")
             .send()
             .map_err(|_| anyhow::Error::msg("Couldn make request to github!"))?;
 
         let resp = resp_one
-            .json::<UserResponse>()
+            .json::<Vec<EmailsResponseItem>>()
             .map_err(|err| {
                 error!("No email in response, error: {:?}", err);
 
                 anyhow::Error::msg("Couldn parse request from github!")
             })?;
 
-        Ok(resp.email)
+        let primary = resp.into_iter().find(|em| em.primary);
+
+        primary
+            .map(|pr| pr.email)
+            .ok_or_else(|| anyhow::Error::msg("No github primary email found!"))
     }
 }
 
