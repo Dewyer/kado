@@ -3,14 +3,14 @@ use rocket::request::FromRequest;
 use rocket::{request, Request};
 
 use crate::crud_repo;
+use crate::db::pagination::*;
 use crate::db::transaction_manager::ITransaction;
 use crate::errors::ServiceError;
-use crate::models::user::db::{NewUser, User};
-use crate::schema::users;
-use crate::schema::teams;
-use crate::models::utils::PaginationOptions;
 use crate::models::team::Team;
-use crate::db::pagination::*;
+use crate::models::user::db::{NewUser, User};
+use crate::models::utils::PaginationOptions;
+use crate::schema::teams;
+use crate::schema::users;
 use diesel::dsl::count_star;
 
 crud_repo!(UserCrudRepo, DbUserCrudRepo, users, User, NewUser, "Users");
@@ -32,9 +32,17 @@ pub trait UserRepo {
 
     fn save(&self, user: &User, td: &ITransaction) -> anyhow::Result<User>;
 
-    fn list_leaderboard_participating_paginated_with_teams(&self, pagination: &PaginationOptions, td: &ITransaction) -> anyhow::Result<(Vec<(User, Option<Team>)>, usize)>;
+    fn list_leaderboard_participating_paginated_with_teams(
+        &self,
+        pagination: &PaginationOptions,
+        td: &ITransaction,
+    ) -> anyhow::Result<(Vec<(User, Option<Team>)>, usize)>;
 
-    fn find_leaderboard_rank_of_user(&self, user: &User, td: &ITransaction) -> anyhow::Result<usize>;
+    fn find_leaderboard_rank_of_user(
+        &self,
+        user: &User,
+        td: &ITransaction,
+    ) -> anyhow::Result<usize>;
 }
 
 pub struct DbUserRepo {
@@ -83,32 +91,50 @@ impl UserRepo for DbUserRepo {
             .map_err(|_| anyhow::Error::msg("Can't save user!"))
     }
 
-    fn list_leaderboard_participating_paginated_with_teams(&self, pagination: &PaginationOptions, td: &ITransaction) -> anyhow::Result<(Vec<(User, Option<Team>)>, usize)> {
+    fn list_leaderboard_participating_paginated_with_teams(
+        &self,
+        pagination: &PaginationOptions,
+        td: &ITransaction,
+    ) -> anyhow::Result<(Vec<(User, Option<Team>)>, usize)> {
         users::table
-            .order((users::individual_points.desc(), users::last_gained_points_at.asc().nulls_last(), users::created_at.asc()))
+            .order((
+                users::individual_points.desc(),
+                users::last_gained_points_at.asc().nulls_last(),
+                users::created_at.asc(),
+            ))
             .filter(users::is_active.eq(true))
             .left_join(teams::table)
             .paginate((pagination.page + 1) as i64)
-            .per_page(std::cmp::min(pagination.per_page.unwrap_or(DEFAULT_USER_PAGE_SIZE), DEFAULT_USER_PAGE_SIZE) as i64)
+            .per_page(std::cmp::min(
+                pagination.per_page.unwrap_or(DEFAULT_USER_PAGE_SIZE),
+                DEFAULT_USER_PAGE_SIZE,
+            ) as i64)
             .load_and_count_pages::<(User, Option<Team>)>(td.get_db_connection())
             .map(|(vv, nn)| (vv, nn as usize))
-            .map_err(|_| {
-                anyhow::Error::msg("Can't load leaderboard!")
-            })
+            .map_err(|_| anyhow::Error::msg("Can't load leaderboard!"))
     }
 
-    fn find_leaderboard_rank_of_user(&self, user: &User, td: &ITransaction) -> anyhow::Result<usize> {
+    fn find_leaderboard_rank_of_user(
+        &self,
+        user: &User,
+        td: &ITransaction,
+    ) -> anyhow::Result<usize> {
         users::table
-            .filter(users::is_active
-                .eq(true)
-                .and(users::individual_points.ge(user.individual_points).or(
-                    users::individual_points.eq(&user.individual_points).and(users::last_gained_points_at.le(&user.last_gained_points_at))
-                        .or(users::last_gained_points_at.eq(&user.last_gained_points_at).and(users::created_at.le(&user.created_at)))
-                ))
+            .filter(
+                users::is_active.eq(true).and(
+                    users::individual_points.ge(user.individual_points).or(
+                        users::individual_points
+                            .eq(&user.individual_points)
+                            .and(users::last_gained_points_at.le(&user.last_gained_points_at))
+                            .or(users::last_gained_points_at
+                                .eq(&user.last_gained_points_at)
+                                .and(users::created_at.le(&user.created_at))),
+                    ),
+                ),
             )
             .select(count_star())
             .first::<i64>(td.get_db_connection())
-            .map(|vv| (vv-1) as usize)
+            .map(|vv| (vv - 1) as usize)
             .map_err(|_| anyhow::Error::msg("Can't load user's rank!"))
     }
 }

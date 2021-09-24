@@ -1,29 +1,36 @@
-use crate::db::transaction_manager::{TransactionManager, ITransaction};
-use rocket::request::FromRequest;
+use crate::db::problem_repo::{DbProblemRepo, IProblemRepo};
+use crate::db::submission_repo::{DbSubmissionRepo, ISubmissionRepo};
+use crate::db::team_repo::{DbTeamRepo, ITeamRepo};
+use crate::db::transaction_manager::{ITransaction, TransactionManager};
+use crate::db::user_repo::{DbUserRepo, IUserRepo};
 use crate::errors::ServiceError;
-use rocket::{Request, request, Data};
-use crate::guards::{AuthTokenGuard, ApiToken};
-use crate::models::http::requests::{StartSubmissionRequest, SendTestOutputRequest, GetTestInputRequest};
-use crate::db::problem_repo::{IProblemRepo, DbProblemRepo};
-use crate::services::utils_service::UtilsService;
+use crate::guards::{ApiToken, AuthTokenGuard};
+use crate::models::http::requests::{
+    GetTestInputRequest, SendTestOutputRequest, StartSubmissionRequest,
+};
+use crate::models::http::responses::{
+    GetTestInputResponse, SendTestOutputResponse, StartSubmissionResponse,
+};
+use crate::models::http::uploaded_file::{UploadedFile, ZipFile};
 use crate::models::problem::code_name::CodeName;
 use crate::models::problem::Problem;
+use crate::models::submission::submission_test::{NewSubmissionTest, SubmissionTest};
+use crate::models::submission::{NewSubmission, Submission};
 use crate::models::user::User;
-use crate::models::submission::{Submission, NewSubmission};
-use crate::db::submission_repo::{ISubmissionRepo, DbSubmissionRepo};
-use crate::services::submission::support::{IProblemSupport, SubmissionGenerationPayload, SubmissionTestGenerationPayload, SubmissionTestGenerationResult, VerificationPayload, SanityCheckProblemSupport};
-use rand::Rng;
-use crate::models::http::responses::{StartSubmissionResponse, GetTestInputResponse, SendTestOutputResponse};
-use crate::models::submission::submission_test::{SubmissionTest, NewSubmissionTest};
-use crate::db::team_repo::{DbTeamRepo, ITeamRepo};
-use uuid::Uuid;
-use crate::db::user_repo::{IUserRepo, DbUserRepo};
-use chrono::NaiveDateTime;
 use crate::schema::submissions::dsl::submissions;
 use crate::services::file_store_service::FileStoreService;
-use crate::models::http::uploaded_file::{UploadedFile, ZipFile};
+use crate::services::submission::support::{
+    IProblemSupport, SanityCheckProblemSupport, SubmissionGenerationPayload,
+    SubmissionTestGenerationPayload, SubmissionTestGenerationResult, VerificationPayload,
+};
+use crate::services::utils_service::UtilsService;
+use chrono::NaiveDateTime;
+use rand::Rng;
+use rocket::request::FromRequest;
+use rocket::{request, Data, Request};
+use uuid::Uuid;
 
-const SUBMISSION_TIMEOUT_PER_TEST: i64 = 3*60; // 15 minutes
+const SUBMISSION_TIMEOUT_PER_TEST: i64 = 3 * 60; // 15 minutes
 const SUBMISSION_TEST_TIMEOUT: i64 = 60; // 1 minute
 
 pub struct SubmissionService {
@@ -60,7 +67,13 @@ impl SubmissionService {
         }
     }
 
-    fn create_submission(&self, user: &User, problem: &Problem, request: &StartSubmissionRequest, td: &ITransaction) -> anyhow::Result<Submission> {
+    fn create_submission(
+        &self,
+        user: &User,
+        problem: &Problem,
+        request: &StartSubmissionRequest,
+        td: &ITransaction,
+    ) -> anyhow::Result<Submission> {
         let now_naive = UtilsService::naive_now();
         let code_name = CodeName::from_string(&request.problem)?;
         let support = self.get_problem_support(code_name.clone());
@@ -71,30 +84,44 @@ impl SubmissionService {
         };
         let gen_res = support.generate_submission_details(gen_payload)?;
 
-        self.submission_repo.crud().insert(&NewSubmission {
-            owner_id: user.id,
-            problem_id: problem.id,
-            seed,
-            test_count: gen_res.test_count,
-            sample_index: request.sample_index,
-            correct: None,
-            proof_file_path: None,
-            proof_file_original_name: None,
-            started_at: now_naive,
-            finished_at: None,
-        }, td)
+        self.submission_repo.crud().insert(
+            &NewSubmission {
+                owner_id: user.id,
+                problem_id: problem.id,
+                seed,
+                test_count: gen_res.test_count,
+                sample_index: request.sample_index,
+                correct: None,
+                proof_file_path: None,
+                proof_file_original_name: None,
+                started_at: now_naive,
+                finished_at: None,
+            },
+            td,
+        )
     }
 
     fn is_submission_timed_out(&self, submission: &Submission) -> bool {
-        UtilsService::time_within_seconds(submission.started_at, SUBMISSION_TIMEOUT_PER_TEST * submission.test_count as i64)
+        UtilsService::time_within_seconds(
+            submission.started_at,
+            SUBMISSION_TIMEOUT_PER_TEST * submission.test_count as i64,
+        )
     }
 
-    fn assert_can_start_submission(&self, user: &User, problem: &Problem, request: &StartSubmissionRequest, td: &ITransaction) -> anyhow::Result<()> {
-        if problem.sample_count-1 < request.sample_index.unwrap_or(0) {
+    fn assert_can_start_submission(
+        &self,
+        user: &User,
+        problem: &Problem,
+        request: &StartSubmissionRequest,
+        td: &ITransaction,
+    ) -> anyhow::Result<()> {
+        if problem.sample_count - 1 < request.sample_index.unwrap_or(0) {
             bail!("Sample index is larger then the number of samples available");
         }
 
-        let submissions_made = self.submission_repo.find_submissions_by_user_and_problem(user.id, problem.id, td)?;
+        let submissions_made = self
+            .submission_repo
+            .find_submissions_by_user_and_problem(user.id, problem.id, td)?;
         if submissions_made.len() >= problem.max_submissions as usize {
             bail!("Max submission attempts reached.");
         }
@@ -108,20 +135,32 @@ impl SubmissionService {
             }
         }
 
-        if submissions_made.iter().any(|sub| sub.correct.contains(&true)) {
+        if submissions_made
+            .iter()
+            .any(|sub| sub.correct.contains(&true))
+        {
             bail!("You already have a correct submission for this problem");
         }
 
         Ok(())
     }
 
-    pub fn start_submission(&self, user_guard: AuthTokenGuard<ApiToken>, request: StartSubmissionRequest) -> anyhow::Result<StartSubmissionResponse> {
+    pub fn start_submission(
+        &self,
+        user_guard: AuthTokenGuard<ApiToken>,
+        request: StartSubmissionRequest,
+    ) -> anyhow::Result<StartSubmissionResponse> {
         self.tm.transaction(|td| {
             let now_naive = UtilsService::naive_now();
-            let problem = self.problem_repo.find_available_problem_by_code(&request.problem, now_naive, &td)?;
+            let problem = self.problem_repo.find_available_problem_by_code(
+                &request.problem,
+                now_naive,
+                &td,
+            )?;
             self.assert_can_start_submission(&user_guard.user, &problem, &request, &td)?;
 
-            let new_submission = self.create_submission(&user_guard.user, &problem, &request, &td)?;
+            let new_submission =
+                self.create_submission(&user_guard.user, &problem, &request, &td)?;
 
             Ok(StartSubmissionResponse {
                 submission: new_submission.to_minimal_dto(),
@@ -129,24 +168,36 @@ impl SubmissionService {
         })
     }
 
-    fn handle_timed_out_submission(&self, submission: &mut Submission, td: &ITransaction) -> anyhow::Result<()> {
+    fn handle_timed_out_submission(
+        &self,
+        submission: &mut Submission,
+        td: &ITransaction,
+    ) -> anyhow::Result<()> {
         submission.correct = Some(false);
         self.submission_repo.save(submission, td)?;
 
         Ok(())
     }
 
-    fn assert_can_start_new_test(&self, submission: &mut Submission, existing_tests: &Vec<SubmissionTest>, user: &User, td: &ITransaction) -> anyhow::Result<()> {
+    fn assert_can_start_new_test(
+        &self,
+        submission: &mut Submission,
+        existing_tests: &Vec<SubmissionTest>,
+        user: &User,
+        td: &ITransaction,
+    ) -> anyhow::Result<()> {
         if submission.owner_id != user.id {
             bail!("You don't have access to this submission.");
         }
 
-        if !self.is_submission_timed_out(submission){
+        if !self.is_submission_timed_out(submission) {
             self.handle_timed_out_submission(submission, td)?;
             bail!("Submission timed out!");
         }
 
-        let open_test = existing_tests.iter().find(|test| test.finished_at.is_none());
+        let open_test = existing_tests
+            .iter()
+            .find(|test| test.finished_at.is_none());
         if open_test.is_some() {
             bail!("You already have an open test running, submit it before getting new inputs!");
         }
@@ -158,41 +209,61 @@ impl SubmissionService {
         Ok(())
     }
 
-    fn create_submission_test(&self, problem: &Problem, submission: &Submission, existing_tests: &Vec<SubmissionTest>, td: &ITransaction) -> anyhow::Result<(SubmissionTest, SubmissionTestGenerationResult)> {
+    fn create_submission_test(
+        &self,
+        problem: &Problem,
+        submission: &Submission,
+        existing_tests: &Vec<SubmissionTest>,
+        td: &ITransaction,
+    ) -> anyhow::Result<(SubmissionTest, SubmissionTestGenerationResult)> {
         let now_naive = UtilsService::naive_now();
         let code_name = CodeName::from_string(&problem.code_name)?;
         let support = self.get_problem_support(code_name.clone());
-        let input_res = support.generate_submission_test_input(SubmissionTestGenerationPayload {
-            test_index: existing_tests.len(),
-            seed: submission.seed,
-            sample_index: submission.sample_index.clone(),
-        })?;
+        let input_res =
+            support.generate_submission_test_input(SubmissionTestGenerationPayload {
+                test_index: existing_tests.len(),
+                seed: submission.seed,
+                sample_index: submission.sample_index.clone(),
+            })?;
 
         Ok((
-            self.submission_repo.crud_tests().insert(&NewSubmissionTest {
-                submission_id: submission.id,
-                class: &input_res.test_class,
-                input: &input_res.input.to_string(),
-                output: None,
-                correct: None,
-                started_at: now_naive,
-                finished_at: None,
-            }, td)?,
-            input_res
+            self.submission_repo.crud_tests().insert(
+                &NewSubmissionTest {
+                    submission_id: submission.id,
+                    class: &input_res.test_class,
+                    input: &input_res.input.to_string(),
+                    output: None,
+                    correct: None,
+                    started_at: now_naive,
+                    finished_at: None,
+                },
+                td,
+            )?,
+            input_res,
         ))
     }
 
-    pub fn get_test_input(&self, user_guard: AuthTokenGuard<ApiToken>, request: GetTestInputRequest) -> anyhow::Result<GetTestInputResponse> {
+    pub fn get_test_input(
+        &self,
+        user_guard: AuthTokenGuard<ApiToken>,
+        request: GetTestInputRequest,
+    ) -> anyhow::Result<GetTestInputResponse> {
         self.tm.transaction(|td| {
             let user = user_guard.user;
             let now_naive = UtilsService::naive_now();
             let submission_id = UtilsService::parse_uuid(&request.submission)?;
-            let (mut submission, submission_tests) = self.submission_repo.find_by_id_with_tests(submission_id, &td)?;
-            let problem = self.problem_repo.crud().find_by_id(submission.problem_id, &td)?;
+            let (mut submission, submission_tests) = self
+                .submission_repo
+                .find_by_id_with_tests(submission_id, &td)?;
+            let problem = self
+                .problem_repo
+                .crud()
+                .find_by_id(submission.problem_id, &td)?;
 
             self.assert_can_start_new_test(&mut submission, &submission_tests, &user, &td)?;
 
-            let (new_test, generated_test) = self.create_submission_test(&problem, &submission, &submission_tests, &td)?;
+            let (new_test, generated_test) =
+                self.create_submission_test(&problem, &submission, &submission_tests, &td)?;
 
             Ok(GetTestInputResponse {
                 test_id: new_test.id.to_string(),
@@ -219,17 +290,38 @@ impl SubmissionService {
         (max_p as f64 * std::f64::consts::E.powf(-R * (sub_count as f64))).floor() as i64
     }
 
-    fn handle_team_member_submission_completion(&self, user: &User, team_id: Uuid, problem: &Problem, td: &ITransaction) -> anyhow::Result<()> {
+    fn handle_team_member_submission_completion(
+        &self,
+        user: &User,
+        team_id: Uuid,
+        problem: &Problem,
+        td: &ITransaction,
+    ) -> anyhow::Result<()> {
         let (mut team, team_members) = self.team_repo.find_by_id_with_users(team_id, td)?;
-        let submissions_for_team_members = self.submission_repo.find_correct_submissions_for_users_and_problem(team_members.iter().map(|usr| usr.id).collect(), problem.id, td)?;
-        team.points += self.get_diminishing_returns_on_points(problem.base_point_value, submissions_for_team_members.len());
+        let submissions_for_team_members = self
+            .submission_repo
+            .find_correct_submissions_for_users_and_problem(
+                team_members.iter().map(|usr| usr.id).collect(),
+                problem.id,
+                td,
+            )?;
+        team.points += self.get_diminishing_returns_on_points(
+            problem.base_point_value,
+            submissions_for_team_members.len(),
+        );
         team.last_gained_points_at = user.last_gained_points_at.clone();
 
         self.team_repo.save(&team, td)?;
         Ok(())
     }
 
-    fn handle_user_correct_and_complete_submission_to_problem(&self, user: &mut User, problem: &Problem, at: &NaiveDateTime, td: &ITransaction) -> anyhow::Result<()> {
+    fn handle_user_correct_and_complete_submission_to_problem(
+        &self,
+        user: &mut User,
+        problem: &Problem,
+        at: &NaiveDateTime,
+        td: &ITransaction,
+    ) -> anyhow::Result<()> {
         user.last_gained_points_at = Some(at.clone());
         user.individual_points += problem.base_point_value;
         if let Some(team_id) = user.team_id {
@@ -241,10 +333,25 @@ impl SubmissionService {
         Ok(())
     }
 
-    fn handle_submission_finished(&self, mut submission: Submission, problem: &Problem, mut user: User, existing_tests: &Vec<SubmissionTest>, updated_last_test: &SubmissionTest, td: &ITransaction) -> anyhow::Result<()> {
+    fn handle_submission_finished(
+        &self,
+        mut submission: Submission,
+        problem: &Problem,
+        mut user: User,
+        existing_tests: &Vec<SubmissionTest>,
+        updated_last_test: &SubmissionTest,
+        td: &ITransaction,
+    ) -> anyhow::Result<()> {
         submission.finished_at = updated_last_test.finished_at;
-        let existing_tests_without_last = existing_tests.iter().filter(|test| test.id != updated_last_test.id).collect::<Vec<&SubmissionTest>>();
-        if existing_tests_without_last.iter().any(|test| !test.correct.unwrap_or(false)) || !updated_last_test.correct.unwrap_or(false) {
+        let existing_tests_without_last = existing_tests
+            .iter()
+            .filter(|test| test.id != updated_last_test.id)
+            .collect::<Vec<&SubmissionTest>>();
+        if existing_tests_without_last
+            .iter()
+            .any(|test| !test.correct.unwrap_or(false))
+            || !updated_last_test.correct.unwrap_or(false)
+        {
             submission.correct = Some(false);
             self.submission_repo.save(&submission, td)?;
 
@@ -257,13 +364,24 @@ impl SubmissionService {
         Ok(())
     }
 
-    fn submit_test_output(&self, mut test: SubmissionTest, request: &SendTestOutputRequest, user: User, td: &ITransaction) -> anyhow::Result<SubmissionTest> {
-        let (submission, existing_tests) = self.submission_repo.find_by_id_with_tests(test.submission_id, td)?;
+    fn submit_test_output(
+        &self,
+        mut test: SubmissionTest,
+        request: &SendTestOutputRequest,
+        user: User,
+        td: &ITransaction,
+    ) -> anyhow::Result<SubmissionTest> {
+        let (submission, existing_tests) = self
+            .submission_repo
+            .find_by_id_with_tests(test.submission_id, td)?;
         if submission.owner_id != user.id {
             bail!("Current user doesn't own this test.");
         }
 
-        let problem = self.problem_repo.crud().find_by_id(submission.problem_id, td)?;
+        let problem = self
+            .problem_repo
+            .crud()
+            .find_by_id(submission.problem_id, td)?;
         let code_name = CodeName::from_string(&problem.code_name)?;
 
         let support = self.get_problem_support(code_name.clone());
@@ -278,16 +396,31 @@ impl SubmissionService {
         self.submission_repo.save_test(&test, td)?;
 
         if submission.test_count as usize == existing_tests.len() || !verification_result.correct {
-            self.handle_submission_finished(submission, &problem, user, &existing_tests, &test, td)?;
+            self.handle_submission_finished(
+                submission,
+                &problem,
+                user,
+                &existing_tests,
+                &test,
+                td,
+            )?;
         }
 
         Ok(test)
     }
 
-    pub fn send_test_output(&self, user_guard: AuthTokenGuard<ApiToken>, test_id: String, request: SendTestOutputRequest) -> anyhow::Result<SendTestOutputResponse> {
+    pub fn send_test_output(
+        &self,
+        user_guard: AuthTokenGuard<ApiToken>,
+        test_id: String,
+        request: SendTestOutputRequest,
+    ) -> anyhow::Result<SendTestOutputResponse> {
         self.tm.transaction(|td| {
             let test_uuid = UtilsService::parse_uuid(&test_id)?;
-            let test = self.submission_repo.crud_tests().find_by_id(test_uuid, &td)?;
+            let test = self
+                .submission_repo
+                .crud_tests()
+                .find_by_id(test_uuid, &td)?;
             self.assert_can_submit_test_output(&test)?;
 
             let new_test = self.submit_test_output(test, &request, user_guard.user, &td)?;
@@ -298,7 +431,11 @@ impl SubmissionService {
         })
     }
 
-    fn assert_can_upload_proof(&self, submission: &Submission, original_name: &str) -> anyhow::Result<()> {
+    fn assert_can_upload_proof(
+        &self,
+        submission: &Submission,
+        original_name: &str,
+    ) -> anyhow::Result<()> {
         if submission.proof_file_path.is_some() {
             bail!("Proof already uploaded!");
         }
@@ -310,23 +447,41 @@ impl SubmissionService {
         Ok(())
     }
 
-    pub fn upload_proof(&self, user: &mut User, file_data: UploadedFile<ZipFile>, problem_code_name: String, original_name: String) -> anyhow::Result<()> {
+    pub fn upload_proof(
+        &self,
+        user: &mut User,
+        file_data: UploadedFile<ZipFile>,
+        problem_code_name: String,
+        original_name: String,
+    ) -> anyhow::Result<()> {
         self.tm.transaction(|td| {
             CodeName::from_string(&problem_code_name)?;
-            let problem = self.problem_repo.find_problem_by_code(&problem_code_name, &td)?;
-            let mut correct_submission = self.submission_repo.find_correct_submission_for_user_and_problem(user.id, problem.id, &td)?;
+            let problem = self
+                .problem_repo
+                .find_problem_by_code(&problem_code_name, &td)?;
+            let mut correct_submission = self
+                .submission_repo
+                .find_correct_submission_for_user_and_problem(user.id, problem.id, &td)?;
             self.assert_can_upload_proof(&correct_submission, &original_name)?;
 
             let now_str = UtilsService::naive_now().format("%Y-%m-%d-%H:%M:%S");
             let file_name = format!("{}/{}-{}.zip", user.username, problem.code_name, now_str);
 
-            self.file_store.store_file(&file_name, &file_data.local_path)?;
+            self.file_store
+                .store_file(&file_name, &file_data.local_path)?;
 
             correct_submission.proof_file_original_name = Some(original_name);
             correct_submission.proof_file_path = Some(file_name);
             self.submission_repo.save(&correct_submission, &td)?;
 
-            self.handle_user_correct_and_complete_submission_to_problem(user, &problem, &correct_submission.finished_at.unwrap_or(UtilsService::naive_now()), &td)?;
+            self.handle_user_correct_and_complete_submission_to_problem(
+                user,
+                &problem,
+                &correct_submission
+                    .finished_at
+                    .unwrap_or(UtilsService::naive_now()),
+                &td,
+            )?;
             Ok(())
         })
     }

@@ -1,4 +1,4 @@
-use crate::models::problem::problem_statement::{ProblemStatementDto, ProblemStatement};
+use crate::models::problem::problem_statement::{ProblemStatement, ProblemStatementDto};
 use crate::models::problem::Problem;
 
 #[derive(serde::Serialize, serde::Deserialize, rocket_okapi::JsonSchema, Clone)]
@@ -32,7 +32,10 @@ pub struct ProblemFullyPopulatedDto {
 }
 
 impl ProblemFullyPopulatedDto {
-    pub fn from_problem_and_statement(problem: &Problem, statement: &ProblemStatement) -> ProblemFullyPopulatedDto {
+    pub fn from_problem_and_statement(
+        problem: &Problem,
+        statement: &ProblemStatement,
+    ) -> ProblemFullyPopulatedDto {
         ProblemFullyPopulatedDto {
             id: problem.id.to_string(),
             code_name: problem.code_name.clone(),

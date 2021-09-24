@@ -6,19 +6,19 @@ use rocket::request::FromRequest;
 use rocket::{request, Request, State};
 use sha2::Sha256;
 
+use crate::blocklists::BLOCK_LIST;
 use crate::config::AppConfig;
 use crate::db::transaction_manager::{ITransaction, TransactionManager};
 use crate::db::user_repo::{DbUserRepo, IUserRepo};
 use crate::errors::ServiceError;
 use crate::guards::{AuthTokenGuard, RefreshToken};
-use crate::models::user::{NewUser, User};
-use crate::services::utils_service::UtilsService;
-use crate::models::http::responses::{AuthorizingResponse, CheckUserResponse};
 use crate::models::http::access_claim::AccessClaim;
-use crate::models::http::requests::{CheckUserRequest, RegisterRequest, LoginRequest};
-use crate::services::authenticators::ExternalAuthenticatorService;
+use crate::models::http::requests::{CheckUserRequest, LoginRequest, RegisterRequest};
+use crate::models::http::responses::{AuthorizingResponse, CheckUserResponse};
+use crate::models::user::{NewUser, User};
 use crate::services::authenticators::models::{AuthenticationPayload, Authorizer};
-use crate::blocklists::{BLOCK_LIST};
+use crate::services::authenticators::ExternalAuthenticatorService;
+use crate::services::utils_service::UtilsService;
 
 pub const REFRESH_TOKEN_EXPIRATION_SECONDS: u64 = 3 * 24 * 60 * 60;
 // 3 days
@@ -160,7 +160,10 @@ impl AuthService {
 
         for bl in BLOCK_LIST.iter() {
             if username.contains(bl) {
-                return Err(anyhow::Error::msg(format!("Blocked, username contains: {}", bl)));
+                return Err(anyhow::Error::msg(format!(
+                    "Blocked, username contains: {}",
+                    bl
+                )));
             }
         }
 
@@ -170,16 +173,20 @@ impl AuthService {
     pub fn register_user(&self, payload: RegisterRequest) -> anyhow::Result<AuthorizingResponse> {
         self.tm.transaction(|tr| {
             let authorizer = Authorizer::from_string(payload.authorizer.clone())?;
-            let external_auth_result = self.external_authenticator_service.authenticate(AuthenticationPayload {
-                authorizer,
-                token: payload.token.clone(),
-            })?;
+            let external_auth_result =
+                self.external_authenticator_service
+                    .authenticate(AuthenticationPayload {
+                        authorizer,
+                        token: payload.token.clone(),
+                    })?;
 
             self.assert_username_not_blocked(&payload.username)?;
 
-            let existing_user =
-                self.user_repo
-                    .find_by_email_or_username(&external_auth_result.email, &payload.username, &tr);
+            let existing_user = self.user_repo.find_by_email_or_username(
+                &external_auth_result.email,
+                &payload.username,
+                &tr,
+            );
             if existing_user.is_ok() {
                 bail!("User already exists");
             }
@@ -191,18 +198,16 @@ impl AuthService {
     pub fn login_user(&self, payload: LoginRequest) -> anyhow::Result<AuthorizingResponse> {
         self.tm.transaction(|tr| {
             let authorizer = Authorizer::from_string(payload.authorizer.clone())?;
-            let external_auth_result = self.external_authenticator_service.authenticate(AuthenticationPayload {
-                authorizer,
-                token: payload.token.clone(),
-            })?;
+            let external_auth_result =
+                self.external_authenticator_service
+                    .authenticate(AuthenticationPayload {
+                        authorizer,
+                        token: payload.token.clone(),
+                    })?;
 
             let existing_user = self
                 .user_repo
-                .find_by_email_or_username(
-                    &external_auth_result.email,
-                    "",
-                    &tr,
-                )
+                .find_by_email_or_username(&external_auth_result.email, "", &tr)
                 .map_err(|_| anyhow::Error::msg("Email address is not registered!"))?;
 
             if existing_user.authenticator != payload.authorizer {
@@ -220,23 +225,24 @@ impl AuthService {
     pub fn check_user(&self, payload: CheckUserRequest) -> anyhow::Result<CheckUserResponse> {
         self.tm.transaction(|tr| {
             let authorizer = Authorizer::from_string(payload.authorizer.clone())?;
-            let external_auth_result = self.external_authenticator_service.authenticate(AuthenticationPayload {
-                authorizer,
-                token: payload.token,
-            })?;
+            let external_auth_result =
+                self.external_authenticator_service
+                    .authenticate(AuthenticationPayload {
+                        authorizer,
+                        token: payload.token,
+                    })?;
 
             let existing_user = self
                 .user_repo
-                .find_by_email_or_username(
-                    &external_auth_result.email,
-                    "",
-                    &tr,
-                )
+                .find_by_email_or_username(&external_auth_result.email, "", &tr)
                 .ok();
 
             Ok(CheckUserResponse {
                 user_exists: existing_user.is_some(),
-                uses_different_authenticator: !existing_user.as_ref().map(|uu| uu.authenticator.clone()).contains(&payload.authorizer),
+                uses_different_authenticator: !existing_user
+                    .as_ref()
+                    .map(|uu| uu.authenticator.clone())
+                    .contains(&payload.authorizer),
                 user_inactive: existing_user.map_or(false, |usr| usr.is_active),
             })
         })

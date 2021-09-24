@@ -1,9 +1,8 @@
-use std::collections::HashMap;
-use std::env;
-use rocket::config::{Config, Environment, Value, Limits};
+use rocket::config::{Config, Environment, Limits, Value};
 use rocket::fairing::AdHoc;
 use rocket_okapi::swagger_ui::SwaggerUIConfig;
-
+use std::collections::HashMap;
+use std::env;
 
 /// Debug only secret for JWT encoding & decoding.
 const SECRET: &'static str = "KKEZxdXd";
@@ -24,7 +23,6 @@ pub struct AppConfig {
     pub github_client_id: String,
     pub github_secret: String,
     pub github_redirect_url: String,
-
 }
 
 impl AppConfig {
@@ -40,15 +38,20 @@ impl AppConfig {
             });
 
             Ok(rocket.manage(AppConfig {
-                google_client_id: env::var("GOOGLE_CLIENT_ID").expect("No google client id in environment!"),
+                google_client_id: env::var("GOOGLE_CLIENT_ID")
+                    .expect("No google client id in environment!"),
                 secret: secret.into_bytes(),
                 admin_key: env::var("ADMIN_KEY").expect("No admin key in environment!"),
                 aws_access_key: env::var("A_AWS_ACCESS_KEY").expect("No aws key in environment!"),
-                aws_secret_key: env::var("A_SECRET_KEY").expect("No aws secret key in environment!"),
+                aws_secret_key: env::var("A_SECRET_KEY")
+                    .expect("No aws secret key in environment!"),
                 aws_bucket: env::var("A_AWS_BUCKET").expect("No aws bucket in environment!"),
-                github_client_id: env::var("GITHUB_CLIENT_ID").expect("No github client id in environment!"),
-                github_secret: env::var("GITHUB_SECRET").expect("No github client secret in environment!"),
-                github_redirect_url: env::var("GITHUB_REDIRECT_URL").expect("No github redirect utl in environment!"),
+                github_client_id: env::var("GITHUB_CLIENT_ID")
+                    .expect("No github client id in environment!"),
+                github_secret: env::var("GITHUB_SECRET")
+                    .expect("No github client secret in environment!"),
+                github_redirect_url: env::var("GITHUB_REDIRECT_URL")
+                    .expect("No github redirect utl in environment!"),
             }))
         })
     }
@@ -70,8 +73,7 @@ pub fn from_env() -> Config {
     database_config.insert("url", Value::from(database_url));
     databases.insert("diesel_postgres_pool", Value::from(database_config));
 
-    let mut builder =     Config::build(environment)
-        .environment(environment);
+    let mut builder = Config::build(environment).environment(environment);
 
     if env::var("PROD").unwrap_or("false".to_string()) != "true" {
         builder = builder.address("127.0.0.1");
@@ -80,9 +82,11 @@ pub fn from_env() -> Config {
     builder
         .port(port)
         .extra("databases", databases)
-        .limits(Limits::new()
-                    .limit("forms", 3 * 1024 * 1024)
-                    .limit("json", 3 * 1024 * 1024))
+        .limits(
+            Limits::new()
+                .limit("forms", 3 * 1024 * 1024)
+                .limit("json", 3 * 1024 * 1024),
+        )
         .finalize()
         .unwrap()
 }

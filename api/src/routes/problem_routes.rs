@@ -1,8 +1,8 @@
-use rocket_okapi::openapi;
-use crate::models::http::api_result::AnyApiResult;
 use crate::guards::{AccessToken, AuthTokenGuard};
+use crate::models::http::api_result::AnyApiResult;
+use crate::models::http::responses::{GetProblemDetailsResponse, GetProblemsResponse};
 use crate::services::problem_service::ProblemService;
-use crate::models::http::responses::{GetProblemsResponse, GetProblemDetailsResponse};
+use rocket_okapi::openapi;
 
 #[openapi]
 #[get("/problems")]
@@ -11,9 +11,7 @@ pub fn get_problems(
     _user_guard: AuthTokenGuard<AccessToken>,
     problem_service: ProblemService,
 ) -> AnyApiResult<GetProblemsResponse> {
-    problem_service
-        .get_problems()
-        .into()
+    problem_service.get_problems().into()
 }
 
 #[openapi]

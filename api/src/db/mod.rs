@@ -5,14 +5,14 @@ use rocket_contrib::databases::diesel;
 
 use crate::errors::ServiceError;
 
-pub mod team_repo;
+pub mod api_token_repo;
 pub mod crud_repo;
 pub mod pagination;
-pub mod user_repo;
-pub mod api_token_repo;
 pub mod problem_repo;
-pub mod transaction_manager;
 pub mod submission_repo;
+pub mod team_repo;
+pub mod transaction_manager;
+pub mod user_repo;
 
 #[database("diesel_postgres_pool")]
 pub struct ConnPool(diesel::PgConnection);

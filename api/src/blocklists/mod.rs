@@ -16,7 +16,5 @@ fn calc_block_list() -> Vec<&'static str> {
 }
 
 lazy_static! {
-    pub static ref BLOCK_LIST: Vec<&'static str> = {
-        calc_block_list()
-    };
+    pub static ref BLOCK_LIST: Vec<&'static str> = { calc_block_list() };
 }

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use rocket::{request, Request};
 use rocket::request::FromRequest;
+use rocket::{request, Request};
 
 use crate::db::{db_connection_guard, DbConn};
 use crate::diesel::Connection;
@@ -45,9 +45,9 @@ impl TransactionManager {
     }
 
     pub fn transaction<T, E, F>(&self, f: F) -> Result<T, E>
-        where
-            F: FnOnce(ITransaction) -> Result<T, E>,
-            E: std::convert::From<diesel::result::Error>,
+    where
+        F: FnOnce(ITransaction) -> Result<T, E>,
+        E: std::convert::From<diesel::result::Error>,
     {
         if let Some(conn) = self.conn.as_ref() {
             conn.transaction::<T, E, _>(|| {

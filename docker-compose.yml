@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: toor
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - api
+    environment:
+      PORT: 3000
+      REACT_APP_BASE_URL: ASDB
+      REACT_APP_GOOGLE_CLIENT_ID: 123
+      REACT_APP_GITHUB_CLIENT_ID: 123
+      REACT_APP_GITHUB_REDIRECT: 123
+      HTTPS: "true"
+    ports:
+      - 3000:3000
+  api:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - db
+    environment:
+      PORT: 3001
+      SECRET_KEY: ASDB
+      DATABASE_URL: postgres://postgres:toor@db/kado
+      ADMIN_KEY: almafa
+      GOOGLE_CLIENT_ID: aa
+      PROD: "true"
+      LOG_FILTER_LEVEL: debug
+      A_AWS_ACCESS_KEY: aws
+      A_SECRET_KEY: secret
+      A_AWS_BUCKET: bucker
+      GITHUB_CLIENT_ID: client
+      GITHUB_SECRET: secret
+      GITHUB_REDIRECT_URL: redirect
+    ports:
+      - 3001:3001

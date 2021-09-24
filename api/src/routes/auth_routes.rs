@@ -1,12 +1,15 @@
+use crate::guards::{AuthTokenGuard, RefreshToken};
+use crate::models::http::api_result::AnyApiResult;
+use crate::models::http::requests::{
+    CheckUserRequest, ExchangeGithubCodeRequest, LoginRequest, RegisterRequest,
+};
+use crate::models::http::responses::{
+    AuthorizingResponse, CheckUserResponse, ExchangeGithubCodeResponse,
+};
+use crate::services::auth_service::AuthService;
+use crate::services::authenticators::github_authenticator_service::GithubAuthenticatorService;
 use rocket_contrib::json::Json;
 use rocket_okapi::openapi;
-use crate::guards::{AuthTokenGuard, RefreshToken};
-use crate::models::http::api_result::{AnyApiResult};
-use crate::services::auth_service::AuthService;
-use crate::models::http::responses::{AuthorizingResponse, CheckUserResponse, ExchangeGithubCodeResponse};
-use crate::models::http::requests::{CheckUserRequest, RegisterRequest, LoginRequest, ExchangeGithubCodeRequest};
-use crate::services::authenticators::github_authenticator_service::GithubAuthenticatorService;
-
 
 #[openapi]
 #[post("/auth/check-user", format = "json", data = "<request>")]
@@ -15,9 +18,7 @@ pub fn check_user(
     request: Json<CheckUserRequest>,
     auth_service: AuthService,
 ) -> AnyApiResult<CheckUserResponse> {
-    auth_service
-        .check_user(request.0)
-        .into()
+    auth_service.check_user(request.0).into()
 }
 
 #[openapi]
@@ -27,9 +28,7 @@ pub fn register_user(
     request: Json<RegisterRequest>,
     auth_service: AuthService,
 ) -> AnyApiResult<AuthorizingResponse> {
-    auth_service
-        .register_user(request.0)
-        .into()
+    auth_service.register_user(request.0).into()
 }
 
 #[openapi]
@@ -39,11 +38,8 @@ pub fn login_user(
     request: Json<LoginRequest>,
     auth_service: AuthService,
 ) -> AnyApiResult<AuthorizingResponse> {
-    auth_service
-        .login_user(request.0)
-        .into()
+    auth_service.login_user(request.0).into()
 }
-
 
 #[openapi]
 #[post("/auth/refresh")]
@@ -66,8 +62,6 @@ pub fn exchange_github_code(
 ) -> AnyApiResult<ExchangeGithubCodeResponse> {
     github_auth_service
         .exchange_code_for_token(&request.0.code)
-        .map(|token| ExchangeGithubCodeResponse {
-            token,
-        })
+        .map(|token| ExchangeGithubCodeResponse { token })
         .into()
 }

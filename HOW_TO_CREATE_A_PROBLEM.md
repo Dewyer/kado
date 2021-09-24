@@ -5,6 +5,8 @@
   - Create a migration for your problem in /api/migrations examples can be seen there
   - Create a problem statement for it in /admin/statements/<code_name>.md
   - Create a problem support program
+  - Contact @barna to add the support to the rust code
+  - DONE :D
 
 #### Problem support program
 - Determines test count and samples
@@ -75,5 +77,5 @@ interface ProblemSupport {
 }
 ```
 
-- Implement these functions as separate api endpoints
+- Implement these functions as separate api endpoints, all of them have to use POST methods
 - Tell me the routes for these endpoints, all input data is sent as a json, output is required to have the exact schema we expect

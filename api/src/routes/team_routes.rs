@@ -1,10 +1,10 @@
+use crate::guards::{AccessToken, AuthTokenGuard};
+use crate::models::http::api_result::AnyApiResult;
+use crate::models::http::requests::{CreateTeamRequest, JoinTeamRequest, LeaveTeamRequest};
+use crate::models::http::responses::{CreateTeamResponse, GetUsersTeamResponse};
+use crate::services::team_service::TeamService;
 use rocket_contrib::json::Json;
 use rocket_okapi::openapi;
-use crate::models::http::api_result::AnyApiResult;
-use crate::guards::{AccessToken, AuthTokenGuard};
-use crate::models::http::responses::{GetUsersTeamResponse, CreateTeamResponse};
-use crate::services::team_service::TeamService;
-use crate::models::http::requests::{CreateTeamRequest, LeaveTeamRequest, JoinTeamRequest};
 
 #[openapi]
 #[get("/team")]
@@ -13,9 +13,7 @@ pub fn get_authenticated_users_team(
     user_guard: AuthTokenGuard<AccessToken>,
     team_service: TeamService,
 ) -> AnyApiResult<GetUsersTeamResponse> {
-    team_service
-        .get_full_team_for_user(user_guard)
-        .into()
+    team_service.get_full_team_for_user(user_guard).into()
 }
 
 #[openapi]
@@ -26,9 +24,7 @@ pub fn create_team(
     request: Json<CreateTeamRequest>,
     team_service: TeamService,
 ) -> AnyApiResult<CreateTeamResponse> {
-    team_service
-        .create_team(user_guard, request.0)
-        .into()
+    team_service.create_team(user_guard, request.0).into()
 }
 
 #[openapi]
@@ -39,9 +35,7 @@ pub fn join_team(
     request: Json<JoinTeamRequest>,
     team_service: TeamService,
 ) -> AnyApiResult<()> {
-    team_service
-        .join_team(user_guard, request.0)
-        .into()
+    team_service.join_team(user_guard, request.0).into()
 }
 
 #[openapi]
@@ -52,7 +46,5 @@ pub fn leave_team(
     request: Json<LeaveTeamRequest>,
     team_service: TeamService,
 ) -> AnyApiResult<()> {
-    team_service
-        .leave_team(user_guard, request.0)
-        .into()
+    team_service.leave_team(user_guard, request.0).into()
 }

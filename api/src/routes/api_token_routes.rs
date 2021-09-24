@@ -1,8 +1,8 @@
-use rocket_okapi::openapi;
-use crate::models::http::api_result::AnyApiResult;
 use crate::guards::{AccessToken, AuthTokenGuard};
-use crate::models::http::responses::{GetApiTokenResponse};
+use crate::models::http::api_result::AnyApiResult;
+use crate::models::http::responses::GetApiTokenResponse;
 use crate::services::api_token_service::ApiTokenService;
+use rocket_okapi::openapi;
 
 #[openapi]
 #[get("/api-token")]
@@ -11,9 +11,7 @@ pub fn get_api_token(
     user_guard: AuthTokenGuard<AccessToken>,
     api_token_service: ApiTokenService,
 ) -> AnyApiResult<GetApiTokenResponse> {
-    api_token_service
-        .get_api_token_for_user(user_guard)
-        .into()
+    api_token_service.get_api_token_for_user(user_guard).into()
 }
 
 #[openapi]

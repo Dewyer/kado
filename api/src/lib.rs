@@ -25,17 +25,17 @@ use rocket_okapi::swagger_ui::make_swagger_ui;
 use crate::config::get_swagger_config;
 
 mod blocklists;
-mod guards;
 mod config;
 mod db;
 mod errors;
+mod guards;
 mod models;
 mod routes;
 mod schema;
 mod services;
 
-use log::{info, error};
 use crate::services::logger::setup_logger_panic_on_fail;
+use log::{error, info};
 use rocket::fairing::AdHoc;
 use rocket::http::Status;
 
@@ -53,7 +53,7 @@ fn cors_fairing() -> Cors {
         allowed_origins,
         ..CorsOptions::default()
     })
-        .expect("Cors fairing cannot be created")
+    .expect("Cors fairing cannot be created")
 }
 
 pub fn rocket() -> rocket::Rocket {
@@ -88,16 +88,25 @@ pub fn rocket() -> rocket::Rocket {
                 routes::auth_routes::exchange_github_code,
             ],
         )
-        .mount("/files/api", routes![
-            routes::submission_routes::upload_proof_api,
-            routes::submission_routes::upload_proof_frontend,
-        ])
+        .mount(
+            "/files/api",
+            routes![
+                routes::submission_routes::upload_proof_api,
+                routes::submission_routes::upload_proof_frontend,
+            ],
+        )
         .mount("/swagger", make_swagger_ui(&get_swagger_config()))
         .attach(db::ConnPool::fairing())
         .attach(cors_fairing())
         .attach(AdHoc::on_response("Log errors", |req, resp| {
             if resp.status().code != 200 {
-                error!("Request error - {}, at: {}", resp.status(), req.route().map(|rr| rr.uri.to_string()).unwrap_or("".to_string()));
+                error!(
+                    "Request error - {}, at: {}",
+                    resp.status(),
+                    req.route()
+                        .map(|rr| rr.uri.to_string())
+                        .unwrap_or("".to_string())
+                );
             }
         }))
         .attach(config::AppConfig::manage())

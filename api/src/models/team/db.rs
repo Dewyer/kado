@@ -1,8 +1,8 @@
-use serde::Serialize;
-use uuid::Uuid;
+use crate::models::team::TeamLeaderboardEntryDto;
 use crate::schema::teams;
 use chrono::NaiveDateTime;
-use crate::models::team::TeamLeaderboardEntryDto;
+use serde::Serialize;
+use uuid::Uuid;
 
 #[derive(Queryable, Serialize, AsChangeset)]
 #[table_name = "teams"]
@@ -37,7 +37,11 @@ impl Team {
         TeamLeaderboardEntryDto {
             id: self.id.to_string(),
             rank,
-            name: if anonymous { "anonymous".to_string() } else { self.name.clone() },
+            name: if anonymous {
+                "anonymous".to_string()
+            } else {
+                self.name.clone()
+            },
             points: self.points,
         }
     }

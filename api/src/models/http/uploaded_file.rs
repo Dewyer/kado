@@ -1,15 +1,15 @@
-use rocket::request::FromRequest;
 use crate::errors::{ServiceError, UploadFileError};
-use rocket::{Request, request, Data, data};
-use rocket::http::{ContentType, Status};
-use multipart_any::server::{Multipart, Entries, SaveResult};
-use multipart_any::server::save::SaveResult::{Full, Partial, Error};
-use multipart_any::server::save::SavedData;
-use std::sync::Arc;
-use rocket::data::{FromDataSimple , Transform, Outcome};
-use std::path::{Path, PathBuf};
 use crate::services::crypto_service::CryptoService;
+use multipart_any::server::save::SaveResult::{Error, Full, Partial};
+use multipart_any::server::save::SavedData;
+use multipart_any::server::{Entries, Multipart, SaveResult};
+use rocket::data::{FromDataSimple, Outcome, Transform};
+use rocket::http::{ContentType, Status};
+use rocket::request::FromRequest;
+use rocket::{data, request, Data, Request};
 use std::marker::PhantomData;
+use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 pub trait FileMimeTrait {
     fn content_type() -> String;
@@ -17,8 +17,7 @@ pub trait FileMimeTrait {
     fn name() -> String;
 }
 
-pub struct ZipFile {
-}
+pub struct ZipFile {}
 
 impl FileMimeTrait for ZipFile {
     fn content_type() -> String {
@@ -57,12 +56,16 @@ impl<Mime: FileMimeTrait> UploadedFile<Mime> {
     }
 
     fn from_entries(entries: Entries) -> anyhow::Result<UploadedFile<Mime>> {
-        let files = entries.fields
+        let files = entries
+            .fields
             .into_iter()
             .find(|el| el.0 == Arc::from("file"))
             .map(|el| el.1)
             .ok_or_else(|| anyhow::Error::msg("no file field!"))?;
-        let file = files.into_iter().next().ok_or_else(|| anyhow::Error::msg("no file field!"))?;
+        let file = files
+            .into_iter()
+            .next()
+            .ok_or_else(|| anyhow::Error::msg("no file field!"))?;
 
         if let SavedData::File(file_path_buf, _) = file.data {
             let kind = infer::get_from_path(file_path_buf.clone())
@@ -70,7 +73,10 @@ impl<Mime: FileMimeTrait> UploadedFile<Mime> {
                 .ok_or_else(|| anyhow::Error::msg("File type unknown"))?;
 
             if kind.mime_type() != Mime::content_type() {
-                return Err(anyhow::Error::msg(format!("File type not {}", Mime::name())));
+                return Err(anyhow::Error::msg(format!(
+                    "File type not {}",
+                    Mime::name()
+                )));
             }
 
             let temp_f = Self::save_longer_temporarily(file_path_buf)?;
@@ -81,13 +87,15 @@ impl<Mime: FileMimeTrait> UploadedFile<Mime> {
     }
 
     pub fn from_multipart_data(boundary: &str, data: Data) -> anyhow::Result<UploadedFile<Mime>> {
-        Ok(match Multipart::with_body(data.open(), boundary).save().temp() {
-            Full(entries) => Self::from_entries(entries)?,
-            Partial(_, _) => {
-                return Err(anyhow::Error::msg("Partial request processing"));
+        Ok(
+            match Multipart::with_body(data.open(), boundary).save().temp() {
+                Full(entries) => Self::from_entries(entries)?,
+                Partial(_, _) => {
+                    return Err(anyhow::Error::msg("Partial request processing"));
+                }
+                Error(_) => return Err(anyhow::Error::msg("Failed to multipart form!")),
             },
-            Error(_) => return Err(anyhow::Error::msg("Failed to multipart form!")),
-        })
+        )
     }
 }
 
@@ -104,14 +112,11 @@ impl<Mime: FileMimeTrait> FromDataSimple for UploadedFile<Mime> {
                     Err(_) => data::Outcome::Failure((
                         Status::BadRequest,
                         UploadFileError::FileUploadFailed,
-                    ))
+                    )),
                 };
             }
         }
 
-        data::Outcome::Failure((
-            Status::BadRequest,
-            UploadFileError::FileUploadFailed,
-        ))
+        data::Outcome::Failure((Status::BadRequest, UploadFileError::FileUploadFailed))
     }
 }

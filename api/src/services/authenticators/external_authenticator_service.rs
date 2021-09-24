@@ -1,11 +1,11 @@
-use rocket::request::FromRequest;
 use crate::errors::ServiceError;
-use rocket::{Request, request};
-use crate::services::authenticators::google_authenticator_service::GoogleAuthenticatorService;
-use crate::services::authenticators::models::{AuthenticationPayload, AuthenticationResult};
-use crate::services::authenticators::models::Authorizer;
-use crate::services::authenticators::authenticator::{IAuthenticator};
+use crate::services::authenticators::authenticator::IAuthenticator;
 use crate::services::authenticators::github_authenticator_service::GithubAuthenticatorService;
+use crate::services::authenticators::google_authenticator_service::GoogleAuthenticatorService;
+use crate::services::authenticators::models::Authorizer;
+use crate::services::authenticators::models::{AuthenticationPayload, AuthenticationResult};
+use rocket::request::FromRequest;
+use rocket::{request, Request};
 
 pub struct ExternalAuthenticatorService {
     google_authenticator_service: IAuthenticator,
@@ -23,7 +23,10 @@ impl ExternalAuthenticatorService {
         }
     }
 
-    pub fn authenticate(&self, payload: AuthenticationPayload) -> anyhow::Result<AuthenticationResult> {
+    pub fn authenticate(
+        &self,
+        payload: AuthenticationPayload,
+    ) -> anyhow::Result<AuthenticationResult> {
         match payload.authorizer {
             Authorizer::Google => self.google_authenticator_service.authenticate(payload),
             Authorizer::Github => self.github_authenticator_service.authenticate(payload),
@@ -34,7 +37,9 @@ impl ExternalAuthenticatorService {
 impl<'a, 'r> FromRequest<'a, 'r> for ExternalAuthenticatorService {
     type Error = ServiceError;
 
-    fn from_request(req: &'a Request<'r>) -> request::Outcome<ExternalAuthenticatorService, Self::Error> {
+    fn from_request(
+        req: &'a Request<'r>,
+    ) -> request::Outcome<ExternalAuthenticatorService, Self::Error> {
         let google_authenticator_service = req.guard::<GoogleAuthenticatorService>()?;
         let github_authenticator_service = req.guard::<GithubAuthenticatorService>()?;
 

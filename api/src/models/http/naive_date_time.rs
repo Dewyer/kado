@@ -2,8 +2,8 @@ use std::ops::Deref;
 
 use chrono::NaiveDateTime;
 use schemars::gen::SchemaGenerator;
-use schemars::JsonSchema;
 use schemars::schema::{InstanceType, Schema, SchemaObject};
+use schemars::JsonSchema;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct ApiNaiveDateTime(pub NaiveDateTime);
@@ -22,7 +22,7 @@ impl JsonSchema for ApiNaiveDateTime {
             format: None,
             ..Default::default()
         }
-            .into()
+        .into()
     }
 }
 

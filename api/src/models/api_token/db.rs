@@ -1,7 +1,7 @@
-use uuid::Uuid;
+use crate::models::api_token::ApiTokenDto;
 use crate::schema::api_tokens;
 use serde::Serialize;
-use crate::models::api_token::ApiTokenDto;
+use uuid::Uuid;
 
 #[derive(Queryable, Serialize, AsChangeset)]
 #[table_name = "api_tokens"]

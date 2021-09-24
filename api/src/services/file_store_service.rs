@@ -1,30 +1,32 @@
-use s3::{Bucket, Region};
-use s3::creds::Credentials;
-use rocket::request::FromRequest;
-use crate::errors::ServiceError;
-use rocket::{Request, request, State, Data};
 use crate::config::AppConfig;
-use rocket::http::Status;
-use std::path::Path;
+use crate::errors::ServiceError;
 use crate::services::crypto_service::CryptoService;
+use rocket::http::Status;
+use rocket::request::FromRequest;
+use rocket::{request, Data, Request, State};
+use s3::creds::Credentials;
+use s3::{Bucket, Region};
 use std::fs;
+use std::path::Path;
 
 pub struct FileStoreService {
     config: AppConfig,
 }
 
 impl FileStoreService {
-    pub fn new(
-        config: AppConfig,
-    ) -> Self {
-        Self {
-            config,
-        }
+    pub fn new(config: AppConfig) -> Self {
+        Self { config }
     }
 
     pub fn store_file(&self, file_name: &str, temp_path: &str) -> anyhow::Result<()> {
-        let credentials = Credentials::new(Some(&self.config.aws_access_key), Some(&self.config.aws_secret_key),None,None, None)
-            .map_err(|_| anyhow::Error::msg("Cant parse credentials"))?;
+        let credentials = Credentials::new(
+            Some(&self.config.aws_access_key),
+            Some(&self.config.aws_secret_key),
+            None,
+            None,
+            None,
+        )
+        .map_err(|_| anyhow::Error::msg("Cant parse credentials"))?;
         let region = "eu-central-1".parse().unwrap();
 
         let bucket = Bucket::new(&self.config.aws_bucket, region, credentials)
@@ -33,7 +35,8 @@ impl FileStoreService {
         let temp_name = Path::new(&temp_path);
         let cont = fs::read(temp_name.clone()).map_err(|_| anyhow::Error::msg("read err"))?;
 
-        let (_, code) = bucket.put_object_blocking(&file_name,&cont[..])
+        let (_, code) = bucket
+            .put_object_blocking(&file_name, &cont[..])
             .map_err(|err| {
                 println!("internal err: {:?}", err);
 
@@ -59,8 +62,6 @@ impl<'a, 'r> FromRequest<'a, 'r> for FileStoreService {
             )
         })?;
 
-        request::Outcome::Success(FileStoreService::new(
-            config.inner().clone(),
-        ))
+        request::Outcome::Success(FileStoreService::new(config.inner().clone()))
     }
 }

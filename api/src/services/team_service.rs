@@ -1,16 +1,16 @@
-use crate::db::transaction_manager::{TransactionManager, ITransaction};
-use rocket::request::FromRequest;
+use crate::db::team_repo::{DbTeamRepo, ITeamRepo};
+use crate::db::transaction_manager::{ITransaction, TransactionManager};
+use crate::db::user_repo::{DbUserRepo, IUserRepo};
 use crate::errors::ServiceError;
-use rocket::{Request, request};
-use crate::models::team::{TeamFullyPopulatedDto, Team, NewTeam};
-use crate::guards::{AuthTokenGuard, AccessToken};
-use crate::models::http::responses::{GetUsersTeamResponse, CreateTeamResponse};
-use crate::db::team_repo::{ITeamRepo, DbTeamRepo};
-use crate::models::http::requests::{CreateTeamRequest, LeaveTeamRequest, JoinTeamRequest};
+use crate::guards::{AccessToken, AuthTokenGuard};
+use crate::models::http::requests::{CreateTeamRequest, JoinTeamRequest, LeaveTeamRequest};
+use crate::models::http::responses::{CreateTeamResponse, GetUsersTeamResponse};
+use crate::models::team::{NewTeam, Team, TeamFullyPopulatedDto};
 use crate::models::user::User;
 use crate::services::crypto_service::CryptoService;
-use crate::db::user_repo::{IUserRepo, DbUserRepo};
 use crate::services::utils_service::UtilsService;
+use rocket::request::FromRequest;
+use rocket::{request, Request};
 
 pub struct TeamService {
     user_repo: IUserRepo,
@@ -19,11 +19,7 @@ pub struct TeamService {
 }
 
 impl TeamService {
-    pub fn new(
-        user_repo: IUserRepo,
-        team_repo: ITeamRepo,
-        tm: TransactionManager,
-    ) -> Self {
+    pub fn new(user_repo: IUserRepo, team_repo: ITeamRepo, tm: TransactionManager) -> Self {
         Self {
             user_repo,
             team_repo,
@@ -39,22 +35,21 @@ impl TeamService {
             let user = user_guard.user;
 
             if let Some(team_id) = user.team_id.clone() {
-                let team_opt = self.team_repo.find_by_id_with_users(team_id, &td)
-                    .ok();
+                let team_opt = self.team_repo.find_by_id_with_users(team_id, &td).ok();
                 if let Some(team) = team_opt {
                     let is_logged_in_user_owner = team.0.owner_user.contains(&user.id);
                     Ok(GetUsersTeamResponse {
-                        team: Some(TeamFullyPopulatedDto::from_team_and_users(&team.0, &team.1, is_logged_in_user_owner)),
+                        team: Some(TeamFullyPopulatedDto::from_team_and_users(
+                            &team.0,
+                            &team.1,
+                            is_logged_in_user_owner,
+                        )),
                     })
                 } else {
-                    Ok(GetUsersTeamResponse {
-                        team: None,
-                    })
+                    Ok(GetUsersTeamResponse { team: None })
                 }
             } else {
-                Ok(GetUsersTeamResponse {
-                    team: None,
-                })
+                Ok(GetUsersTeamResponse { team: None })
             }
         })
     }
@@ -63,11 +58,15 @@ impl TeamService {
         CryptoService::get_random_string(8)
     }
 
-    pub fn assert_user_can_create_team(&self, user: &User, payload: &CreateTeamRequest, td: &ITransaction) -> anyhow::Result<()> {
+    pub fn assert_user_can_create_team(
+        &self,
+        user: &User,
+        payload: &CreateTeamRequest,
+        td: &ITransaction,
+    ) -> anyhow::Result<()> {
         if let Some(user_team_id) = user.team_id.clone() {
             let team_res = self.team_repo.find_by_id_not_deleted(user_team_id, &td);
-            if team_res.is_ok()
-            {
+            if team_res.is_ok() {
                 bail!("Can't create a new team while already in one!");
             }
         }
@@ -80,21 +79,28 @@ impl TeamService {
         Ok(())
     }
 
-    pub fn create_team(&self, user_guard: AuthTokenGuard<AccessToken>, payload: CreateTeamRequest) -> anyhow::Result<CreateTeamResponse> {
+    pub fn create_team(
+        &self,
+        user_guard: AuthTokenGuard<AccessToken>,
+        payload: CreateTeamRequest,
+    ) -> anyhow::Result<CreateTeamResponse> {
         self.tm.transaction(|td| {
             let mut user = user_guard.user;
             self.assert_user_can_create_team(&user, &payload, &td)?;
 
-            let new_team = self.team_repo.crud().insert(&NewTeam {
-                name: &payload.name,
-                join_code: &self.get_new_join_code_for_team(),
-                owner_user: Some(user.id),
-                points: 0,
-                participate_in_leaderboards: payload.participate_in_leaderboards,
-                last_gained_points_at: None,
-                is_deleted: false,
-                created_at: UtilsService::naive_now(),
-            }, &td)?;
+            let new_team = self.team_repo.crud().insert(
+                &NewTeam {
+                    name: &payload.name,
+                    join_code: &self.get_new_join_code_for_team(),
+                    owner_user: Some(user.id),
+                    points: 0,
+                    participate_in_leaderboards: payload.participate_in_leaderboards,
+                    last_gained_points_at: None,
+                    is_deleted: false,
+                    created_at: UtilsService::naive_now(),
+                },
+                &td,
+            )?;
 
             user.team_id = Some(new_team.id);
             self.user_repo.save(&user, &td)?;
@@ -134,7 +140,10 @@ impl TeamService {
         if !team_users.iter().any(|el| el.id == inheritor_uuid) {
             bail!("Inheritor is not in the team!");
         }
-        self.user_repo.crud().find_by_id(inheritor_uuid, &td).map_err(|_| anyhow::Error::msg("Inheritor not found!"))?;
+        self.user_repo
+            .crud()
+            .find_by_id(inheritor_uuid, &td)
+            .map_err(|_| anyhow::Error::msg("Inheritor not found!"))?;
 
         team.owner_user = Some(inheritor_uuid);
         self.team_repo.save(&team, &td)?;
@@ -142,11 +151,17 @@ impl TeamService {
         Ok(())
     }
 
-    pub fn leave_team(&self, user_guard: AuthTokenGuard<AccessToken>, payload: LeaveTeamRequest) -> anyhow::Result<()> {
+    pub fn leave_team(
+        &self,
+        user_guard: AuthTokenGuard<AccessToken>,
+        payload: LeaveTeamRequest,
+    ) -> anyhow::Result<()> {
         self.tm.transaction(|td| {
             let mut user = user_guard.user;
             self.assert_user_can_leave_team(&user)?;
-            let mut team_and_users = self.team_repo.find_by_id_with_users(user.team_id.unwrap(), &td)?;
+            let mut team_and_users = self
+                .team_repo
+                .find_by_id_with_users(user.team_id.unwrap(), &td)?;
 
             user.team_id = None;
             self.user_repo.save(&user, &td)?;
@@ -167,7 +182,11 @@ impl TeamService {
         Ok(())
     }
 
-    pub fn join_team(&self, user_guard: AuthTokenGuard<AccessToken>, payload: JoinTeamRequest) -> anyhow::Result<()> {
+    pub fn join_team(
+        &self,
+        user_guard: AuthTokenGuard<AccessToken>,
+        payload: JoinTeamRequest,
+    ) -> anyhow::Result<()> {
         self.tm.transaction(|td| {
             let mut user = user_guard.user;
             self.assert_user_can_join_team(&user)?;

@@ -1,8 +1,8 @@
+use crate::models::submission::{SubmissionDto, SubmissionMinimalDto};
+use crate::schema::submissions;
+use chrono::NaiveDateTime;
 use serde::Serialize;
 use uuid::Uuid;
-use chrono::NaiveDateTime;
-use crate::schema::submissions;
-use crate::models::submission::{SubmissionDto, SubmissionMinimalDto};
 
 #[derive(Queryable, Serialize, AsChangeset, Clone)]
 #[table_name = "submissions"]

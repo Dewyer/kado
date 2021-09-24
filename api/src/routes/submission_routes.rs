@@ -1,13 +1,17 @@
-use rocket_okapi::openapi;
+use crate::guards::{AccessToken, ApiToken, AuthTokenGuard};
 use crate::models::http::api_result::{AnyApiResult, ErrorResponse, OkErrorResponse};
-use crate::guards::{ApiToken, AuthTokenGuard, AccessToken};
-use crate::services::submission::submission_service::SubmissionService;
-use rocket_contrib::json::Json;
-use crate::models::http::requests::{StartSubmissionRequest, SendTestOutputRequest, GetTestInputRequest};
-use crate::models::http::responses::{StartSubmissionResponse, GetTestInputResponse, SendTestOutputResponse};
-use rocket::Data;
-use rocket::http::ContentType;
+use crate::models::http::requests::{
+    GetTestInputRequest, SendTestOutputRequest, StartSubmissionRequest,
+};
+use crate::models::http::responses::{
+    GetTestInputResponse, SendTestOutputResponse, StartSubmissionResponse,
+};
 use crate::models::http::uploaded_file::{UploadedFile, ZipFile};
+use crate::services::submission::submission_service::SubmissionService;
+use rocket::http::ContentType;
+use rocket::Data;
+use rocket_contrib::json::Json;
+use rocket_okapi::openapi;
 
 #[openapi]
 #[post("/submissions/start-submission", format = "json", data = "<request>")]
@@ -49,7 +53,10 @@ pub fn send_test_output(
         .into()
 }
 
-#[post("/submissions/code-upload/<problem_code>/<original_name>", data="<file>")]
+#[post(
+    "/submissions/code-upload/<problem_code>/<original_name>",
+    data = "<file>"
+)]
 pub fn upload_proof_api(
     problem_code: String,
     original_name: String,
@@ -57,14 +64,25 @@ pub fn upload_proof_api(
     user_guard: AuthTokenGuard<ApiToken>,
     submission_service: SubmissionService,
 ) -> Json<OkErrorResponse> {
-    let res = submission_service.upload_proof(&mut user_guard.user.clone(), file, problem_code, original_name);
+    let res = submission_service.upload_proof(
+        &mut user_guard.user.clone(),
+        file,
+        problem_code,
+        original_name,
+    );
     Json(OkErrorResponse {
-        error: if let Err(err) = res { format!("{}", err) } else { "".to_string() },
+        error: if let Err(err) = res {
+            format!("{}", err)
+        } else {
+            "".to_string()
+        },
     })
 }
 
-
-#[post("/submissions/code-upload-with-token/<problem_code>/<original_name>", data = "<file>")]
+#[post(
+    "/submissions/code-upload-with-token/<problem_code>/<original_name>",
+    data = "<file>"
+)]
 pub fn upload_proof_frontend(
     problem_code: String,
     original_name: String,
@@ -72,8 +90,17 @@ pub fn upload_proof_frontend(
     user_guard: AuthTokenGuard<AccessToken>,
     submission_service: SubmissionService,
 ) -> Json<OkErrorResponse> {
-    let res = submission_service.upload_proof(&mut user_guard.user.clone(), file, problem_code, original_name);
+    let res = submission_service.upload_proof(
+        &mut user_guard.user.clone(),
+        file,
+        problem_code,
+        original_name,
+    );
     Json(OkErrorResponse {
-        error: if let Err(err) = res { format!("{}", err) } else { "".to_string() },
+        error: if let Err(err) = res {
+            format!("{}", err)
+        } else {
+            "".to_string()
+        },
     })
 }

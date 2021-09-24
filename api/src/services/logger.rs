@@ -1,6 +1,6 @@
-use std::str::FromStr;
 use crate::services::utils_service::UtilsService;
 use std::env;
+use std::str::FromStr;
 
 pub(crate) fn setup_logger_panic_on_fail() {
     let log_filter = env::var("LOG_FILTER_LEVEL").expect("No log filter level in environment!");

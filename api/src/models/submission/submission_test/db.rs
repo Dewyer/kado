@@ -1,9 +1,9 @@
+use crate::schema::submission_tests;
+use chrono::NaiveDateTime;
 use serde::Serialize;
 use uuid::Uuid;
-use chrono::NaiveDateTime;
-use crate::schema::submission_tests;
 
-#[derive(Queryable, Serialize, AsChangeset)]
+#[derive(Queryable, Serialize, AsChangeset, Clone, serde::Deserialize)]
 #[table_name = "submission_tests"]
 #[changeset_options(treat_none_as_null = "true")]
 pub struct SubmissionTest {

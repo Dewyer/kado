@@ -1,5 +1,5 @@
-use crate::models::user::{UserDto, User};
 use crate::models::team::Team;
+use crate::models::user::{User, UserDto};
 
 #[derive(serde::Serialize, serde::Deserialize, rocket_okapi::JsonSchema)]
 pub struct TeamFullyPopulatedDto {
@@ -13,15 +13,29 @@ pub struct TeamFullyPopulatedDto {
 }
 
 impl TeamFullyPopulatedDto {
-    pub fn from_team_and_users(team: &Team, users: &Vec<User>, can_see_join_code: bool) -> TeamFullyPopulatedDto {
-        let members = users.into_iter().map(|usr| usr.to_dto()).collect::<Vec<UserDto>>();
+    pub fn from_team_and_users(
+        team: &Team,
+        users: &Vec<User>,
+        can_see_join_code: bool,
+    ) -> TeamFullyPopulatedDto {
+        let members = users
+            .into_iter()
+            .map(|usr| usr.to_dto())
+            .collect::<Vec<UserDto>>();
         let team_id_str = team.owner_user.map(|ow| ow.to_string());
-        let owner_user = members.iter().find(|user| team_id_str.contains(&user.id)).map(|usr| usr.clone());
+        let owner_user = members
+            .iter()
+            .find(|user| team_id_str.contains(&user.id))
+            .map(|usr| usr.clone());
 
         TeamFullyPopulatedDto {
             id: team.id.to_string(),
             name: team.name.clone(),
-            join_code: if can_see_join_code { Some(team.join_code.clone()) } else { None },
+            join_code: if can_see_join_code {
+                Some(team.join_code.clone())
+            } else {
+                None
+            },
             points: team.points,
             last_gained_points_at: team.last_gained_points_at.map(|dt| dt.to_string()),
             owner_user,

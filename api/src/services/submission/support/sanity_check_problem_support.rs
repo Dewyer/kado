@@ -1,7 +1,11 @@
-use crate::services::submission::support::{ProblemSupport, SubmissionGenerationPayload, SubmissionGenerationResult, SubmissionTestGenerationPayload, SubmissionTestGenerationResult, VerificationPayload, VerificationResult};
+use crate::services::submission::support::{
+    ProblemSupport, SubmissionGenerationPayload, SubmissionGenerationResult,
+    SubmissionTestGenerationPayload, SubmissionTestGenerationResult, VerificationPayload,
+    VerificationResult,
+};
 use rand::prelude::*;
-use rand::{RngCore, SeedableRng, rngs::StdRng};
-use rand_distr::{Uniform, Distribution};
+use rand::{rngs::StdRng, RngCore, SeedableRng};
+use rand_distr::{Distribution, Uniform};
 use std::collections::{HashMap, HashSet};
 
 pub struct SanityCheckProblemSupport {}
@@ -23,7 +27,7 @@ pub struct SanityCheckInput {
     pub meta: SanityCheckInputMeta,
 }
 
-#[derive(serde::Serialize,serde::Deserialize, Debug)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct SanityCheckOutput {
     pub insane_numbers: Vec<usize>,
 }
@@ -31,25 +35,15 @@ pub struct SanityCheckOutput {
 const MAX_INPUTS: i64 = 10000;
 pub type IRng = StdRng;
 
-
 lazy_static! {
     pub static ref SAMPLES: Vec<SanityCheckInput> = {
         vec![
             SanityCheckInput {
-                meta: SanityCheckInputMeta {
-                    set_length: 4,
-                },
-                set: vec![
-                    1,
-                    233,
-                    100,
-                    64
-                ]
+                meta: SanityCheckInputMeta { set_length: 4 },
+                set: vec![1, 233, 100, 64],
             },
             SanityCheckInput {
-                meta: SanityCheckInputMeta {
-                    set_length: 12,
-                },
+                meta: SanityCheckInputMeta { set_length: 12 },
                 set: vec![
                     424242424242424,
                     42,
@@ -62,8 +56,8 @@ lazy_static! {
                     2424,
                     4242,
                     24242,
-                    2424
-                ]
+                    2424,
+                ],
             },
         ]
     };
@@ -80,16 +74,14 @@ impl SanityCheckProblemSupport {
         let mut set = vec![];
         let unf = Uniform::new(10usize.pow(payload.test_index as u32), MAX_INPUTS as usize);
         let set_length = unf.sample(&mut rng);
-        let unf_small = Uniform::new(0, 10usize.pow(payload.test_index as u32 * 3u32 + 2u32 ));
+        let unf_small = Uniform::new(0, 10usize.pow(payload.test_index as u32 * 3u32 + 2u32));
 
         for _ in 0..set_length {
             set.push(unf_small.sample(&mut rng));
         }
 
         SanityCheckInput {
-            meta: SanityCheckInputMeta {
-                set_length,
-            },
+            meta: SanityCheckInputMeta { set_length },
             set,
         }
     }
@@ -117,9 +109,7 @@ impl SanityCheckProblemSupport {
             }
         }
 
-        Ok(SanityCheckOutput {
-            insane_numbers,
-        })
+        Ok(SanityCheckOutput { insane_numbers })
     }
 
     fn are_outputs_conforming(correct: &SanityCheckOutput, to_test: &SanityCheckOutput) -> bool {
@@ -148,15 +138,22 @@ impl SanityCheckProblemSupport {
 }
 
 impl ProblemSupport for SanityCheckProblemSupport {
-    fn generate_submission_details(&self, payload: SubmissionGenerationPayload) -> anyhow::Result<SubmissionGenerationResult> {
+    fn generate_submission_details(
+        &self,
+        payload: SubmissionGenerationPayload,
+    ) -> anyhow::Result<SubmissionGenerationResult> {
         Ok(SubmissionGenerationResult {
             test_count: if payload.sample_index.is_some() { 1 } else { 4 },
         })
     }
 
-    fn generate_submission_test_input(&self, payload: SubmissionTestGenerationPayload) -> anyhow::Result<SubmissionTestGenerationResult> {
+    fn generate_submission_test_input(
+        &self,
+        payload: SubmissionTestGenerationPayload,
+    ) -> anyhow::Result<SubmissionTestGenerationResult> {
         if let Some(sample_index) = payload.sample_index {
-            let sample = SAMPLES.get(sample_index as usize)
+            let sample = SAMPLES
+                .get(sample_index as usize)
                 .ok_or_else(|| anyhow::Error::msg("Sample not found!"))?;
 
             return Ok(SubmissionTestGenerationResult {
@@ -179,12 +176,10 @@ impl ProblemSupport for SanityCheckProblemSupport {
     fn verify_output(&self, payload: VerificationPayload) -> anyhow::Result<VerificationResult> {
         let expected_output = Self::solver(&payload.test.input)?;
         let got_output = serde_json::from_value::<SanityCheckOutput>(payload.output.clone())
-            .map_err(|_|  anyhow::Error::msg("Output is invalid!"))?;
+            .map_err(|_| anyhow::Error::msg("Output is invalid!"))?;
 
         let correct = Self::are_outputs_conforming(&expected_output, &got_output);
 
-        Ok(VerificationResult {
-            correct,
-        })
+        Ok(VerificationResult { correct })
     }
 }

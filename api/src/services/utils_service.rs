@@ -1,6 +1,6 @@
-use uuid::Uuid;
+use chrono::{NaiveDateTime, Utc};
 use rocket::Request;
-use chrono::{Utc, NaiveDateTime};
+use uuid::Uuid;
 
 pub const AUTHORIZATION_HEADER: &'static str = "Authorization";
 

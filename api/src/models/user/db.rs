@@ -1,9 +1,9 @@
+use crate::models::team::Team;
+use crate::models::user::{UserDto, UserLeaderboardEntryDto};
+use crate::schema::users;
+use chrono::NaiveDateTime;
 use serde::Serialize;
 use uuid::Uuid;
-use chrono::NaiveDateTime;
-use crate::schema::users;
-use crate::models::user::{UserDto, UserLeaderboardEntryDto};
-use crate::models::team::Team;
 
 #[derive(Queryable, Serialize, AsChangeset, Clone)]
 #[table_name = "users"]
@@ -51,13 +51,26 @@ impl User {
         }
     }
 
-    pub fn to_leaderboard_dto(&self, rank: usize, team: Option<Team>, anonymous: bool) -> UserLeaderboardEntryDto {
+    pub fn to_leaderboard_dto(
+        &self,
+        rank: usize,
+        team: Option<Team>,
+        anonymous: bool,
+    ) -> UserLeaderboardEntryDto {
         UserLeaderboardEntryDto {
             id: self.id.to_string(),
             rank,
-            username: if anonymous { "anonymous".to_string() } else { self.username.clone() },
+            username: if anonymous {
+                "anonymous".to_string()
+            } else {
+                self.username.clone()
+            },
             individual_points: self.individual_points,
-            team_name: if anonymous { None } else { team.map(|tt| tt.name.clone()) } ,
+            team_name: if anonymous {
+                None
+            } else {
+                team.map(|tt| tt.name.clone())
+            },
         }
     }
 }

@@ -1,8 +1,4 @@
-use crate::services::authenticators::models::{
-    AuthenticationResult,
-    AuthenticationPayload,
-};
-
+use crate::services::authenticators::models::{AuthenticationPayload, AuthenticationResult};
 
 pub trait Authenticator {
     fn authenticate(&self, payload: AuthenticationPayload) -> anyhow::Result<AuthenticationResult>;

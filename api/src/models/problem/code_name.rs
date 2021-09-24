@@ -9,7 +9,7 @@ impl CodeName {
     pub fn from_string(code_name: &str) -> anyhow::Result<CodeName> {
         match &code_name.to_lowercase()[..] {
             SANITY_CHECK_NAME => Ok(CodeName::SanityCheck),
-            _ => { Err(anyhow::Error::msg("Problem id invalid!")) }
+            _ => Err(anyhow::Error::msg("Problem id invalid!")),
         }
     }
 

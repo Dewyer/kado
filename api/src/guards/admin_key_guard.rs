@@ -1,9 +1,9 @@
 use crate::errors::AuthError;
-use rocket::request::FromRequest;
-use rocket::{Request, request};
 use crate::services::auth_service::AuthService;
-use rocket::http::Status;
 use crate::services::utils_service::UtilsService;
+use rocket::http::Status;
+use rocket::request::FromRequest;
+use rocket::{request, Request};
 
 pub const ADMIN_KEY_HEADER: &'static str = "X-Admin-Key";
 
