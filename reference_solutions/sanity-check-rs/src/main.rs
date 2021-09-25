@@ -17,7 +17,7 @@ pub struct SanityCheckOutput {
     pub insane_numbers: Vec<usize>,
 }
 
-const API_TOKEN: &'static str = "ZE0CpCNKF0BHVqJZ";
+const API_TOKEN: &'static str = "1WtOH9qaWYpbk7Dh";
 
 fn sleep(secs: u64) {
     let dur = std::time::Duration::from_secs(secs);
@@ -37,7 +37,7 @@ fn main() {
 
     for _ in 0..sub_res.submission.test_count {
         println!("Beginning test ...");
-        sleep(2);
+        // sleep(2);
         println!("running test ...");
 
         let test = client.start_test::<SanityCheckInput>(StartTestPayload {

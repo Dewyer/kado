@@ -1,0 +1,15 @@
+[package]
+name = "blackjack"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+# Error
+thiserror = "1.0.25"
+
+# Rand
+rand = "0.8.4"
+rand_distr = "0.4.2"
+
+uuid = { version = "0.8", features = ["serde", "v4"] }

@@ -102,7 +102,7 @@ impl UserRepo for DbUserRepo {
                 users::last_gained_points_at.asc().nulls_last(),
                 users::created_at.asc(),
             ))
-            .filter(users::is_active.eq(true))
+            .filter(users::is_active.eq(true).and(users::is_admin.eq(false)))
             .left_join(teams::table)
             .paginate((pagination.page + 1) as i64)
             .per_page(std::cmp::min(
@@ -121,7 +121,7 @@ impl UserRepo for DbUserRepo {
     ) -> anyhow::Result<usize> {
         users::table
             .filter(
-                users::is_active.eq(true).and(
+                users::is_active.eq(true).and(users::is_admin.eq(false)).and(
                     users::individual_points.ge(user.individual_points).or(
                         users::individual_points
                             .eq(&user.individual_points)
