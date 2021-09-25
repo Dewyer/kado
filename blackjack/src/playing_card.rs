@@ -1,6 +1,6 @@
 use crate::errors::{BlackGameResult, BlackjackGameError};
 
-const DECK_SIZE: usize = 52usize;
+pub const DECK_SIZE: usize = 52usize;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum PlayingCardSuit {
@@ -25,6 +25,7 @@ impl PlayingCardSuit {
     }
 }
 
+#[derive(Clone)]
 pub struct PlayingCard(usize);
 
 impl PlayingCard {
@@ -50,6 +51,11 @@ impl PlayingCard {
             12 => vec![1,11],
             _ => vec![10],
         }
+    }
+
+    pub fn is_ace_or_ten(&self) -> bool {
+        let val = self.get_suite_and_type().1;
+        vec![8, 9, 10, 11, 12].iter().any(|el| el == val)
     }
 }
 

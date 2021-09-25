@@ -17,6 +17,8 @@ pub trait BlackjackGameStateProvider {
 
     fn get_dealer_hand_mut(&mut self) -> &mut BlackjackHand;
 
+    fn get_players(&self) -> &Vec<BlackjackPlayer>;
+
     fn get_players_mut(&mut self) -> &mut Vec<BlackjackPlayer>;
 }
 
@@ -59,6 +61,10 @@ impl BlackjackGameStateProvider for InMemoryBlackjackGameState {
 
     fn get_dealer_hand_mut(&mut self) -> &mut BlackjackHand {
         &mut self.dealer_hand
+    }
+
+    fn get_players(&self) -> &Vec<BlackjackPlayer> {
+        &self.players
     }
 
     fn get_players_mut(&mut self) -> &mut Vec<BlackjackPlayer> {

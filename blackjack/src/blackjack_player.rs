@@ -6,6 +6,9 @@ pub struct BlackjackPlayer {
     pub id: Uuid,
     pub plays_with_credits: bool,
     pub credits: usize,
+
+    pub has_insurance: Option<bool>,
+    pub bet: Option<usize>,
     pub hands: Vec<BlackjackHand>,
 }
 
@@ -16,5 +19,17 @@ impl BlackjackPlayer {
         } else {
             Err(BlackjackGameError::PlayerNotEnoughCredits(credits))
         }
+    }
+
+    pub fn can_double_down(&self) -> bool {
+        let double_down_values = vec![9usize, 10usize, 11usize];
+        self.hands
+            .get(0)
+            .map(|hand|
+                hand
+                    .get_hand_values()
+                    .iter()
+                    .any(|vv| double_down_values.iter().any(|el| el == vv))
+            ).unwrap_or(false)
     }
 }

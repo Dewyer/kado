@@ -5,8 +5,19 @@ pub struct BetAction {
     pub bet: usize,
 }
 
+pub struct InsuranceBetAction {
+    pub player_id: Uuid,
+    pub place_insurance_bet: bool,
+}
+
+pub struct DoubleDownAction {
+    pub player_id: Uuid,
+    pub doubles_down: bool,
+}
+
 #[non_exhaustive]
 pub enum BlackjackGameAction {
-    Deal,
     Bet(BetAction),
+    InsuranceBet(InsuranceBetAction),
+    DoubleDown(DoubleDownAction),
 }

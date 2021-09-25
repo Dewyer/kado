@@ -5,6 +5,8 @@ use crate::blackjack_game_actions::BlackjackGameAction;
 pub enum BlackjackGameError {
     #[error("InvalidPlayingCardIndex")]
     InvalidPlayingCardIndex,
+    #[error("PlayerNotPartOfRound")]
+    PlayerNotPartOfRound,
     #[error("InvalidSuiteIndex")]
     InvalidSuiteIndex,
     #[error("Invalid action for this game status")]

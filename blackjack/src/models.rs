@@ -1,7 +1,11 @@
+use uuid::Uuid;
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub enum BlackjackGameStatus {
     Betting,
+    InsuranceBetting(Uuid),
+    DoubleDown(Uuid),
+    Playing(Uuid),
 }
 
 #[derive(Clone)]
