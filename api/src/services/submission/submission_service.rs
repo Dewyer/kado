@@ -82,7 +82,7 @@ impl SubmissionService {
             CodeName::Maze => Box::new(ApiBasedSupport::new(
                 CodeName::Maze,
                 self.get_maze_ep_settings(),
-                self.config.maze_base_url.clone()
+                self.config.maze_api_key.clone()
             ).expect("Maze api support couldn't be constructed")),
         }
     }
