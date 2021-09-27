@@ -7,6 +7,8 @@ pub struct BlackjackPlayer {
     pub plays_with_credits: bool,
     pub credits: usize,
 
+    pub done_playing: bool,
+    pub doubled_down: Option<bool>,
     pub has_insurance: Option<bool>,
     pub bet: Option<usize>,
     pub hands: Vec<BlackjackHand>,
@@ -30,6 +32,14 @@ impl BlackjackPlayer {
                     .get_hand_values()
                     .iter()
                     .any(|vv| double_down_values.iter().any(|el| el == vv))
+            ).unwrap_or(false)
+    }
+
+    pub fn has_natural_blackjack(&self) -> bool {
+        self.hands
+            .get(0)
+            .map(|hand|
+                hand.has_blackjack()
             ).unwrap_or(false)
     }
 }

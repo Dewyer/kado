@@ -8,7 +8,7 @@ pub struct SnapChallengeClient {
 }
 
 impl SnapChallengeClient {
-    pub fn from_api_token(api_token: &str) -> ClientResult<Self> {
+    pub fn from_api_token(api_token: &str, base_url: &str) -> ClientResult<Self> {
         let mut headers = header::HeaderMap::new();
         headers.insert("User-Agent", header::HeaderValue::from_static("SnapChallengeClient-rs"));
         headers.insert("Accept", header::HeaderValue::from_static("application/json"));
@@ -20,7 +20,7 @@ impl SnapChallengeClient {
 
         Ok(Self {
             client,
-            base_url: "http://localhost:3001".to_string(),
+            base_url: base_url.to_string(),
         })
     }
 

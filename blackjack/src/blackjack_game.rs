@@ -2,7 +2,7 @@ use crate::blackjack_game_state::IBlackjackGameStateProvider;
 use crate::rng::SeededRng;
 use crate::errors::{BlackGameResult, BlackjackGameError};
 use crate::models::{BlackjackGameStatus, BlackjackGameConfig};
-use crate::blackjack_game_actions::{BlackjackGameAction, BetAction, InsuranceBetAction};
+use crate::blackjack_game_actions::{BlackjackGameAction, BetAction, InsuranceBetAction, DoubleDownAction};
 use crate::blackjack_player::BlackjackPlayer;
 use uuid::Uuid;
 use crate::blackjack_hand::BlackjackHand;
@@ -68,6 +68,8 @@ impl BlackjackGame {
                 plays_with_credits: false,
                 bet: None,
                 has_insurance: None,
+                done_playing: false,
+                doubled_down: None,
             };
 
             players.push(player);
@@ -120,6 +122,34 @@ impl BlackjackGame {
             .iter()
             .find(|pl| pl.bet.is_some())
             .map(|pl| pl.id)
+    }
+
+    fn reset_to_next_round(&mut self) {
+        self.state.set_turn_index(self.state.get_turn_index() + 1);
+        self.state.set_status(BlackjackGameStatus::Betting);
+    }
+
+    fn check_naturals(&mut self) -> bool {
+        let dealer_bj = self.state.get_dealer_hand_mut().has_blackjack();
+
+        for player in self.state.get_players_mut().iter_mut() {
+            if player.bet.is_none() {
+                continue;
+            }
+
+            if player.has_natural_blackjack() {
+                let bj_bet = ((player.bet.unwrap_or(0) as f64) * 2.5).floor() as usize;
+
+                player.credits += if dealer_bj { player.bet.unwrap_or(0) } else { bj_bet };
+                player.done_playing = true;
+            }
+        }
+
+        if dealer_bj {
+
+        }
+
+        dealer_bj
     }
 
     fn handle_betting_over(&mut self) {
@@ -185,6 +215,41 @@ impl BlackjackGame {
         Ok(())
     }
 
+    fn handle_double_down_action(&mut self, double_down: DoubleDownAction) -> BlackGameResult<()> {
+        let player = self.find_player_by_id(insurance_bet.player_id)?;
+        if player.bet.is_none() {
+            return Err(BlackjackGameError::PlayerNotPartOfRound);
+        }
+
+        if !player.can_double_down() {
+            return Err(BlackjackGameError::PlayerCantDoubleDown);
+        }
+        if !double_down.doubles_down {
+            player.doubled_down = Some(false);
+            return Ok(());
+        }
+
+        let double_down_value = player.bet.unwrap();
+        player.assert_has_more_credits_then(double_down_value)?;
+        player.credits -= double_down_value;
+        player.doubled_down = Some(true);
+
+        player.hands.get_mut(0).unwrap().cards.push(self.draw_card());
+        player.done_playing = true;
+
+        let first_player_who_didnt_choose_to_double_down = self.state.get_players_mut()
+            .iter()
+            .find(|pl | pl.can_double_down() && pl.doubled_down.is_none());
+
+        if let Some(next_player) = first_player_who_didnt_choose_to_double_down {
+            self.state.set_status(BlackjackGameStatus::DoubleDown(next_player.id));
+        } else {
+            self.state.set_status(BlackjackGameStatus::Playing(self.get_first_in_row_player_id().unwrap()));
+        }
+
+        Ok(())
+    }
+
     pub fn apply_action(&mut self, action: BlackjackGameAction) -> BlackGameResult<()> {
         match action {
             BlackjackGameAction::Bet(bet_action) => {
@@ -201,6 +266,7 @@ impl BlackjackGame {
             },
             BlackjackGameAction::DoubleDown(double_down) => {
                 self.assert_in_game_status(vec![BlackjackGameStatus::DoubleDown(double_down.player_id)])?;
+                self.handle_double_down_action(double_down)?;
 
                 Ok(())
             },

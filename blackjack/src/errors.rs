@@ -15,6 +15,8 @@ pub enum BlackjackGameError {
     PlayerWithIdNotFound,
     #[error("Player doesn't have at least `{0}` credits")]
     PlayerNotEnoughCredits(usize),
+    #[error("This player can't double down in this round!")]
+    PlayerCantDoubleDown,
 }
 
 pub type BlackGameResult<T> = Result<T, BlackjackGameError>;

@@ -17,7 +17,7 @@ pub struct SanityCheckOutput {
     pub insane_numbers: Vec<usize>,
 }
 
-const API_TOKEN: &'static str = "W93NnSuom2QCdIUC";
+const API_TOKEN: &'static str = "7HOQGxZYklWLmiPr";
 
 fn sleep(secs: u64) {
     let dur = std::time::Duration::from_secs(secs);
@@ -27,7 +27,7 @@ fn sleep(secs: u64) {
 fn main() {
     println!("Sanity check rust reference impl!");
 
-    let client = SnapChallengeClient::from_api_token(API_TOKEN)
+    let client = SnapChallengeClient::from_api_token(API_TOKEN, "http://localhost:3001")
         .expect("a client");
 
     let sub_res = client.start_submission(StartSubmissionPayload {

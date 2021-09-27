@@ -214,6 +214,7 @@ impl SubmissionRepo for DbSubmissionRepo {
             .filter(
                 submissions::owner_id
                     .eq(user_id)
+                    .and(submissions::sample_index.is_null())
                     .and(submissions::correct.eq(true))
                     .and(submissions::problem_id.eq(problem_id)),
             )

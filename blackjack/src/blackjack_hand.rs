@@ -13,7 +13,15 @@ impl BlackjackHand {
     }
 
     pub fn could_have_blackjack(&self) -> bool {
-        self.cards.iter().all(|cd| cd.is_ace_or_ten())
+        self.cards
+            .iter()
+            .next()
+            .map(|card| card.is_ace_or_ten())
+            .unwrap_or(false)
+    }
+
+    pub fn has_blackjack(&self) -> bool {
+        self.get_hand_values().iter().any(|vv| vv == 21)
     }
 
     pub fn get_hand_values(&self) -> Vec<usize> {

@@ -26,7 +26,9 @@ export const ProblemDetailsPage: React.FC = () => {
     }
     const problem = problemQuery.data.problem;
     const submissions = problemQuery.data.submissions;
-    const correctSubmission = submissions.find((sub) => !!sub.correct);
+    const correctSubmission = submissions.find((sub) => !!sub.correct && (sub.sample_index === undefined || sub.sample_index === null));
+
+    console.log(submissions, 'ss', correctSubmission);
 
     return (
         <PageLayout contentClassName={styles.ProblemDetailsPage}>

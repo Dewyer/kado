@@ -122,7 +122,7 @@ impl SubmissionService {
         let submissions_made = self
             .submission_repo
             .find_submissions_by_user_and_problem(user.id, problem.id, td)?;
-        if submissions_made.len() >= problem.max_submissions as usize {
+        if submissions_made.iter().filter(|sb| sb.sample_index.is_none()).count() >= problem.max_submissions as usize {
             bail!("Max submission attempts reached.");
         }
 
@@ -137,6 +137,7 @@ impl SubmissionService {
 
         if submissions_made
             .iter()
+            .filter(|sub | sub.sample_index.is_none())
             .any(|sub| sub.correct.contains(&true))
         {
             bail!("You already have a correct submission for this problem");

@@ -1,6 +1,7 @@
 import React from "react";
 import {SubmissionDto} from "src/typings/api";
 import styles from "./SubmissionsList.module.scss";
+import {nullOrUndefined} from "../../../helpers/nullOrUndefined";
 
 export interface SubmissionsListProps {
     submissions: SubmissionDto[],
@@ -20,7 +21,7 @@ const ListItem: React.FC<ListItemProps> = (props) => {
     const done = submission.correct !== null;
     const took = Math.floor((submission.finished_at || 0) - submission.started_at);
     let tookStr = submission.finished_at ? `took: ${took}s` : 'Timed out';
-    const doneRow = <>{submission.correct ? "✔️" : "❌"} - {tookStr}, {submission.correct ? "Good job 🤓" : ""}</>
+    const doneRow = <>{submission.correct ? "✔️" : "❌"} - {tookStr}, {submission.correct ? "Good job 🤓" : ""} {!nullOrUndefined(submission.sample_index) ? "sample solution, not worth any points." : ""}</>
     const notDoneRow = <>didn't finish evaluation</>;
 
     return (
