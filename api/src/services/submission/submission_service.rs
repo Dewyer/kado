@@ -307,7 +307,7 @@ impl SubmissionService {
             )?;
         team.points += self.get_diminishing_returns_on_points(
             problem.base_point_value,
-            submissions_for_team_members.len(),
+            submissions_for_team_members.len() - 1,
         );
         team.last_gained_points_at = user.last_gained_points_at.clone();
 
