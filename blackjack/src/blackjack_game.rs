@@ -167,7 +167,7 @@ impl BlackjackGame {
         }
 
         if !insurance_bet.place_insurance_bet {
-            player.has_insurance = Some(false)
+            player.has_insurance = Some(false);
             return Ok(());
         }
 

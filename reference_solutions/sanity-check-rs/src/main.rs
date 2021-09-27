@@ -17,7 +17,7 @@ pub struct SanityCheckOutput {
     pub insane_numbers: Vec<usize>,
 }
 
-const API_TOKEN: &'static str = "1WtOH9qaWYpbk7Dh";
+const API_TOKEN: &'static str = "W93NnSuom2QCdIUC";
 
 fn sleep(secs: u64) {
     let dur = std::time::Duration::from_secs(secs);

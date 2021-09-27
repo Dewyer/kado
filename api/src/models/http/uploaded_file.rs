@@ -10,6 +10,7 @@ use rocket::{data, request, Data, Request};
 use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use log::{error};
 
 pub trait FileMimeTrait {
     fn content_type() -> String;
@@ -42,6 +43,19 @@ impl<Mime: FileMimeTrait> UploadedFile<Mime> {
         }
     }
 
+    fn save_longer_temporarily_bytes(bytes: Vec<u8>) -> anyhow::Result<String> {
+        if std::fs::metadata("./temp").is_err() {
+            std::fs::create_dir("./temp")
+                .map_err(|_| anyhow::Error::msg("Temp directory can't be created"))?;
+        }
+
+        let temp_f = format!("./temp/{}.zip", CryptoService::get_random_string(8));
+        std::fs::write(Path::new(&temp_f), bytes)
+            .map_err(|_| anyhow::Error::msg("File can't be saved to temp directory!"))?;
+
+        Ok(temp_f)
+    }
+
     fn save_longer_temporarily(temp_temp_path: PathBuf) -> anyhow::Result<String> {
         if std::fs::metadata("./temp").is_err() {
             std::fs::create_dir("./temp")
@@ -67,22 +81,37 @@ impl<Mime: FileMimeTrait> UploadedFile<Mime> {
             .next()
             .ok_or_else(|| anyhow::Error::msg("no file field!"))?;
 
-        if let SavedData::File(file_path_buf, _) = file.data {
-            let kind = infer::get_from_path(file_path_buf.clone())
-                .map_err(|_| anyhow::Error::msg("File type couldn't be identified."))?
-                .ok_or_else(|| anyhow::Error::msg("File type unknown"))?;
+        match file.data {
+            SavedData::File(file_path_buf, _) => {
+                let kind = infer::get_from_path(file_path_buf.clone())
+                    .map_err(|_| anyhow::Error::msg("File type couldn't be identified."))?
+                    .ok_or_else(|| anyhow::Error::msg("File type unknown"))?;
 
-            if kind.mime_type() != Mime::content_type() {
-                return Err(anyhow::Error::msg(format!(
-                    "File type not {}",
-                    Mime::name()
-                )));
-            }
+                if kind.mime_type() != Mime::content_type() {
+                    return Err(anyhow::Error::msg(format!(
+                        "File type not {}",
+                        Mime::name()
+                    )));
+                }
 
-            let temp_f = Self::save_longer_temporarily(file_path_buf)?;
-            Ok(UploadedFile::new(temp_f))
-        } else {
-            Err(anyhow::Error::msg("Not a file!"))
+                let temp_f = Self::save_longer_temporarily(file_path_buf)?;
+                Ok(UploadedFile::new(temp_f))
+            },
+            SavedData::Bytes(bytes) => {
+                let kind = infer::get(&bytes)
+                    .ok_or_else(|| anyhow::Error::msg("File type unknown"))?;
+
+                if kind.mime_type() != Mime::content_type() {
+                    return Err(anyhow::Error::msg(format!(
+                        "File type not {}",
+                        Mime::name()
+                    )));
+                }
+
+                let temp_f = Self::save_longer_temporarily_bytes(bytes)?;
+                Ok(UploadedFile::new(temp_f))
+            },
+            _ => Err(anyhow::Error::msg("Not a file!"))
         }
     }
 

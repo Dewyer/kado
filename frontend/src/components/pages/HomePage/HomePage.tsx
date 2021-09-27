@@ -34,6 +34,9 @@ The individual (contributing to a team or not) with the highest rank at the end 
 Have fun and happy problem-solving, if encounter any problems please reach out to us at: *qpa-challenge@snapsoft.hu*.
 
 We also recommend using a desktop computer to use the site for the best experience.
+
+### Updates
+- 09.27-16:10 - We solved a file uploading issue, now you should be able to upload your solutions, our apologies for the inconvenience.
 `;
 
 
