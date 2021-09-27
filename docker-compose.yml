@@ -46,5 +46,7 @@ services:
       GITHUB_CLIENT_ID: client
       GITHUB_SECRET: secret
       GITHUB_REDIRECT_URL: redirect
+      MAZE_API_KEY: api_key_here
+      MAZE_BASE_URL: http://localhost:3002
     ports:
       - 3001:3001

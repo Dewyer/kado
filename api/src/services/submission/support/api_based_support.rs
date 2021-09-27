@@ -5,11 +5,11 @@ use reqwest::blocking::Client;
 use reqwest::{header, Method};
 
 pub struct ApiBasedSupportEndpointSettings {
-    base_url: String,
+    pub base_url: String,
 
-    generate_submission_details_endpoint: String,
-    generate_submission_test_input_endpoint: String,
-    verify_output_endpoint: String,
+    pub generate_submission_details_endpoint: String,
+    pub generate_submission_test_input_endpoint: String,
+    pub verify_output_endpoint: String,
 }
 
 pub struct ApiBasedSupport {
@@ -65,7 +65,7 @@ impl ApiBasedSupport {
             .client
             .request(
                 method,
-                format!("{}/{}", self.ep_settings.base_url, endpoint),
+                format!("{}{}", self.ep_settings.base_url, endpoint),
             )
             .json(body)
             .send()

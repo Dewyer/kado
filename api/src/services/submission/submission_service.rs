@@ -27,13 +27,17 @@ use crate::services::utils_service::UtilsService;
 use chrono::NaiveDateTime;
 use rand::Rng;
 use rocket::request::FromRequest;
-use rocket::{request, Data, Request};
+use rocket::{request, Data, Request, State};
 use uuid::Uuid;
+use crate::services::submission::support::api_based_support::{ApiBasedSupport, ApiBasedSupportEndpointSettings};
+use crate::config::AppConfig;
+use rocket::http::Status;
 
 const SUBMISSION_TIMEOUT_PER_TEST: i64 = 3 * 60; // 15 minutes
 const SUBMISSION_TEST_TIMEOUT: i64 = 60; // 1 minute
 
 pub struct SubmissionService {
+    config: AppConfig,
     submission_repo: ISubmissionRepo,
     problem_repo: IProblemRepo,
     user_repo: IUserRepo,
@@ -44,6 +48,7 @@ pub struct SubmissionService {
 
 impl SubmissionService {
     pub fn new(
+        config: AppConfig,
         submission_repo: ISubmissionRepo,
         problem_repo: IProblemRepo,
         user_repo: IUserRepo,
@@ -52,6 +57,7 @@ impl SubmissionService {
         tm: TransactionManager,
     ) -> Self {
         Self {
+            config,
             submission_repo,
             problem_repo,
             user_repo,
@@ -61,9 +67,23 @@ impl SubmissionService {
         }
     }
 
+    fn get_maze_ep_settings(&self) -> ApiBasedSupportEndpointSettings {
+        ApiBasedSupportEndpointSettings {
+            base_url: self.config.maze_base_url.clone(),
+            generate_submission_details_endpoint: "/api/challenges/generateSubmissionDetails".to_string(),
+            generate_submission_test_input_endpoint: "/api/challenges/generateSubmissionTestInput".to_string(),
+            verify_output_endpoint: "/api/challenges/verifyOutput".to_string(),
+        }
+    }
+
     fn get_problem_support(&self, code_name: CodeName) -> IProblemSupport {
         match code_name {
             CodeName::SanityCheck => Box::new(SanityCheckProblemSupport::new()),
+            CodeName::Maze => Box::new(ApiBasedSupport::new(
+                CodeName::Maze,
+                self.get_maze_ep_settings(),
+                self.config.maze_base_url.clone()
+            ).expect("Maze api support couldn't be constructed")),
         }
     }
 
@@ -492,6 +512,12 @@ impl<'a, 'r> FromRequest<'a, 'r> for SubmissionService {
     type Error = ServiceError;
 
     fn from_request(req: &'a Request<'r>) -> request::Outcome<SubmissionService, Self::Error> {
+        let config = req.guard::<State<AppConfig>>().map_failure(|_| {
+            (
+                Status::InternalServerError,
+                ServiceError::ServiceGuardFailed,
+            )
+        })?;
         let submission_repo = req.guard::<DbSubmissionRepo>()?;
         let user_repo = req.guard::<DbUserRepo>()?;
         let team_repo = req.guard::<DbTeamRepo>()?;
@@ -500,6 +526,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for SubmissionService {
         let db_tm = req.guard::<TransactionManager>()?;
 
         request::Outcome::Success(SubmissionService::new(
+            config.inner().clone(),
             Box::new(submission_repo),
             Box::new(problem_repo),
             Box::new(user_repo),

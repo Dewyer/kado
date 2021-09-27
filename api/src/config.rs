@@ -25,6 +25,7 @@ pub struct AppConfig {
     pub github_redirect_url: String,
 
     pub maze_api_key: String,
+    pub maze_base_url: String,
 }
 
 impl AppConfig {
@@ -56,6 +57,8 @@ impl AppConfig {
                     .expect("No github redirect utl in environment!"),
                 maze_api_key: env::var("MAZE_API_KEY")
                     .expect("No maze api key in environment!"),
+                maze_base_url: env::var("MAZE_BASE_URL")
+                    .expect("No maze base url in environment!"),
             }))
         })
     }
