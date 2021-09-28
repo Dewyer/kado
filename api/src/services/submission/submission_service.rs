@@ -142,7 +142,7 @@ impl SubmissionService {
         request: &StartSubmissionRequest,
         td: &ITransaction,
     ) -> anyhow::Result<()> {
-        if problem.sample_count - 1 < request.sample_index.unwrap_or(0) {
+        if problem.sample_count - 1 < request.sample_index.unwrap_or(0) || request.sample_index.unwrap_or(0) < 0 {
             bail!("Sample index is larger then the number of samples available");
         }
 
