@@ -36,6 +36,7 @@ The communication between your program and our verification programs is done thr
 - At the first incorrect test output your submission is closed
 - Submissions and tests can time out if you stop requesting/responding (timeout is ~10s per test but this is subject to change), a timed out test is considered to be incorrect
 - You can only have one "in-progress" submission at a time for reach problem
+- If your test or the whole submission times out you have to create a new submission 
 
 #### Authentication to the API
 For us to know who is trying to create a submission we need you to include your secret **API token** (copiable on the top of the page) in every request you make

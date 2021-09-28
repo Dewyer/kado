@@ -33,8 +33,7 @@ use crate::services::submission::support::api_based_support::{ApiBasedSupport, A
 use crate::config::AppConfig;
 use rocket::http::Status;
 
-const SUBMISSION_TIMEOUT_PER_TEST: i64 = 3 * 60; // 15 minutes
-const SUBMISSION_TEST_TIMEOUT: i64 = 60; // 1 minute
+const SUBMISSION_TEST_TIMEOUT: i64 = 20; // 1 minute
 
 pub struct SubmissionService {
     config: AppConfig,
@@ -122,10 +121,18 @@ impl SubmissionService {
     }
 
     fn is_submission_timed_out(&self, submission: &Submission) -> bool {
-        UtilsService::time_within_seconds(
+        !UtilsService::time_within_seconds(
             submission.started_at,
-            SUBMISSION_TIMEOUT_PER_TEST * submission.test_count as i64,
+            SUBMISSION_TEST_TIMEOUT * submission.test_count as i64,
         )
+    }
+
+    fn any_test_on_submission_timed_out(&self, submission: &Submission, td: &ITransaction) -> anyhow::Result<bool> {
+        let (_, tests) = self.submission_repo.find_by_id_with_tests(submission.id, td)?;
+        Ok(tests.iter().any(|tt|
+            tt.correct.is_none() &&
+            !UtilsService::time_within_seconds(tt.started_at, SUBMISSION_TEST_TIMEOUT)
+        ))
     }
 
     fn assert_can_start_submission(
@@ -148,7 +155,7 @@ impl SubmissionService {
 
         let open_submission = submissions_made.iter().find(|sb| sb.correct.is_none());
         if let Some(open) = open_submission {
-            if self.is_submission_timed_out(open) {
+            if self.is_submission_timed_out(open) || self.any_test_on_submission_timed_out(&open, td)? {
                 self.handle_timed_out_submission(&mut open.clone(), td)?;
             } else {
                 bail!("There is an open submission made by you for this problem, finish that or let it time out first.");
