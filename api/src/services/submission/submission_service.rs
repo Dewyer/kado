@@ -326,16 +326,24 @@ impl SubmissionService {
         td: &ITransaction,
     ) -> anyhow::Result<()> {
         let (mut team, team_members) = self.team_repo.find_by_id_with_users(team_id, td)?;
-        let submissions_for_team_members = self
+        let submissions_for_team_members_count = self
             .submission_repo
             .find_correct_submissions_for_users_and_problem(
                 team_members.iter().map(|usr| usr.id).collect(),
                 problem.id,
                 td,
-            )?;
+            )?
+            .iter()
+            .filter(|sol| sol.sample_index.is_none() && sol.correct.contains(&true))
+            .count();
+
+        if submissions_for_team_members_count == 0 {
+            bail!("Submission count invariant violated.");
+        }
+
         team.points += self.get_diminishing_returns_on_points(
             problem.base_point_value,
-            submissions_for_team_members.len() - 1,
+            submissions_for_team_members_count - 1,
         );
         team.last_gained_points_at = user.last_gained_points_at.clone();
 
