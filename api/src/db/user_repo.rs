@@ -103,7 +103,7 @@ impl UserRepo for DbUserRepo {
                 users::created_at.asc(),
             ))
             .filter(users::is_active.eq(true).and(users::is_admin.eq(false)))
-            .left_join(teams::table)
+            .left_join(teams::table.on(teams::id.nullable().eq(users::team_id)))
             .paginate((pagination.page + 1) as i64)
             .per_page(std::cmp::min(
                 pagination.per_page.unwrap_or(DEFAULT_USER_PAGE_SIZE),
