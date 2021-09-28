@@ -37,7 +37,7 @@ We also recommend using a desktop computer to use the site for the best experien
 
 ### Updates
 - 09.27-16:10 - We solved a file uploading issue, now you should be able to upload your solutions, our apologies for the inconvenience.
-- 09.28-08:00 - We are aware of a problem that is causing submissions to never time out, we are fixing that right now.
+- 09.28-10:00 - We fixed a problem that caused submissions to never time out correctly, now if you see the 'didn't finish evaluation' status on your submission, wait a bit for it to time out, and then you should be able to create a new submission.
 `;
 
 
