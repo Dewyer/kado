@@ -5,12 +5,12 @@ import {Markdown} from "../../templates/Markdown/Markdown";
 const pageContent = `
 ### Snap Challenge
 
-This program is part of Schönhertz Qpa 2021, and is a competitive programming style, multi-day competition.
+This program is part of Schönherz Qpa 2021, and is a competitive programming style, multi-day competition.
 You can earn points that get converted to QPA points at the end.
 
 Each day from **2021.09.26 (starting at 00:00) - 2021.09.30** we will release a new problem for you to solve increasing in difficulty.
 You can solve these problems with your favorite programming language (more about submissions in the API guide).
-You can work alone or in a team but **QPA points are only awarded to real QPA teams** (We expect teams to correspond to a real Schönhertz QPA team).
+You can work alone or in a team but **QPA points are only awarded to real QPA teams** (We expect teams to correspond to a real Schönherz QPA team).
 
 The individual (contributing to a team or not) with the highest rank at the end will also be eligible for a special prize at the Snapsoft booth on 2021.10.05.
 
