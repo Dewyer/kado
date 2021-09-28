@@ -3,6 +3,7 @@ mod problem_support_trait;
 pub mod api_based_support;
 mod sanity_check_problem_support;
 
+pub mod king_pinned_support;
 pub mod tests;
 
 pub use sanity_check_problem_support::*;
