@@ -218,7 +218,7 @@ impl SubmissionService {
             bail!("You don't have access to this submission.");
         }
 
-        if !self.is_submission_timed_out(submission) {
+        if self.is_submission_timed_out(submission) {
             self.handle_timed_out_submission(submission, td)?;
             bail!("Submission timed out!");
         }
