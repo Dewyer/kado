@@ -6,6 +6,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 RUN USER=root cargo new --bin api
 COPY google-jwt-verify google-jwt-verify
+COPY oxichess oxichess
 WORKDIR ./api
 ENV TZ=Etc/UTC \
     APP_USER=appuser
