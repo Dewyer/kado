@@ -34,12 +34,17 @@ export interface AvailableProblemsListProps {
 
 export const AvailableProblemsList: React.FC<AvailableProblemsListProps> = (props) => {
     const { problemsResponse } = props;
+    const problemsSorted = problemsResponse.problems.sort((a,b) =>
+        new Date(a.available_from || 0) >= new Date(b.available_from || 0) ?
+            1 :
+            a.available_from === b.available_from ? 0 : -1
+    );
 
     return (
         <div className={styles.AvailableProblemsList}>
             <h3 className={"ui header"}>Problems: </h3>
             <div className="ui ordered list">
-                {problemsResponse.problems.map((pr) => <ProblemListItem problem={pr} />)}
+                {problemsSorted.map((pr) => <ProblemListItem problem={pr} />)}
             </div>
             {problemsResponse.next_problem_available_at && <TimerToNextAvailableProblem nextProblemAt={problemsResponse.next_problem_available_at} />}
         </div>
