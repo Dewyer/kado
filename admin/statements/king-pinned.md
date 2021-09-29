@@ -6,15 +6,20 @@ He got into a square room and needs to find the place where to dodge to before h
 There are multiple type of hostiles in the room and the best way to describe them would be to compare them 
 to black chess pieces.
 
-All of them can only threaten squares they would be able to **move** to according to normal chess rules.
-(Excluding the en-passant and castling rules and also the board can be bigger than 8x8, but it will always be a square)
+All of them can only threaten squares they would be able to **move** to according to [normal](https://en.wikipedia.org/wiki/Rules_of_chess) chess rules with the following changes:
+- The en-passant rule doesn't exist
+- You can't castle
+- Kings can be captured
+- The board can be bigger than 8x8, but it will always be a square
+
 All enemy pieces are black pieces, and the mafia boss is a white king (but can be captured).
 Your job is to create a list of places for your boss to jump to, in increasing order according to their level ot threat
 (if two squares have the same threat level, then sort by their column index, and then their row index).
 Your boss can move to any unoccupied square in the room. 
 Each square's threat is equal to the amount of enemy pieces/guys threatening it.
+The other parti also brought their mafia boss.  (There is always a black king).
 
-Encoding of chess pieces:
+We use the following encoding for chess pieces:
 - 1 - Pawn
 - 2 - Rook
 - 3 - Knight
@@ -24,7 +29,6 @@ Encoding of chess pieces:
 - 7 - Enemy king
 - 0 - Empty space
 
-The other parti also brought their mafia boss.  (There is always a black king)
 
 The input json for this problem looks like this:
 ```json
@@ -37,6 +41,7 @@ The input json for this problem looks like this:
     ]
 }
 ```
+There is only one sample available and its this one.
 
 The output should be a simple JSON array of coordinate pairs (column index and row index, the room is indexed from the top left corner and indexing starts with 0):
 ```json
