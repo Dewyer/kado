@@ -25,7 +25,7 @@ pub struct KingPinnedInput {
     pub room: Vec<Vec<usize>>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct KingPinnedOutput {
     pub places_to_move_to: Vec<(usize, usize)>,
 }
@@ -83,7 +83,7 @@ impl KingPinnedProblemSupport {
         for yy in 0..size {
             let mut row = vec![];
             for xx in 0..size {
-                if (xx, yy).equivalent(&king_pin_pos) || (xx, yy).equivalent(&enemy_king_pos) {
+                if (xx, yy).eq(&king_pin_pos) || (xx, yy).eq(&enemy_king_pos) {
                     row.push(0);
                     continue;
                 }
@@ -104,7 +104,7 @@ impl KingPinnedProblemSupport {
         let actual_seed = if payload.sample_index.is_some() { 10 } else { payload.seed };
         let mut rng = SeededRng::new(actual_seed);
 
-        let board_size = self.get_board_sizes(&mut rng,, 6)
+        let board_size = self.get_board_sizes(&mut rng, 6)
             .get(payload.test_index)
             .ok_or(anyhow::Error::msg("Test board size not found!"))?.clone();
 
@@ -161,10 +161,10 @@ impl KingPinnedProblemSupport {
         (brd, white_king, black_king)
     }
 
-    fn solver(&self, input: KingPinnedInput) -> anyhow::Result<KingPinnedOutput> {
+    fn solver(&self, input: KingPinnedInput) -> KingPinnedOutput {
         let (board, white_king, black_king) = self.get_board_from_input(&input);
-        let chess = ChessGame::new_custom(board, white_king, black_king);
         let size = board.len();
+        let chess = ChessGame::new_custom(board, white_king, black_king);
 
         let mut threats: HashMap<(usize, usize), usize> = HashMap::new();
 
@@ -176,7 +176,7 @@ impl KingPinnedProblemSupport {
                     let pos = (move_s.col, move_s.row);
                     if threats.contains_key(&pos) {
                         let mut threat = threats.get_mut(&pos).unwrap();
-                        threat += 1;
+                        *threat += 1;
                     }
                 }
             }
@@ -185,7 +185,11 @@ impl KingPinnedProblemSupport {
         let mut threats_vec = threats.into_iter()
             .collect::<Vec<((usize, usize), usize)>>();
 
-        threats_vec
+        threats_vec.sort_by(|a, b| a.1.cmp(&b.1));
+
+        KingPinnedOutput {
+            places_to_move_to: threats_vec.into_iter().map(|el| el.0).collect(),
+        }
     }
 }
 
@@ -217,6 +221,12 @@ impl ProblemSupport for KingPinnedProblemSupport {
         let input = serde_json::from_str::<KingPinnedInput>(&payload.test.input)
             .map_err(|_| anyhow::Error::msg("Input couldn't be constructed!"))?;
 
+        let solution = self.solver(input);
+        let got_output = serde_json::from_value::<KingPinnedOutput>(payload.output.clone())
+            .map_err(|_| anyhow::Error::msg("Output is invalid!"))?;
 
+        Ok(VerificationResult {
+            correct: solution.eq(&got_output),
+        })
     }
 }

@@ -32,6 +32,7 @@ use uuid::Uuid;
 use crate::services::submission::support::api_based_support::{ApiBasedSupport, ApiBasedSupportEndpointSettings};
 use crate::config::AppConfig;
 use rocket::http::Status;
+use crate::services::submission::support::king_pinned_support::KingPinnedProblemSupport;
 
 const SUBMISSION_TEST_TIMEOUT: i64 = 20; // 1 minute
 
@@ -83,7 +84,7 @@ impl SubmissionService {
                 self.get_maze_ep_settings(),
                 self.config.maze_api_key.clone()
             ).expect("Maze api support couldn't be constructed")),
-            CodeName::KingPinned => todo!(),
+            CodeName::KingPinned => Box::new(KingPinnedProblemSupport::new()),
         }
     }
 
