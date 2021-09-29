@@ -40,13 +40,13 @@ const PROBABILITY_BASE: usize = 1000;
 lazy_static! {
     pub static ref PIECE_PROBABILITES: Vec<(usize, usize, usize)> = {
         vec![
-            (0, 0, 300),
-            (1, 300, 350),
-            (2, 350, 380),
-            (3, 380, 400),
-            (4, 400, 420),
-            (5, 420, 430),
-            (0, 430, 1000),
+            (0, 0, 200),
+            (1, 200, 350),
+            (2, 350, 480),
+            (3, 480, 500),
+            (4, 500, 580),
+            (5, 580, 610),
+            (0, 610, 1000),
         ]
     };
 }
@@ -220,7 +220,7 @@ impl KingPinnedProblemSupport {
         let (board, white_king, black_king) = self.get_board_from_input(&input);
         let size = board.len();
         let chess = ChessGame::new_custom(board, white_king, black_king);
-        display_on_console(&chess);
+        // display_on_console(&chess);
 
         let mut threats: HashMap<(usize, usize), usize> = HashMap::new();
 

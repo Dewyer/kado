@@ -7,7 +7,7 @@ There are multiple type of hostiles in the room and the best way to describe the
 to black chess pieces.
 
 All of them can only threaten squares they would be able to **move** to according to normal chess rules.
-(Excluding the en-passant and castling rules)
+(Excluding the en-passant and castling rules and also the board can be bigger than 8x8, but it will always be a square)
 All enemy pieces are black pieces, and the mafia boss is a white king.
 Your job is to create a list of places for your boss to jump to, in increasing order according to their level ot threat
 (if two squares have the same threat level, then sort by their column index, and then their row index).

@@ -34,7 +34,7 @@ use crate::config::AppConfig;
 use rocket::http::Status;
 use crate::services::submission::support::king_pinned_support::KingPinnedProblemSupport;
 
-const SUBMISSION_TEST_TIMEOUT: i64 = 120; // 1 minute
+const SUBMISSION_TEST_TIMEOUT: i64 = 20; // 20 seconds
 
 pub struct SubmissionService {
     config: AppConfig,
