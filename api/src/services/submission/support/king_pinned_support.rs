@@ -11,6 +11,7 @@ use super::rng::SeededRng;
 use oxichess::chess::game::{ChessBoard, Player, ChessGame};
 use oxichess::chess::piece::{ChessPiece, PieceType};
 use oxichess::chess::piece::piece_position::PiecePosition;
+use std::cmp::Ordering;
 
 pub struct KingPinnedProblemSupport {}
 
@@ -88,6 +89,13 @@ pub fn display_on_console(game: &ChessGame)
             print!("{}|", get_unicode_representation_of_piece(at_piece));
         }
         println!();
+    }
+}
+
+fn chain_ordering(o1: Ordering, o2: Ordering) -> Ordering {
+    match o1 {
+        Ordering::Equal => o2,
+        _ => o1,
     }
 }
 
@@ -218,7 +226,17 @@ impl KingPinnedProblemSupport {
 
         for yy in 0..size {
             for xx in 0..size {
+                threats.insert((yy, xx), 0);
+            }
+        }
+
+        for yy in 0..size {
+            for xx in 0..size {
                 let pc = &chess.board[yy][xx];
+                if pc.owner == Player::White {
+                    continue;
+                }
+
                 let possible_moves = chess.get_moves_for_piece(pc);
                 for move_s in possible_moves.into_iter() {
                     let pos = (move_s.col, move_s.row);
@@ -233,9 +251,10 @@ impl KingPinnedProblemSupport {
         }
 
         let mut threats_vec = threats.into_iter()
+            .filter(|el| !chess.is_position_occupied(PiecePosition::new_from_cord(el.0.1, el.0.0).unwrap()))
             .collect::<Vec<((usize, usize), usize)>>();
 
-        threats_vec.sort_by(|a, b| a.1.cmp(&b.1));
+        threats_vec.sort_by(|a,b| chain_ordering(a.1.cmp(&b.1), chain_ordering(a.0.0.cmp(&b.0.0), a.0.1.cmp(&b.0.1))));
 
         KingPinnedOutput {
             places_to_move_to: threats_vec.into_iter().map(|el| el.0).collect(),
@@ -274,8 +293,6 @@ impl ProblemSupport for KingPinnedProblemSupport {
         let solution = self.solver(input);
         let got_output = serde_json::from_value::<KingPinnedOutput>(payload.output.clone())
             .map_err(|_| anyhow::Error::msg("Output is invalid!"))?;
-
-        println!("Correct solution: {:?}", solution);
 
         Ok(VerificationResult {
             correct: solution.eq(&got_output),
