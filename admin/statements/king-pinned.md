@@ -21,7 +21,8 @@ Encoding of chess pieces:
 - 3 - Knight
 - 4 - Bishop
 - 5 - Queen
-- 6 - King
+- 6 - Kingpin
+- 7 - Enemy king
 - 0 - Empty space
 
 The other parti also brought their mafia boss. 

@@ -99,6 +99,19 @@ impl ChessGame
 		}
 	}
 
+	pub fn new_custom(custom_board: ChessBoard, white_king: PiecePosition, black_king: PiecePosition) -> Self
+	{
+		Self
+		{
+			state: GameState::Playing,
+			board: custom_board,
+			check_state: CheckState::NoCheck,
+			on_turn: Player::White,
+			white_king,
+			black_king,
+		}
+	}
+
 	fn is_position_threatened(&self, pos: PiecePosition, for_player: Player) -> bool
 	{
 		for row in 0..8

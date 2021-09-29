@@ -27,11 +27,12 @@ impl PiecePosition
 {
     pub fn new_from_cord(row: usize, col: usize) -> Result<Self,ChessError>
     {
+        /*
         if  row > 7 || col > 7
         {
             return Err(ChessError::InvalidPiecePosition);
         }
-
+        */
         Ok(Self
         {
             row,
