@@ -195,7 +195,7 @@ impl KingPinnedProblemSupport {
                 let piece_id = input.room[yy][xx];
                 let pos = PiecePosition::new_from_cord(yy, xx).unwrap();
                 let pc: ChessPiece = ChessPiece {
-                    owner: if piece_id == 7 { Player::White } else { Player::Black },
+                    owner: if piece_id == 6 { Player::White } else { Player::Black },
                     piece_type: self.piece_type_from_id(piece_id),
                     position: pos.clone(),
                 };
@@ -293,6 +293,8 @@ impl ProblemSupport for KingPinnedProblemSupport {
         let solution = self.solver(input);
         let got_output = serde_json::from_value::<KingPinnedOutput>(payload.output.clone())
             .map_err(|_| anyhow::Error::msg("Output is invalid!"))?;
+
+        println!("Correct solution: {}", serde_json::to_string(&solution).unwrap());
 
         Ok(VerificationResult {
             correct: solution.eq(&got_output),
