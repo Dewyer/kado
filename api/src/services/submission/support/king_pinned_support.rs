@@ -50,6 +50,47 @@ lazy_static! {
     };
 }
 
+lazy_static! {
+    pub static ref SAMPLE_INPUTS: Vec<Vec<Vec<usize>>> = {
+        vec![
+            vec![
+                vec![0,6,0,0],
+                vec![0,0,1,0],
+                vec![0,1,7,0],
+                vec![0,0,0,0],
+            ]
+        ]
+    };
+}
+
+pub const CHESS_PIECES_BASE_UNICODE_VALUE:u32 = 9812;
+
+pub fn get_unicode_representation_of_piece(piece:&ChessPiece) -> String
+{
+    if piece.piece_type == PieceType::Empty
+    {
+        return "▯".to_string();
+    }
+    let piece_order = vec![PieceType::King, PieceType::Queen, PieceType::Rook, PieceType::Bishop, PieceType::Knight, PieceType::Pawn];
+    let index: u32 = piece_order.iter().position(|el| std::mem::discriminant(el) == std::mem::discriminant(&piece.piece_type)).unwrap() as u32;
+    let code_point = CHESS_PIECES_BASE_UNICODE_VALUE + index + (if piece.owner.is_white() { 0 } else { 6 });
+    std::char::from_u32(code_point).unwrap().to_string()
+}
+
+pub fn display_on_console(game: &ChessGame)
+{
+    for row in 0..(game.board.len())
+    {
+        print!("|");
+        for col in 0..(game.board.len())
+        {
+            let at_piece =  &game.board[row][col];
+            print!("{}|", get_unicode_representation_of_piece(at_piece));
+        }
+        println!();
+    }
+}
+
 impl KingPinnedProblemSupport {
     fn get_board_sizes(&self, rng: &mut SeededRng, count: usize) -> Vec<usize> {
         let mut res = vec![];
@@ -101,6 +142,12 @@ impl KingPinnedProblemSupport {
     }
 
     fn generate_input(&self, payload: SubmissionTestGenerationPayload) -> anyhow::Result<KingPinnedInput> {
+        if let Some(sample) = payload.sample_index {
+            return Ok(KingPinnedInput {
+                room: SAMPLE_INPUTS[sample as usize].clone(),
+            });
+        }
+
         let actual_seed = if payload.sample_index.is_some() { 10 } else { payload.seed };
         let mut rng = SeededRng::new(actual_seed);
 
@@ -141,7 +188,7 @@ impl KingPinnedProblemSupport {
                 let pos = PiecePosition::new_from_cord(yy, xx).unwrap();
                 let pc: ChessPiece = ChessPiece {
                     owner: if piece_id == 7 { Player::White } else { Player::Black },
-                    piece_type: PieceType::King,
+                    piece_type: self.piece_type_from_id(piece_id),
                     position: pos.clone(),
                 };
 
@@ -165,6 +212,7 @@ impl KingPinnedProblemSupport {
         let (board, white_king, black_king) = self.get_board_from_input(&input);
         let size = board.len();
         let chess = ChessGame::new_custom(board, white_king, black_king);
+        display_on_console(&chess);
 
         let mut threats: HashMap<(usize, usize), usize> = HashMap::new();
 
@@ -177,6 +225,8 @@ impl KingPinnedProblemSupport {
                     if threats.contains_key(&pos) {
                         let mut threat = threats.get_mut(&pos).unwrap();
                         *threat += 1;
+                    } else {
+                        threats.insert(pos.clone(), 1);
                     }
                 }
             }
@@ -224,6 +274,8 @@ impl ProblemSupport for KingPinnedProblemSupport {
         let solution = self.solver(input);
         let got_output = serde_json::from_value::<KingPinnedOutput>(payload.output.clone())
             .map_err(|_| anyhow::Error::msg("Output is invalid!"))?;
+
+        println!("Correct solution: {:?}", solution);
 
         Ok(VerificationResult {
             correct: solution.eq(&got_output),

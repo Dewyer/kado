@@ -114,9 +114,9 @@ impl ChessGame
 
 	fn is_position_threatened(&self, pos: PiecePosition, for_player: Player) -> bool
 	{
-		for row in 0..8
+		for row in 0..(self.board.len())
 		{
-			for col in 0..8
+			for col in 0..(self.board.len())
 			{
 				let at_pos = PiecePosition::new_from_cord(row, col).unwrap();
 				let pp = self.get_piece_at(at_pos);
@@ -270,7 +270,6 @@ impl ChessGame
 		let mut filtered_moves: Vec<PiecePosition> = Vec::new();
 		for p_move in possible_moves
 		{
-			println!("{:?} pos move.",p_move);
 			let pseudo_move = PlayerMove {
 				owner: piece.owner,
 				from: piece.position,

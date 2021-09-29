@@ -20,12 +20,14 @@ impl ChessPieceMovementHelper
 	pub fn generate_positions(&self,game:&ChessGame,base_position:PiecePosition,include_collision_position:bool) -> Vec<PiecePosition>
 	{
 		let mut results:Vec<PiecePosition> = Vec::new();
+		let board_size = game.board.len() as i32;
+
 		for change_vector in self.change_vectors.iter()
 		{
 			let mut at_position = base_position;
 			loop
 			{
-				if let Ok(got_position) = at_position.add(change_vector.0,change_vector.1)
+				if let Ok(got_position) = at_position.add(change_vector.0,change_vector.1, board_size)
 				{
 					let got_free = !game.is_position_occupied(got_position);
 					if got_free || (!got_free && include_collision_position)

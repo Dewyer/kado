@@ -58,13 +58,13 @@ impl PiecePosition
         PiecePosition::new_from_cord((s_pos-1) as usize,f_pos)
     }
 
-    pub fn add(&self,row_dif:i32,col_dif:i32) -> Result<PiecePosition,ChessError>
+    pub fn add(&self,row_dif:i32,col_dif:i32, board_size: i32) -> Result<PiecePosition,ChessError>
     {
         let new_row = self.row as i32 + row_dif;
         let new_col = self.col as i32 + col_dif;
         //println!("{} {} trying from add",new_row,new_col);
 
-        if new_row < 0 || new_col < 0
+        if new_row < 0 || new_col < 0 || new_row >= board_size || new_col >= board_size
         {
             return Err(ChessError::InvalidPiecePosition)
         }
