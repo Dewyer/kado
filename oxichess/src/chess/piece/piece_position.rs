@@ -75,6 +75,13 @@ impl PiecePosition
     {
         format!("{}{}",Self::column_letters()[self.col],self.row+1)
     }
+
+    pub fn within_one(&self, pos: &PiecePosition) -> bool {
+        let row_dist = (pos.row as i64 - self.row as i64).abs();
+        let col_dist = (pos.col as i64 - self.col as i64).abs();
+
+        row_dist <= 1 && col_dist <= 1
+    }
 }
 
 impl PlayerMove

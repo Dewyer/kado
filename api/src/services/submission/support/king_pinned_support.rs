@@ -201,10 +201,10 @@ impl KingPinnedProblemSupport {
                 };
 
                 if piece_id == 6 {
-                    black_king = pos;
+                    white_king = pos;
                 }
                 if piece_id == 7 {
-                    white_king = pos;
+                    black_king = pos;
                 }
 
                 brd_row.push(pc);
@@ -240,6 +240,11 @@ impl KingPinnedProblemSupport {
                 let possible_moves = chess.get_moves_for_piece(pc);
                 for move_s in possible_moves.into_iter() {
                     let pos = (move_s.col, move_s.row);
+                    if pc.piece_type == PieceType::King && white_king.within_one(&move_s) {
+                        println!("WHUAHTJKASDFHJKHJKADSDHJK {:?} {:?}", move_s, white_king);
+                        continue;
+                    }
+
                     if threats.contains_key(&pos) {
                         let mut threat = threats.get_mut(&pos).unwrap();
                         *threat += 1;
@@ -250,6 +255,7 @@ impl KingPinnedProblemSupport {
             }
         }
 
+        println!("Threats: {:?}", threats);
         let mut threats_vec = threats.into_iter()
             .filter(|el| !chess.is_position_occupied(PiecePosition::new_from_cord(el.0.1, el.0.0).unwrap()))
             .collect::<Vec<((usize, usize), usize)>>();

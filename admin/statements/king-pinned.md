@@ -46,7 +46,7 @@ There is only one sample available and its this one.
 The output should be a simple JSON array of coordinate pairs (column index and row index, the room is indexed from the top left corner and indexing starts with 0):
 ```json
 {
-    "places_to_move_to": [[0,0],[0,1],[0,2],[0,3],[2,0],[3,0],[1,1],[2,3],[3,1],[3,2],[3,3],[1,3]]
+    "places_to_move_to": [[0,0],[0,1],[0,2],[0,3],[1,1],[2,0],[3,0],[2,3],[3,1],[3,2],[3,3],[1,3]]
 }
 ```
 
@@ -57,9 +57,9 @@ All the squares listed are unoccupied.
 - (0, 1) - Isn't threatened at all
 - (0, 2) - Isn't threatened at all
 - (0, 3) - Isn't threatened at all
+- (1, 1) - Isn't threatened at all
 - (2, 0) - Isn't threatened at all
 - (3, 0) - Isn't threatened at all
-- (1, 1) - Isn't threatened at all
 - (2, 3) - Threatened by the enemy king
 - (3, 1) - Threatened by the enemy king
 - (3, 2) - Threatened by the enemy king
@@ -68,3 +68,11 @@ All the squares listed are unoccupied.
 #### Constraints
 
 The room's size will always be between 8 and a 100 (including 8 and 100).
+
+### Updates
+
+Well a lot of you pointed out totally correctly that in the sample the `[1,1]` in the `places_to_move_to` list had the correct explanation but was in the incorrect place.
+Which is totally correct and I was wrong, sorry for the inconvenience. 
+My bad.
+
+*Barnabás*
