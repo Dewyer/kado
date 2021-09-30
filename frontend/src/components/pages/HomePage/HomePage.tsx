@@ -38,6 +38,7 @@ We also recommend using a desktop computer to use the site for the best experien
 ### Updates
 - 09.27-16:10 - We solved a file uploading issue, now you should be able to upload your solutions, our apologies for the inconvenience.
 - 09.28-10:00 - We fixed a problem that caused submissions to never time out correctly, now if you see the 'didn't finish evaluation' status on your submission, wait a bit for it to time out, and then you should be able to create a new submission.
+- 09.30-09:09 - We fixed the \`King Pinned\` problem's incorrect sample, our apologies.
 `;
 
 
