@@ -9,7 +9,7 @@ export const TimerToNextAvailableProblem: React.FC<TimerToNextAvailableProblemPr
     const { nextProblemAt } = props;
     const [now] = useState(new Date().getTime());
     const nextAt = new Date(nextProblemAt).getTime();
-    const timeTill = nextAt - now;
+    const timeTill = (nextAt - now) + 2*60*60*1000;
 
     const timeTillMoreThen = [
         timeTill >= 24*60*60*1000,

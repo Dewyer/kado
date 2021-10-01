@@ -76,6 +76,16 @@ impl SubmissionService {
         }
     }
 
+    fn get_barrel_ep_settings(&self) -> ApiBasedSupportEndpointSettings {
+        ApiBasedSupportEndpointSettings {
+            base_url: format!("{}/barrel", self.config.maze_base_url),
+            generate_submission_details_endpoint: "/api/challenges/generateSubmissionDetails".to_string(),
+            generate_submission_test_input_endpoint: "/api/challenges/generateSubmissionTestInput".to_string(),
+            verify_output_endpoint: "/api/challenges/verifyOutput".to_string(),
+        }
+    }
+
+
     fn get_problem_support(&self, code_name: CodeName) -> IProblemSupport {
         match code_name {
             CodeName::SanityCheck => Box::new(SanityCheckProblemSupport::new()),
@@ -85,6 +95,11 @@ impl SubmissionService {
                 self.config.maze_api_key.clone()
             ).expect("Maze api support couldn't be constructed")),
             CodeName::KingPinned => Box::new(KingPinnedProblemSupport::new()),
+            CodeName::Barrel => Box::new(ApiBasedSupport::new(
+                CodeName::Barrel,
+                self.get_barrel_ep_settings(),
+                self.config.maze_api_key.clone()
+            ).expect("Barrel api support couldn't be constructed")),
         }
     }
 

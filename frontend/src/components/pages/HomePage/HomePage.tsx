@@ -8,7 +8,7 @@ const pageContent = `
 This program is part of Schönherz Qpa 2021, and is a competitive programming style, multi-day competition.
 You can earn points that get converted to QPA points at the end.
 
-Each day from **2021.09.26 (starting at 00:00) - 2021.09.30** we will release a new problem for you to solve increasing in difficulty.
+On most days from **2021.09.27 (starting at 00:00) - 2021.10.01** we will release a new problem for you to solve increasing in difficulty.
 You can solve these problems with your favorite programming language (more about submissions in the API guide).
 You can work alone or in a team but **QPA points are only awarded to real QPA teams** (We expect teams to correspond to a real Schönherz QPA team).
 
@@ -39,6 +39,14 @@ We also recommend using a desktop computer to use the site for the best experien
 - 09.27-16:10 - We solved a file uploading issue, now you should be able to upload your solutions, our apologies for the inconvenience.
 - 09.28-10:00 - We fixed a problem that caused submissions to never time out correctly, now if you see the 'didn't finish evaluation' status on your submission, wait a bit for it to time out, and then you should be able to create a new submission.
 - 09.30-09:09 - We fixed the \`King Pinned\` problem's incorrect sample, our apologies.
+
+### 10.01 - Next task
+
+Hi players, as you probably noticed we didn't release a problem yesterday, we are sorry that our original plans couldn't come to fruition.
+Today (10.01) we are going to release the **last task** in the competition.
+
+Sorry for all the hiccups.
+Thank you all for participating 😀 Hope you enjoyed it (maybe see you next year 😉 ?) 
 `;
 
 
