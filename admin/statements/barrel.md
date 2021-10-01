@@ -4,11 +4,11 @@ Yeeeyy!!! The Mafia boss managed to escape successfully from the square room, an
 
 We are in the middle of the Alcohol Prohibition-era, but illegal alcohol trading pays well. Because of this the Mafia boss wants to start his own alcohol business. However he is abstinent, so he has no deep knowledge about the topic. 
 
-He asks you - as an experienced alcohol consumer - to help him buying good quality alcoholic drinks. Several types of drinks are stored in different sized barrels and the barrels are full. Drinks are not blended in a barrel.
+He asks you - as an experienced alcohol consumer - to help him to buy good quality alcoholic drinks. Several types of drinks are stored in different sized barrels and the barrels are full. Drinks are not blended in a barrel.
 
 The Mafia boss thinks that the bigger a barrel is, the stronger the beverage is.
 
-Help him disprove this belief. To do this, take the data on a collection of barrels and put as large a subset of this data as possible into a sequence so that the barrel sizes are increasing, but the amount of ethanols are decreasing.
+Help him disprove this belief. To do this, take the data on a collection of barrels and put as large a subset of this data as possible into a sequence so that the barrel sizes are increasing, but the amount of ethanol is decreasing.
 
 Input
 
