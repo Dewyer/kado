@@ -1,22 +1,22 @@
 use reqwest::{header, Response};
-use crate::models::{ClientResult, SnapChallengeClientError, StartSubmissionPayload, StartSubmissionResponse, StartTestPayload, StartTestResponse, SubmitTestPayload, SubmitTestResponse};
+use crate::models::{ClientResult, KadoClientError, StartSubmissionPayload, StartSubmissionResponse, StartTestPayload, StartTestResponse, SubmitTestPayload, SubmitTestResponse};
 use reqwest::blocking::Client;
 
-pub struct SnapChallengeClient {
+pub struct KadoClient {
     client: Client,
     base_url: String,
 }
 
-impl SnapChallengeClient {
+impl KadoClient {
     pub fn from_api_token(api_token: &str, base_url: &str) -> ClientResult<Self> {
         let mut headers = header::HeaderMap::new();
-        headers.insert("User-Agent", header::HeaderValue::from_static("SnapChallengeClient-rs"));
+        headers.insert("User-Agent", header::HeaderValue::from_static("KadoClient-rs"));
         headers.insert("Accept", header::HeaderValue::from_static("application/json"));
-        headers.insert("X-Api-Token", header::HeaderValue::from_str(api_token).map_err(|_| SnapChallengeClientError::FailedToConstructClient)?);
+        headers.insert("X-Api-Token", header::HeaderValue::from_str(api_token).map_err(|_| KadoClientError::FailedToConstructClient)?);
 
         let client = Client::builder()
             .default_headers(headers)
-            .build().map_err(|_| SnapChallengeClientError::FailedToConstructClient)?;
+            .build().map_err(|_| KadoClientError::FailedToConstructClient)?;
 
         Ok(Self {
             client,
@@ -32,34 +32,29 @@ impl SnapChallengeClient {
         self.client.post(format!("{}/{}", self.base_url, "/api/submissions/start-submission"))
             .json(&payload)
             .send()
-            .map_err(|_| SnapChallengeClientError::RequestFailed)?
+            .map_err(|_| KadoClientError::RequestFailed)?
             .json::<StartSubmissionResponse>()
-            .map_err(|_| SnapChallengeClientError::FailedDeserializingResponse)
+            .map_err(|_| KadoClientError::FailedDeserializingResponse)
     }
 
     pub fn start_test<Inp: serde::de::DeserializeOwned>(&self, payload: StartTestPayload) -> ClientResult<StartTestResponse<Inp>> {
         self.client.put(format!("{}/{}", self.base_url, "/api/submissions/test"))
             .json(&payload)
             .send()
-            .map_err(|_| SnapChallengeClientError::RequestFailed)?
+            .map_err(|_| KadoClientError::RequestFailed)?
             .json::<StartTestResponse<Inp>>()
-            .map_err(|_| SnapChallengeClientError::FailedDeserializingResponse)
+            .map_err(|_| KadoClientError::FailedDeserializingResponse)
     }
 
     pub fn submit_test<Out: serde::Serialize>(&self, payload: SubmitTestPayload<Out>) -> ClientResult<SubmitTestResponse> {
         let resp = self.client.post(format!("{}/{}/{}", self.base_url, "/api/submissions/test", payload.test_id))
             .json(&payload)
             .send()
-            .map_err(|_| SnapChallengeClientError::RequestFailed)?;
-
-
-        println!("Sts {}", resp.status());
+            .map_err(|_| KadoClientError::RequestFailed)?;
 
         resp.json::<SubmitTestResponse>()
             .map_err(|err| {
-                println!("errs: {:?}", err);
-
-                SnapChallengeClientError::FailedDeserializingResponse
+                KadoClientError::FailedDeserializingResponse
             })
     }
 }

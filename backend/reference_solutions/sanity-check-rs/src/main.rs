@@ -1,5 +1,5 @@
-use snapchallange_lib_rs::client::SnapChallengeClient;
-use snapchallange_lib_rs::models::{StartSubmissionPayload, StartTestPayload, SubmitTestPayload};
+use kado_lib_rs::client::SnapChallengeClient;
+use kado_lib_rs::models::{StartSubmissionPayload, StartTestPayload, SubmitTestPayload};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct SanityCheckInputMeta {

@@ -1,6 +1,6 @@
 
 #[derive(thiserror::Error, Debug, serde::Serialize)]
-pub enum SnapChallengeClientError {
+pub enum KadoClientError {
     #[error("FailedToConstructClient")]
     FailedToConstructClient,
     #[error("RequestFailed")]
@@ -53,4 +53,4 @@ pub struct SubmitTestResponse {
 }
 
 
-pub type ClientResult<T> =  Result<T, SnapChallengeClientError>;
+pub type ClientResult<T> =  Result<T, KadoClientError>;

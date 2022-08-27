@@ -24,7 +24,7 @@ impl ApiBasedSupport {
         let mut headers = header::HeaderMap::new();
         headers.insert(
             "User-Agent",
-            header::HeaderValue::from_static("SnapChallengeServer"),
+            header::HeaderValue::from_static("KadoServer"),
         );
         headers.insert(
             "Accept",

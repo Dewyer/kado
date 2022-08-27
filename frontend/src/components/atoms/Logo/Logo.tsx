@@ -9,6 +9,6 @@ export interface LogoProps {
 
 export const Logo: React.FC<LogoProps> = (props) => {
     return <div className={classNames(styles.Logo, props.className, { [styles.small]: props.small })}>
-        <span>Snap</span> Challenge
+        <span>Kado</span> Challenge
     </div>;
 };

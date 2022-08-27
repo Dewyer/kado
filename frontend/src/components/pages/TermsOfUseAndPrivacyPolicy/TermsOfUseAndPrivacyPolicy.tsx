@@ -2,6 +2,10 @@ import React from "react";
 import {PageLayout} from "src/components/templates/PageLayout/PageLayout";
 import styles from "./TermsOfUseAndPrivacyPolicy.module.scss";
 
+const COUNTRY = "Hungary";
+const COMPANY_NAME = "SnapSoft Ltd.";
+const COMPANY_ADDRESS = "14 Dohany str. 7th floor, Budapest 1074";
+
 export const TermsOfUseAndPrivacyPolicy: React.FC = () => {
 	return (
 		<PageLayout contentClassName={styles.TermsOfUseAndPrivacyPolicy}>
@@ -19,13 +23,13 @@ export const TermsOfUseAndPrivacyPolicy: React.FC = () => {
 					<p><strong>Account</strong> means a unique account created for You to access our Service or parts of our Service.</p>
 				</li>
 				<li>
-					<p><strong>Company</strong> (referred to as either &quot;the Company&quot;, &quot;We&quot;, &quot;Us&quot; or &quot;Our&quot; in this Agreement) refers to SnapSoft Ltd., 14 Dohany str. 7th floor, Budapest 1074.</p>
+					<p><strong>Company</strong> (referred to as either &quot;the Company&quot;, &quot;We&quot;, &quot;Us&quot; or &quot;Our&quot; in this Agreement) refers to {COMPANY_NAME}, {COMPANY_ADDRESS}.</p>
 				</li>
 				<li>
 					<p><strong>Cookies</strong> are small files that are placed on Your computer, mobile device or any other device by a website, containing the details of Your browsing history on that website among its many uses.</p>
 				</li>
 				<li>
-					<p><strong>Country</strong> refers to:  Hungary</p>
+					<p><strong>Country</strong> refers to:  {COUNTRY}</p>
 				</li>
 				<li>
 					<p><strong>Device</strong> means any device that can access the Service such as a computer, a cellphone or a digital tablet.</p>

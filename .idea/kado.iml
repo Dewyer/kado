@@ -7,19 +7,19 @@
   </component>
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/api/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/google-jwt-verify/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/client_libraries/snapchallange-lib-rs/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/reference_solutions/sanity-check-rs/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/blackjack/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/oxichess/src" isTestSource="false" />
-      <excludeFolder url="file://$MODULE_DIR$/api/target" />
-      <excludeFolder url="file://$MODULE_DIR$/google-jwt-verify/target" />
+      <sourceFolder url="file://$MODULE_DIR$/backend/crates/api/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/backend/crates/google-jwt-verify/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/backend/crates/oxichess/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/backend/reference_solutions/sanity-check-rs/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/client_libraries/kado-lib-rs/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
-      <excludeFolder url="file://$MODULE_DIR$/client_libraries/snapchallange-lib-rs/target" />
-      <excludeFolder url="file://$MODULE_DIR$/reference_solutions/sanity-check-rs/target" />
       <excludeFolder url="file://$MODULE_DIR$/blackjack/target" />
-      <excludeFolder url="file://$MODULE_DIR$/oxichess/target" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/crates/api/target" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/crates/oxichess/target" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/reference_solutions/sanity-check-rs/target" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/crates/google-jwt-verify/target" />
+      <excludeFolder url="file://$MODULE_DIR$/client_libraries/kado-lib-rs/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

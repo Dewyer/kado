@@ -1,7 +1,7 @@
 @import "src/styles/globals";
 
 .logo {
-	background-color: $color-snapsoft;
+	background-color: $color-main-brand;
 	border-radius: 3px;
 	font-size: 1.2rem;
 	width: max-content;
@@ -16,7 +16,7 @@
 	.logo-secondary {
 		display: inline-block;
 		font-weight: bold;
-		color: $color-snapsoft;
+		color: $color-main-brand;
 		margin: 2px;
 		padding: 5px 5px 5px 5px;
 		font-style: italic;

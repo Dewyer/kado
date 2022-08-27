@@ -10,9 +10,9 @@ $color-blue: #0566eb;
 $color-red: #f43467;
 $color-yellow: #ffd740;
 
-$color-snapsoft: #29deb5;
+$color-main-brand: #29deb5;
 
-$color-primary: $color-snapsoft;
-$color-primary-medium: lighten($color-snapsoft, 10%);
-$color-primary-light: lighten($color-snapsoft, 20%);
-$color-primary-extra-light: lighten($color-snapsoft, 40%);
+$color-primary: $color-main-brand;
+$color-primary-medium: lighten($color-main-brand, 10%);
+$color-primary-light: lighten($color-main-brand, 20%);
+$color-primary-extra-light: lighten($color-main-brand, 40%);

@@ -71,7 +71,7 @@ impl GithubAuthenticatorService {
         let mut headers = header::HeaderMap::new();
         headers.insert(
             "User-Agent",
-            header::HeaderValue::from_static("snapchallange - Dewyer"),
+            header::HeaderValue::from_static("kado - Dewyer"),
         );
         headers.insert(
             "Accept",
