@@ -5,7 +5,7 @@ from os import listdir
 from os.path import isfile, join
 
 config = {
-    **dotenv_values("../api/.env"),
+    **dotenv_values("../crates/api/.env"),
 }
 
 file_path = os.path.dirname(os.path.realpath(__file__))

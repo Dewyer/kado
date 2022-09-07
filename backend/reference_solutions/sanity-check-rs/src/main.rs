@@ -1,4 +1,4 @@
-use kado_lib_rs::client::SnapChallengeClient;
+use kado_lib_rs::client::KadoClient;
 use kado_lib_rs::models::{StartSubmissionPayload, StartTestPayload, SubmitTestPayload};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
@@ -27,7 +27,7 @@ fn sleep(secs: u64) {
 fn main() {
     println!("Sanity check rust reference impl!");
 
-    let client = SnapChallengeClient::from_api_token(API_TOKEN, "http://localhost:3001")
+    let client = KadoClient::from_api_token(API_TOKEN, "http://localhost:3001")
         .expect("a client");
 
     let sub_res = client.start_submission(StartSubmissionPayload {
